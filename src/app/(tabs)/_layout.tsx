@@ -12,7 +12,7 @@ type TabDef = { name: string; title: string; icon: SymbolViewProps["name"] };
 
 const TABS: TabDef[] = [
     { name: "home", title: "Home", icon: { ios: "house.fill", android: "home", web: "home" } },
-    { name: "khata", title: "Khata", icon: { ios: "book.closed.fill", android: "menu_book", web: "menu_book" } },
+    // { name: "khata", title: "Khata", icon: { ios: "book.closed.fill", android: "menu_book", web: "menu_book" } },
     { name: "settings", title: "Settings", icon: { ios: "gearshape.fill", android: "settings", web: "settings" } },
 ];
 

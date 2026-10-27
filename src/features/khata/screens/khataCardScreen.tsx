@@ -7,7 +7,7 @@ import { DataModeBar } from "@/features/khata/components/data-mode-bar"
 
 import { colors } from "@/theme/tokens";
 
-type Section = { title: string; description: string; href: Href; icon: SymbolViewProps["name"] };
+type Section = { title: string; description: string; href?: Href; icon: SymbolViewProps["name"] };
 
 const SECTIONS: Section[] = [
     {
@@ -31,7 +31,8 @@ const SECTIONS: Section[] = [
     {
         title: "Party",
         description: "Customers and suppliers, with balances.",
-        href: "/khata/party",
+        // href: "/khata/party",
+        href: "/khata/",
         icon: { ios: "person.2.fill", android: "groups", web: "groups" },
     },
 ];

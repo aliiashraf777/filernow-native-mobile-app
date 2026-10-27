@@ -23,7 +23,8 @@ export type ShortcutItem = {
 };
 
 export const KHATA_SERVICES: ServiceItem[] = [
-    { id: "party", label: "Party", icon: "expenses", href: "/khata/party" },
+    // { id: "party", label: "Party", icon: "expenses", href: "/khata/party" },
+    { id: "party", label: "Party", icon: "expenses" },
     { id: "cash", label: "Cash", icon: "budget" },
     { id: "stock", label: "Stock", icon: "reports" },
     { id: "bills", label: "Bills", icon: "receipts" },
