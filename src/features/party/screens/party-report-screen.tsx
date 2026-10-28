@@ -14,6 +14,7 @@ import { PartyBalanceCard } from "@/features/party/components/party-balance-card
 import { type ExportInput, exportCsv, exportPdf, exportXlsx } from "@/features/party/lib/party-export";
 import { cn } from "@/lib/cn";
 import { toast } from "@/lib/toast";
+import { useBusinessData } from "@/features/khata/hook/use-business-data";
 
 type Side = "all" | "gave" | "got";
 type ExportKind = "pdf" | "xlsx" | "csv";
@@ -31,8 +32,10 @@ const EXPORTS: { key: ExportKind; label: string }[] = [
 
 export default function PartyReportScreen() {
     const { slug } = useLocalSearchParams<{ slug: string }>();
-    const party = useKhataStore((s) => s.parties.find((p) => p.slug === slug || p.id === slug));
-    const entries = useKhataStore((s) => s.entries);
+    // const party = useKhataStore((s) => s.parties.find((p) => p.slug === slug || p.id === slug));
+    // const entries = useKhataStore((s) => s.entries);
+    const { parties, entries } = useBusinessData();
+    const party = parties.find((p) => p.slug === slug || p.id === slug);
 
     const [q, setQ] = useState("");
     const [side, setSide] = useState<Side>("all");

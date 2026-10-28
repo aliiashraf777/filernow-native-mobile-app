@@ -29,6 +29,15 @@ const colors = {
     "warning-bg": "#FFFBEB",
     info: "#2563EB",
     "info-bg": "#EFF6FF",
+
+    "chip-green-bg": "#DCFCE7",
+    "chip-green": "#16A34A",
+    "chip-blue-bg": "#DBEAFE",
+    "chip-blue": "#2563EB",
+    "chip-purple-bg": "#EDE9FE",
+    "chip-purple": "#7C3AED",
+    "chip-red-bg": "#FEE2E2",
+    "chip-red": "#DC2626",
 };
 
 const fontFamily = {

@@ -20,6 +20,7 @@ import { PARTY_BASE, partyHref } from "@/features/party/lib/party";
 import { formatDateTime } from "@/lib/date-format";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
+import { useBusinessData } from "@/features/khata/hook/use-business-data";
 
 type IconName = SymbolViewProps["name"];
 
@@ -41,8 +42,10 @@ function ActionButton({ icon, label, sub, disabled, onPress }: { icon: IconName;
 export default function PartyDetailScreen() {
     const { slug } = useLocalSearchParams<{ slug: string }>();
     const router = useRouter();
-    const party = useKhataStore((s) => s.parties.find((p) => p.slug === slug || p.id === slug));
-    const entries = useKhataStore((s) => s.entries);
+    // const party = useKhataStore((s) => s.parties.find((p) => p.slug === slug || p.id === slug));
+    // const entries = useKhataStore((s) => s.entries);
+    const { parties, entries } = useBusinessData();
+    const party = parties.find((p) => p.slug === slug || p.id === slug);
     const addEntry = useKhataStore((s) => s.addEntry);
     const updateEntry = useKhataStore((s) => s.updateEntry);
     const deleteEntry = useKhataStore((s) => s.deleteEntry);

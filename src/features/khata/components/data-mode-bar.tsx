@@ -4,10 +4,14 @@ import { Alert, Pressable, Text, View } from "react-native";
 
 import { useKhataStore } from "@/features/khata/store/khata-store";
 import { cn } from "@/lib/cn";
+import { useBusinessData } from "../hook/use-business-data";
 
 export function DataModeBar() {
-    const dataMode = useKhataStore((s) => s.dataMode);
-    const hasData = useKhataStore((s) => s.entries.length + s.cards.length + s.parties.length > 0);
+    // const dataMode = useKhataStore((s) => s.dataMode);
+    // const hasData = useKhataStore((s) => s.entries.length + s.cards.length + s.parties.length > 0);
+    const { dataMode, entries, cards, parties } = useBusinessData();
+    const hasData = entries.length + cards.length + parties.length > 0;
+
     const loadDemoData = useKhataStore((s) => s.loadDemoData);
     const resetToBlank = useKhataStore((s) => s.resetToBlank);
     const isDemo = dataMode === "demo";

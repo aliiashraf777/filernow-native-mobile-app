@@ -1,7 +1,3 @@
 // nativeApp\src\app\(tabs)\khata\daily.tsx
 
-import { PlaceholderScreen } from "@/components/ui/placeholder-screen";
-
-export default function Daily() {
-    return <PlaceholderScreen title="Daily Khata" headerTitle="Daily Khata" />;
-}
+export {default } from "@/features/khata/screens/daily-khata-screen"

@@ -1,4 +1,4 @@
-// nativeApp\src\features\khata\screens\khataCardScreen.tsx
+// nativeApp\src\features\khata\screens\khata-screen.tsx
 
 import { Link, type Href } from "expo-router";
 import { SymbolView, type SymbolViewProps } from "expo-symbols";

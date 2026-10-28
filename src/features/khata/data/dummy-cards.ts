@@ -1,4 +1,4 @@
-// nativeApp\src\features\khata\data\dummyCards.ts
+// nativeApp\src\features\khata\data\dummy-cards.ts
 
 import { ICard } from "../types";
 
