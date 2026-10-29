@@ -10,8 +10,8 @@ import { useOpenService } from "@/features/home/hooks/use-open-service";
 
 function PremiumBadge() {
     return (
-        <View className="flex-row items-center gap-1.5 rounded-full border border-[#F2B5BF] bg-[#FFF3F4] px-3 py-1">
-            <Crown size={15} color="#E9A21B" fill="#F7B733" strokeWidth={2} />
+        <View className="flex-row items-center gap-1.5 rounded-full border border-primary-lighter bg-primary-lighter/10 px-3 py-1">
+            <Crown size={14} color="#E9A21B" fill="#F7B733" strokeWidth={2} />
             <Text className="font-jakarta-extrabold text-[12px] tracking-wider text-primary">PREMIUM</Text>
         </View>
     );
@@ -24,9 +24,7 @@ export function AdvanceServices() {
     return (
         <SectionCard
             title="Advanced Tools"
-            titleClassName="font-jakarta text-heading-h5 text-[#454545]"
             action={<PremiumBadge />}
-            className="rounded-[20px] p-3.5"
         >
             <View className="-m-[5px] flex-row flex-wrap">
                 {ADVANCE_SERVICES.map((item) => (

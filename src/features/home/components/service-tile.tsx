@@ -26,7 +26,7 @@ export function ServiceTile({ item, onPress, variant = "boxed" }: Props) {
             className={cn(
                 "items-center justify-center active:opacity-70",
                 boxed
-                    ? "gap-2.5 rounded-[20px] border border-[#EAE6E5] bg-[#F5F3F2] px-1.5 pb-3.5 pt-4"
+                    ? "gap-brand-8 rounded-brand-12 border border-[#EAE6E5]x border-border-clr/25 bg-[#F5F3F2]x bg-card-bg-clr px-1.5 py-3"
                     : "gap-2 px-1 py-3"
             )}
         >

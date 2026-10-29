@@ -9,7 +9,7 @@ import { PromoBanner } from "@/features/home/components/promo-banner";
 
 export default function Home() {
     return (
-        <ScrollView className="flex-1 bg-page-bg" contentContainerClassName="gap-brand px-brand pb-6 pt-1">
+        <ScrollView className="flex-1 bg-page-bg" contentContainerClassName="gap-brand-12 px-brand-12 pt-1 pb-brand-12">
             <PromoBanner />
             <KhataServices />
             <KhataShortcuts />

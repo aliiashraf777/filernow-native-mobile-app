@@ -128,7 +128,7 @@ export function PromoBanner() {
             {...swipe.panHandlers}
             accessibilityLabel="Featured services"
             style={{ aspectRatio: IMAGE_ASPECT }}
-            className="mt-2 w-full overflow-hidden rounded-brand-16"
+            className="mt-brand-8 w-full overflow-hidden rounded-brand-12 border border-border-clr/50 shadow-primary-light"
             onTouchStart={() => setIsTouching(true)}
             onTouchEnd={() => setIsTouching(false)}
             onTouchCancel={() => setIsTouching(false)}
@@ -137,6 +137,7 @@ export function PromoBanner() {
                 <BannerSlide key={slide.id} slide={slide} isActive={index === activeSlide} onPress={openSlide} />
             ))}
 
+            {/* slide bottom buttons */}
             {hasMultipleSlides && (
                 <View className="absolute bottom-1.5 z-20 w-full items-center" pointerEvents="box-none">
                     <View className="flex-row items-center gap-1 rounded-full bg-white/85 px-1.5 py-[3px]">
@@ -150,7 +151,7 @@ export function PromoBanner() {
                                 onPress={() => showSlide(index)}
                                 className={cn(
                                     "h-1.5 rounded-full",
-                                    index === activeSlide ? "w-5 bg-primary" : "w-1.5 bg-primary/30"
+                                    index === activeSlide ? "w-5 bg-primary" : "w-1.5 bg-primary/25"
                                 )}
                             />
                         ))}
