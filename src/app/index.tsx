@@ -10,5 +10,6 @@ export default function Index() {
   const isSignedIn = useAuthStore((s) => s.phone !== null);
 
   if (isSignedIn) return <Redirect href="/home" />;
-  return <Redirect href={hasOnboarded ? "/register" : "/welcome"} />;
+  // return <Redirect href={hasOnboarded ? "/register" : "/welcome"} />;
+  return <Redirect href="/welcome" />;
 }
