@@ -26,7 +26,7 @@ import { entryDateTime, entrySortKey } from "@/lib/date-format";
 import { cn } from "@/lib/cn";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
-import { useBusinessData } from "@/features/khata/hook/use-business-data";
+import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 
 type Row = { party: IParty; balance: number; last?: IExpenseEntry; count: number };
 type Tab = "all" | PartyType;

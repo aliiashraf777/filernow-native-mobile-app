@@ -16,6 +16,8 @@ const colors = {
     "text-secondary": "#463C40",
     "text-secondary-muted": "#6B7280",
     "text-secondary-muter": "#9CA3AF",
+    "secondary": "#34B08D", // dashboard --brand-secondary
+    "secondary-light": "#65C5AA",
     "text-tertiary": "#F9FAFB",
     "text-muted": "rgba(17, 17, 17, 0.5)",
     "text-link": "#0059D9",

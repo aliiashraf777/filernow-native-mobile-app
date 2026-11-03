@@ -4,7 +4,7 @@ import { Alert, Pressable, Text, View } from "react-native";
 
 import { useKhataStore } from "@/features/khata/store/khata-store";
 import { cn } from "@/lib/cn";
-import { useBusinessData } from "../hook/use-business-data";
+import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 
 export function DataModeBar() {
     // const dataMode = useKhataStore((s) => s.dataMode);

@@ -14,9 +14,15 @@ const CHIP: Record<StatChipVariant, { box: string; tint: string }> = {
     red: { box: "bg-chip-red-bg", tint: colors["chip-red"] },
 };
 
-type Props = { item: IExpenseStatItem; active?: boolean; onPress: () => void };
+type Props = {
+    item: IExpenseStatItem;
+    active?: boolean;
+    onPress: () => void;
+    ctaLabel?: string;
+    onCtaPress?: () => void;
+};
 
-export function StatCard({ item, active, onPress }: Props) {
+export function StatCard({ item, active, onPress, ctaLabel, onCtaPress }: Props) {
     const chip = CHIP[item.chip];
     const tone = item.isPositive ? colors.success : colors.danger;
 
@@ -26,7 +32,7 @@ export function StatCard({ item, active, onPress }: Props) {
             accessibilityState={{ selected: !!active }}
             onPress={onPress}
             className={cn(
-                "min-h-[112px] grow basis-[47%] justify-between rounded-brand-12 border bg-white p-3 active:opacity-80",
+                "min-h-[112px] grow basis-[47%] justify-between gap-2 rounded-brand-12 border bg-white p-3 active:opacity-80",
                 active ? "border-primary" : "border-border-clr",
             )}>
             <View className="flex-row items-center gap-2">
@@ -61,6 +67,15 @@ export function StatCard({ item, active, onPress }: Props) {
                     {item.trendLabel}
                 </Text>
             </View>
+
+            {ctaLabel ? (
+                <Pressable
+                    accessibilityRole="button"
+                    onPress={onCtaPress}
+                    className="min-h-9 items-center justify-center rounded-brand-8 bg-page-bg active:opacity-80">
+                    <Text className="font-jakarta-semibold text-xs text-primary">+ {ctaLabel}</Text>
+                </Pressable>
+            ) : null}
         </Pressable>
     );
 }

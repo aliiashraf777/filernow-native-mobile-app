@@ -20,7 +20,7 @@ import { PARTY_BASE, partyHref } from "@/features/party/lib/party";
 import { formatDateTime } from "@/lib/date-format";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
-import { useBusinessData } from "@/features/khata/hook/use-business-data";
+import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 
 type IconName = SymbolViewProps["name"];
 

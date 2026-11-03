@@ -4,7 +4,7 @@ import type { SymbolViewProps } from "expo-symbols";
 import { useMemo } from "react";
 
 // import { useBusinessData } from "@/features/khata/hooks/use-business-data";
-import { useBusinessData } from "./use-business-data";
+import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { debtBalances, debtTotals, pkr } from "@/features/khata/lib/debt";
 import {
     type EntryKind,
@@ -14,7 +14,7 @@ import {
     KHATA_LABELS,
 } from "@/features/khata/types";
 
-export type StatItem = IExpenseStatItem & { filter: FilterTab };
+export type StatItem = IExpenseStatItem & { filter: FilterTab; ctaLabel?: string };
 
 const ICONS = {
     balance: { ios: "creditcard.fill", android: "account_balance_wallet", web: "account_balance_wallet" },
@@ -73,17 +73,17 @@ export function useDailyStats(): StatItem[] {
             {
                 id: "income", title: KHATA_LABELS.income.title, value: pkr(sum("income")),
                 trendDirection: inc.direction, trendPercent: inc.percent, trendLabel: label,
-                icon: ICONS.income, chip: "blue", isPositive: inc.direction === "up", filter: "income",
+                icon: ICONS.income, chip: "blue", isPositive: inc.direction === "up", filter: "income", ctaLabel: KHATA_LABELS.income.verb,
             },
             {
                 id: "expense", title: KHATA_LABELS.expense.title, value: pkr(sum("expense")),
                 trendDirection: exp.direction, trendPercent: exp.percent, trendLabel: label,
-                icon: ICONS.expense, chip: "purple", isPositive: exp.direction === "down", filter: "expense",
+                icon: ICONS.expense, chip: "purple", isPositive: exp.direction === "down", filter: "expense", ctaLabel: KHATA_LABELS.expense.verb,
             },
             {
                 id: "debt", title: KHATA_LABELS.debt.title, value: pkr(Math.abs(youWillGet - youWillGive)),
                 trendDirection: debt.direction, trendPercent: debt.percent, trendLabel: label,
-                icon: ICONS.debt, chip: "red", isPositive: debt.direction === "down", filter: "debt",
+                icon: ICONS.debt, chip: "red", isPositive: debt.direction === "down", filter: "debt", ctaLabel: KHATA_LABELS.debt.verb,
             },
         ];
     }, [entries, cards]);

@@ -1,24 +1,26 @@
 // nativeApp\src\features\khata\screens\daily-khata-screen.tsx
 
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useMemo, useState } from "react";
 import { Alert, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 
 import { Input } from "@/components/ui/form";
 import { OptionSheet } from "@/components/ui/option-sheet";
+import { CardsManager } from "@/features/khata/components/cards-manager";
+import { CategoryManagerSheet } from "@/features/khata/components/category-manager-sheet";
 import { DataModeBar } from "@/features/khata/components/data-mode-bar";
+import { DetailedEntrySheet } from "@/features/khata/components/detailed-entry-sheet";
 import { StatCard } from "@/features/khata/components/stat-card";
 import { TransactionRow } from "@/features/khata/components/transaction-row";
-// import { useBusinessData } from "@/features/khata/hooks/use-business-data";
-// import { useDailyStats } from "@/features/khata/hooks/use-daily-stats";
-import { useBusinessData } from "../hook/use-business-data";
-import { useDailyStats } from "../hook/use-daily-stats";
+import { useBusinessData } from "@/features/khata/hooks/use-business-data";
+import { useDailyStats } from "@/features/khata/hooks/use-daily-stats";
 import { pkr } from "@/features/khata/lib/debt";
 import { useKhataStore } from "@/features/khata/store/khata-store";
 import { type FilterTab, type IExpenseEntry, KHATA_LABELS } from "@/features/khata/types";
 import { cn } from "@/lib/cn";
 import { entrySortKey } from "@/lib/date-format";
+import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
 
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc" | "subject_asc";
@@ -47,6 +49,7 @@ const TABS: { key: FilterTab; label: string }[] = [
 ];
 
 export default function DailyKhataScreen() {
+    const router = useRouter();
     const { entries } = useBusinessData();
     const categories = useKhataStore((s) => s.categories);
     const deleteEntry = useKhataStore((s) => s.deleteEntry);
@@ -56,6 +59,9 @@ export default function DailyKhataScreen() {
     const [q, setQ] = useState("");
     const [sortKey, setSortKey] = useState<SortKey>("date_desc");
     const [sortOpen, setSortOpen] = useState(false);
+    const [entryKind, setEntryKind] = useState<"income" | "expense" | null>(null);
+    const [editing, setEditing] = useState<IExpenseEntry | null>(null);
+    const [categoriesOpen, setCategoriesOpen] = useState(false);
 
     const categoryLabel = useMemo(() => new Map(categories.map((c) => [c.id, c.label])), [categories]);
     const labelOf = (id: string) => categoryLabel.get(id) ?? "Uncategorized";
@@ -87,9 +93,33 @@ export default function DailyKhataScreen() {
             { text: "Haan, delete", style: "destructive", onPress: () => deleteEntry(entry.id) },
         ]);
 
+    const onCta = (id: string) => {
+        if (id === "income") setEntryKind("income");
+        else if (id === "expense") setEntryKind("expense");
+        else if (id === "debt") {
+            toast("Party chun kar Udhaar add karein");
+            router.push("/khata/party");
+        }
+    };
+
+    const sheetKind: "income" | "expense" = editing ? (editing.kind === "income" ? "income" : "expense") : (entryKind ?? "expense");
+    const closeEntrySheet = () => {
+        setEntryKind(null);
+        setEditing(null);
+    };
+
     return (
         <View className="flex-1 bg-page-bg">
-            <Stack.Screen options={{ title: "Daily Khata" }} />
+            <Stack.Screen
+                options={{
+                    title: "Daily Khata",
+                    headerRight: () => (
+                        <Pressable accessibilityRole="button" accessibilityLabel="Categories" onPress={() => setCategoriesOpen(true)} hitSlop={12}>
+                            <SymbolView name={{ ios: "tag", android: "sell", web: "sell" }} size={22} tintColor={colors.primary} />
+                        </Pressable>
+                    ),
+                }}
+            />
 
             <FlatList
                 data={shown}
@@ -107,9 +137,13 @@ export default function DailyKhataScreen() {
                                     item={item}
                                     active={item.filter !== "all" && filter === item.filter}
                                     onPress={() => setFilter(item.filter)}
+                                    ctaLabel={item.ctaLabel}
+                                    onCtaPress={() => onCta(item.id)}
                                 />
                             ))}
                         </View>
+
+                        <CardsManager />
 
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingTop: 16 }}>
                             {TABS.map((t) => (
@@ -164,23 +198,23 @@ export default function DailyKhataScreen() {
                 ListEmptyComponent={
                     <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">
                         {entries.length === 0
-                            ? 'Abhi koi entry nahi. Upar "Load Demo Data" dabayein. Nayi entry add karna agle phase (3B) mein aayega.'
+                            ? 'Abhi koi entry nahi. Upar "+ Add Aamdani" / "+ Add Kharcha" dabayein ya "Load Demo Data" chalayein.'
                             : "Is filter mein koi entry nahi mili."}
                     </Text>
                 }
                 renderItem={({ item }) => (
-                    <TransactionRow entry={item} categoryLabel={labelOf(item.categoryId)} onDelete={confirmDelete} />
+                    <TransactionRow
+                        entry={item}
+                        categoryLabel={labelOf(item.categoryId)}
+                        onDelete={confirmDelete}
+                        onEdit={item.kind === "debt" ? undefined : setEditing}
+                    />
                 )}
             />
 
-            <OptionSheet
-                visible={sortOpen}
-                title="Tarteeb"
-                options={SORTS}
-                value={sortKey}
-                onChange={setSortKey}
-                onClose={() => setSortOpen(false)}
-            />
+            <OptionSheet visible={sortOpen} title="Tarteeb" options={SORTS} value={sortKey} onChange={setSortKey} onClose={() => setSortOpen(false)} />
+            <DetailedEntrySheet visible={entryKind !== null || editing !== null} kind={sheetKind} editing={editing} onClose={closeEntrySheet} />
+            <CategoryManagerSheet visible={categoriesOpen} onClose={() => setCategoriesOpen(false)} />
         </View>
     );
 }

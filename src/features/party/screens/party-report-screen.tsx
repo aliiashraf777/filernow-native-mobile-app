@@ -14,7 +14,7 @@ import { PartyBalanceCard } from "@/features/party/components/party-balance-card
 import { type ExportInput, exportCsv, exportPdf, exportXlsx } from "@/features/party/lib/party-export";
 import { cn } from "@/lib/cn";
 import { toast } from "@/lib/toast";
-import { useBusinessData } from "@/features/khata/hook/use-business-data";
+import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 
 type Side = "all" | "gave" | "got";
 type ExportKind = "pdf" | "xlsx" | "csv";

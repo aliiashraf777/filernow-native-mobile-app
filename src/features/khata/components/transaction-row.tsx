@@ -15,9 +15,15 @@ const KIND: Record<EntryKind, { badge: string; text: string }> = {
     debt: { badge: "bg-warning-bg", text: "text-warning" },
 };
 
-type Props = { entry: IExpenseEntry; categoryLabel: string; onDelete: (entry: IExpenseEntry) => void };
+type Props = {
+    entry: IExpenseEntry;
+    categoryLabel: string;
+    onDelete: (entry: IExpenseEntry) => void;
+    /** Omit for entries that are edited elsewhere (udhaar entries are edited in the Party screen). */
+    onEdit?: (entry: IExpenseEntry) => void;
+};
 
-export function TransactionRow({ entry, categoryLabel, onDelete }: Props) {
+export function TransactionRow({ entry, categoryLabel, onDelete, onEdit }: Props) {
     const kind = KIND[entry.kind];
     const income = entry.kind === "income";
 
@@ -40,6 +46,11 @@ export function TransactionRow({ entry, categoryLabel, onDelete }: Props) {
                 {income ? "+" : "-"}
                 {pkr(entry.amount)}
             </Text>
+            {onEdit ? (
+                <Pressable accessibilityRole="button" accessibilityLabel="Edit entry" onPress={() => onEdit(entry)} hitSlop={10}>
+                    <SymbolView name={{ ios: "pencil", android: "edit", web: "edit" }} size={17} tintColor={colors["text-secondary"]} />
+                </Pressable>
+            ) : null}
             <Pressable accessibilityRole="button" accessibilityLabel="Delete entry" onPress={() => onDelete(entry)} hitSlop={10}>
                 <SymbolView name={{ ios: "trash", android: "delete", web: "delete" }} size={17} tintColor={colors["text-secondary-muted"]} />
             </Pressable>
