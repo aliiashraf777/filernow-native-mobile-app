@@ -3,7 +3,6 @@
 import type { SymbolViewProps } from "expo-symbols";
 import { useMemo } from "react";
 
-// import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { debtBalances, debtTotals, pkr } from "@/features/khata/lib/debt";
 import {

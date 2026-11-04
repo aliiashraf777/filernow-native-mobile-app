@@ -7,8 +7,10 @@ import { Alert, FlatList, Pressable, ScrollView, Text, View } from "react-native
 
 import { Input } from "@/components/ui/form";
 import { OptionSheet } from "@/components/ui/option-sheet";
+import { useActiveBusiness } from "@/features/business/store/business-store";
 import { CardsManager } from "@/features/khata/components/cards-manager";
 import { CategoryManagerSheet } from "@/features/khata/components/category-manager-sheet";
+import { DailyCharts } from "@/features/khata/components/daily-charts";
 import { DataModeBar } from "@/features/khata/components/data-mode-bar";
 import { DetailedEntrySheet } from "@/features/khata/components/detailed-entry-sheet";
 import { StatCard } from "@/features/khata/components/stat-card";
@@ -16,14 +18,21 @@ import { TransactionRow } from "@/features/khata/components/transaction-row";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { useDailyStats } from "@/features/khata/hooks/use-daily-stats";
 import { pkr } from "@/features/khata/lib/debt";
+import {
+    type TransactionsExport,
+    exportTransactionsCsv,
+    exportTransactionsPdf,
+    exportTransactionsXlsx,
+} from "@/features/khata/lib/export-transactions-data";
 import { useKhataStore } from "@/features/khata/store/khata-store";
 import { type FilterTab, type IExpenseEntry, KHATA_LABELS } from "@/features/khata/types";
 import { cn } from "@/lib/cn";
-import { entrySortKey } from "@/lib/date-format";
+import { entrySortKey, localDate } from "@/lib/date-format";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
 
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc" | "subject_asc";
+type ExportKind = "pdf" | "xlsx" | "csv";
 
 const SORTS: { value: SortKey; label: string }[] = [
     { value: "date_desc", label: "Newest first" },
@@ -31,6 +40,12 @@ const SORTS: { value: SortKey; label: string }[] = [
     { value: "amount_desc", label: "Amount: high to low" },
     { value: "amount_asc", label: "Amount: low to high" },
     { value: "subject_asc", label: "Naam (A-Z)" },
+];
+
+const EXPORTS: { value: ExportKind; label: string }[] = [
+    { value: "pdf", label: "PDF" },
+    { value: "xlsx", label: "Excel (.xlsx)" },
+    { value: "csv", label: "CSV" },
 ];
 
 const COMPARE: Record<SortKey, (a: IExpenseEntry, b: IExpenseEntry) => number> = {
@@ -50,7 +65,8 @@ const TABS: { key: FilterTab; label: string }[] = [
 
 export default function DailyKhataScreen() {
     const router = useRouter();
-    const { entries } = useBusinessData();
+    const business = useActiveBusiness();
+    const { entries, parties, cards } = useBusinessData();
     const categories = useKhataStore((s) => s.categories);
     const deleteEntry = useKhataStore((s) => s.deleteEntry);
     const stats = useDailyStats();
@@ -59,6 +75,7 @@ export default function DailyKhataScreen() {
     const [q, setQ] = useState("");
     const [sortKey, setSortKey] = useState<SortKey>("date_desc");
     const [sortOpen, setSortOpen] = useState(false);
+    const [exportOpen, setExportOpen] = useState(false);
     const [entryKind, setEntryKind] = useState<"income" | "expense" | null>(null);
     const [editing, setEditing] = useState<IExpenseEntry | null>(null);
     const [categoriesOpen, setCategoriesOpen] = useState(false);
@@ -102,6 +119,26 @@ export default function DailyKhataScreen() {
         }
     };
 
+    const runExport = async (kind: ExportKind) => {
+        if (!shown.length) return toast("Export ke liye koi entry nahi hai");
+        try {
+            const input: TransactionsExport = {
+                title: `Daily Khata — ${business.name}`,
+                entries: shown, // exactly what the list shows: filtered + sorted
+                categoryLabel: labelOf,
+                partyName: (id) => parties.find((p) => p.id === id)?.name ?? "",
+                cardLabel: (id) => cards.find((c) => c.id === id)?.label ?? "Cash",
+            };
+            const base = `daily-khata-${localDate()}`;
+            if (kind === "pdf") await exportTransactionsPdf(input, `${base}.pdf`);
+            else if (kind === "xlsx") await exportTransactionsXlsx(input, `${base}.xlsx`);
+            else await exportTransactionsCsv(input, `${base}.csv`);
+        } catch (e) {
+            console.warn("export failed", e);
+            toast.error("Export nahi ho saka. Dobara koshish karein.");
+        }
+    };
+
     const sheetKind: "income" | "expense" = editing ? (editing.kind === "income" ? "income" : "expense") : (entryKind ?? "expense");
     const closeEntrySheet = () => {
         setEntryKind(null);
@@ -114,9 +151,14 @@ export default function DailyKhataScreen() {
                 options={{
                     title: "Daily Khata",
                     headerRight: () => (
-                        <Pressable accessibilityRole="button" accessibilityLabel="Categories" onPress={() => setCategoriesOpen(true)} hitSlop={12}>
-                            <SymbolView name={{ ios: "tag", android: "sell", web: "sell" }} size={22} tintColor={colors.primary} />
-                        </Pressable>
+                        <View className="flex-row items-center gap-5">
+                            <Pressable accessibilityRole="button" accessibilityLabel="Export" onPress={() => setExportOpen(true)} hitSlop={12}>
+                                <SymbolView name={{ ios: "square.and.arrow.up", android: "ios_share", web: "ios_share" }} size={21} tintColor={colors["text-secondary"]} />
+                            </Pressable>
+                            <Pressable accessibilityRole="button" accessibilityLabel="Categories" onPress={() => setCategoriesOpen(true)} hitSlop={12}>
+                                <SymbolView name={{ ios: "tag", android: "sell", web: "sell" }} size={22} tintColor={colors.primary} />
+                            </Pressable>
+                        </View>
                     ),
                 }}
             />
@@ -144,6 +186,7 @@ export default function DailyKhataScreen() {
                         </View>
 
                         <CardsManager />
+                        <DailyCharts />
 
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingTop: 16 }}>
                             {TABS.map((t) => (
@@ -213,6 +256,14 @@ export default function DailyKhataScreen() {
             />
 
             <OptionSheet visible={sortOpen} title="Tarteeb" options={SORTS} value={sortKey} onChange={setSortKey} onClose={() => setSortOpen(false)} />
+            <OptionSheet<ExportKind | "">
+                visible={exportOpen}
+                title="Transactions export karein"
+                options={EXPORTS}
+                value=""
+                onChange={(v) => v && runExport(v)}
+                onClose={() => setExportOpen(false)}
+            />
             <DetailedEntrySheet visible={entryKind !== null || editing !== null} kind={sheetKind} editing={editing} onClose={closeEntrySheet} />
             <CategoryManagerSheet visible={categoriesOpen} onClose={() => setCategoriesOpen(false)} />
         </View>
