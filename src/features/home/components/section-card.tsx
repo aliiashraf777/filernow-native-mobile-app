@@ -17,11 +17,9 @@ export const cardShadow = {
 
 type Props = {
     title: string;
-    /** Rendered on the right of the header, e.g. a link or badge. */
     action?: ReactNode;
     children: ReactNode;
     className?: string;
-    /** Overrides the default title style. */
     titleClassName?: string;
 };
 
@@ -29,11 +27,11 @@ type Props = {
 export function SectionCard({ title, action, children, className, titleClassName }: Props) {
     return (
         <View
-            style={cardShadow}
-            className={cn("rounded-brand-16 border border-border-clr bg-white p-brand-12", className)}
+            // style={cardShadow}
+            className={cn("bg-white p-brand-12 border border-border-clr/65 rounded-brand-12", className)}
         >
             <View className="mb-brand-12 min-h-7 flex-row items-center justify-between px-1">
-                <Text className={cn("font-jakarta-medium text-heading-h5 text-text-secondary", titleClassName)}>{title}</Text>
+                <Text className={cn("font-jakarta-medium text-heading-h6 text-text-secondary", titleClassName)}>{title}</Text>
                 {action}
             </View>
             {children}

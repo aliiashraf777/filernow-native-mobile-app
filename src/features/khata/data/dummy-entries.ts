@@ -1,4 +1,4 @@
-// nativeApp\src\features\khata\data\dummyExpenseEntries.ts
+// nativeApp\src\features\khata\data\dummy-entries.ts
 
 import { IExpenseEntry, IParty } from "../types";
 

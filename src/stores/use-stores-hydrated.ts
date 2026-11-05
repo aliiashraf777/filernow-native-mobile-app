@@ -12,8 +12,8 @@ const isReady = () =>
     useKhataStore.persist.hasHydrated() &&
     useAppStore.persist.hasHydrated() &&
     useAuthStore.persist.hasHydrated() &&
-    useBusinessStore.persist.hasHydrated() &&
-    useNotificationsStore.persist.hasHydrated();
+    useBusinessStore.persist.hasHydrated();
+    // useNotificationsStore.persist.hasHydrated();
 
 export function useStoresHydrated() {
     const [ready, setReady] = useState(isReady);
@@ -25,7 +25,7 @@ export function useStoresHydrated() {
             useAppStore.persist.onFinishHydration(check),
             useAuthStore.persist.onFinishHydration(check),
             useBusinessStore.persist.onFinishHydration(check),
-            useNotificationsStore.persist.onFinishHydration(check),
+            // useNotificationsStore.persist.onFinishHydration(check),
         ];
         check();
         return () => offs.forEach((off) => off());

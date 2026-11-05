@@ -33,7 +33,6 @@ export function KhataServices() {
             title={t("khataServices")}
             titleClassName="font-jakarta text-heading-h6 text-[#454545]"
             action={<ViewDashboardLink />}
-            className="rounded-[20px] p-3.5"
         >
             <View className="-m-[5px] flex-row flex-wrap">
                 {KHATA_SERVICES.map((item) => (

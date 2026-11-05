@@ -4,10 +4,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import { defaultCategories } from "@/features/khata/data/defaultCategoriesData";
-import { dummyCards } from "@/features/khata/data/dummyCards";
-import { dummyExpenseEntries, dummyParties } from "@/features/khata/data/dummyExpenseEntries";
-import { cardDelta } from "@/features/khata/lib/cardDelta";
+import { DEFAULT_BUSINESS_ID } from "@/features/business/data/business-options";
+import { useBusinessStore } from "@/features/business/store/business-store";
+import { defaultCategories } from "@/features/khata/data/default-categories";
+import { dummyCards } from "@/features/khata/data/dummy-cards";
+import { dummyExpenseEntries, dummyParties } from "@/features/khata/data/dummy-entries";
+import { cardDelta } from "@/features/khata/lib/card-delta";
 import {
     type EntryKind,
     type ICard,
@@ -22,15 +24,25 @@ import { newId } from "@/lib/id";
 import i18n from "@/i18n";
 import { toast } from "@/lib/toast";
 
-type DataMode = "demo" | "blank";
+export type DataMode = "demo" | "blank";
+
+/** Everything that belongs to ONE business (maps 1:1 to /businesses/{id}/... in the future API). */
+export type BusinessData = {
+    entries: IExpenseEntry[];
+    parties: IParty[];
+    cards: ICard[];
+    dataMode: DataMode;
+};
+
+export const EMPTY_BUSINESS_DATA: BusinessData = { entries: [], parties: [], cards: [], dataMode: "blank" };
 
 type KhataState = {
-    entries: IExpenseEntry[];
+    /** Shared default categories. Custom per-business categories arrive in phase 3B. */
     categories: ICategory[];
-    cards: ICard[];
-    parties: IParty[];
-    dataMode: DataMode;
+    /** One slice per business id. */
+    data: Record<string, BusinessData>;
 
+    // All actions below work on the ACTIVE business.
     loadDemoData: () => void;
     resetToBlank: () => void;
 
@@ -54,24 +66,41 @@ type KhataState = {
     transferBetweenCards: (fromId: string, toId: string, amount: number) => void;
 };
 
+type Persisted = Pick<KhataState, "categories" | "data">;
+type PersistedV1 = {
+    entries?: IExpenseEntry[];
+    parties?: IParty[];
+    cards?: ICard[];
+    categories?: ICategory[];
+    dataMode?: DataMode;
+};
+
 const money = (n: number) => `PKR ${n.toLocaleString("en-PK")}`;
 // store messages follow the app language
 const t = i18n.getFixedT(null, "khata", "toast");
 
-// Select primitives or stable references only: useKhataStore((s) => s.parties).
-// Selectors that build new objects/arrays need useShallow, or React 19 will loop.
+// Select primitives or stable references only: useKhataStore((s) => s.categories).
 export const useKhataStore = create<KhataState>()(
     persist(
         (set, get) => {
+            const activeId = () => useBusinessStore.getState().activeId;
+            const current = (): BusinessData => get().data[activeId()] ?? EMPTY_BUSINESS_DATA;
+            const update = (patch: Partial<BusinessData> | ((d: BusinessData) => Partial<BusinessData>)) => {
+                const id = activeId();
+                set((s) => {
+                    const cur = s.data[id] ?? EMPTY_BUSINESS_DATA;
+                    const next = typeof patch === "function" ? patch(cur) : patch;
+                    return { data: { ...s.data, [id]: { ...cur, ...next } } };
+                });
+            };
+
             // ONE place that changes card balances + shows the balance toast.
             const applyCardDeltas = (deltas: Record<string, number>) => {
                 const touched = Object.entries(deltas).filter(([, d]) => d !== 0);
                 if (touched.length === 0) return;
 
-                const before = get().cards;
-                set({
-                    cards: before.map((c) => (deltas[c.id] ? { ...c, balance: c.balance + deltas[c.id] } : c)),
-                });
+                const before = current().cards;
+                update({ cards: before.map((c) => (deltas[c.id] ? { ...c, balance: c.balance + deltas[c.id] } : c)) });
 
                 touched.forEach(([id, d]) => {
                     const card = before.find((c) => c.id === id);
@@ -88,37 +117,34 @@ export const useKhataStore = create<KhataState>()(
             };
 
             return {
-                entries: [],
                 categories: defaultCategories,
-                cards: [],
-                parties: [],
-                dataMode: "blank",
+                data: {},
 
                 loadDemoData: () => {
-                    set({ entries: dummyExpenseEntries, cards: dummyCards, parties: dummyParties, dataMode: "demo" });
+                    update({ entries: dummyExpenseEntries, cards: dummyCards, parties: dummyParties, dataMode: "demo" });
                     toast.success(t("demoLoaded"));
                 },
 
                 resetToBlank: () => {
-                    set({ entries: [], cards: [], parties: [], dataMode: "blank" });
+                    update({ entries: [], cards: [], parties: [], dataMode: "blank" });
                     toast.success(t("cleared"));
                 },
 
                 addEntry: (entry) => {
                     const clean = entry.kind === "debt" ? { ...entry, cardId: undefined } : entry;
-                    set((s) => ({
-                        entries: [{ ...clean, id: newId(), createdAt: new Date().toISOString() }, ...s.entries],
+                    update((d) => ({
+                        entries: [{ ...clean, id: newId(), createdAt: new Date().toISOString() }, ...d.entries],
                     }));
                     toast.success(t("saved", { name: entry.subject }));
                     if (clean.cardId) applyCardDeltas({ [clean.cardId]: cardDelta(clean) });
                 },
 
                 updateEntry: (id, patch) => {
-                    const old = get().entries.find((e) => e.id === id);
+                    const old = current().entries.find((e) => e.id === id);
                     if (!old) return;
 
                     const updated = { ...old, ...patch };
-                    set((s) => ({ entries: s.entries.map((e) => (e.id === id ? updated : e)) }));
+                    update((d) => ({ entries: d.entries.map((e) => (e.id === id ? updated : e)) }));
                     toast.success(t("updated", { name: updated.subject }));
 
                     // Debt card effects are ledger-style (never recomputed on edit).
@@ -131,10 +157,10 @@ export const useKhataStore = create<KhataState>()(
                 },
 
                 deleteEntry: (id) => {
-                    const target = get().entries.find((e) => e.id === id);
+                    const target = current().entries.find((e) => e.id === id);
                     if (!target) return;
 
-                    set((s) => ({ entries: s.entries.filter((e) => e.id !== id) }));
+                    update((d) => ({ entries: d.entries.filter((e) => e.id !== id) }));
                     toast.success(t("deleted", { name: target.subject }));
 
                     if (target.cardId && target.kind !== "debt") {
@@ -144,7 +170,7 @@ export const useKhataStore = create<KhataState>()(
 
                 addParty: (p) => {
                     const party: IParty = { ...p, id: newId(), slug: makeSlug(p.name), createdAt: new Date().toISOString() };
-                    set((s) => ({ parties: [party, ...s.parties] }));
+                    update((d) => ({ parties: [party, ...d.parties] }));
                     toast.success(t("partyAdded", { name: party.name }));
                     return party;
                 },
@@ -152,16 +178,16 @@ export const useKhataStore = create<KhataState>()(
                 addParties: (list) => {
                     const now = new Date().toISOString();
                     const created: IParty[] = list.map((p) => ({ ...p, id: newId(), slug: makeSlug(p.name), createdAt: now }));
-                    set((s) => ({ parties: [...created, ...s.parties] }));
+                    update((d) => ({ parties: [...created, ...d.parties] }));
                     toast.success(t("partiesAdded", { count: created.length }));
                     return created.length;
                 },
 
                 updateParty: (id, patch) =>
-                    set((s) => ({ parties: s.parties.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
+                    update((d) => ({ parties: d.parties.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
 
                 deleteParty: (id, withEntries = false) => {
-                    const linked = get().entries.filter((e) => e.partyId === id);
+                    const linked = current().entries.filter((e) => e.partyId === id);
                     if (linked.length && !withEntries) {
                         toast.error(t("partyHasEntries"));
                         return false;
@@ -173,9 +199,9 @@ export const useKhataStore = create<KhataState>()(
                             if (e.kind !== "debt" && e.cardId) deltas[e.cardId] = (deltas[e.cardId] ?? 0) - cardDelta(e);
                         });
                         applyCardDeltas(deltas);
-                        set((s) => ({ entries: s.entries.filter((e) => e.partyId !== id) }));
+                        update((d) => ({ entries: d.entries.filter((e) => e.partyId !== id) }));
                     }
-                    set((s) => ({ parties: s.parties.filter((p) => p.id !== id) }));
+                    update((d) => ({ parties: d.parties.filter((p) => p.id !== id) }));
                     toast.success(
                         linked.length ? t("partyDeletedWithEntries", { count: linked.length }) : t("partyDeleted"),
                     );
@@ -209,41 +235,47 @@ export const useKhataStore = create<KhataState>()(
                         toast.error(t("otherCategoryLocked"));
                         return;
                     }
+                    // categories are shared, so re-point entries in EVERY business
                     set((s) => ({
-                        entries: s.entries.map((e) => (e.categoryId === id ? { ...e, categoryId: fallback.id } : e)),
                         categories: s.categories.filter((c) => c.id !== id),
+                        data: Object.fromEntries(
+                            Object.entries(s.data).map(([businessId, d]) => [
+                                businessId,
+                                { ...d, entries: d.entries.map((e) => (e.categoryId === id ? { ...e, categoryId: fallback.id } : e)) },
+                            ]),
+                        ),
                     }));
                     toast.success(t("categoryDeleted", { name: target.label }));
                 },
 
                 addCard: (card) => {
-                    if (get().cards.length >= MAX_CARDS) {
+                    if (current().cards.length >= MAX_CARDS) {
                         toast.error(t("maxCards", { count: MAX_CARDS }));
                         return;
                     }
-                    set((s) => ({ cards: [...s.cards, { ...card, id: newId() }] }));
+                    update((d) => ({ cards: [...d.cards, { ...card, id: newId() }] }));
                     toast.success(t("cardAdded", { name: card.label }));
                 },
 
                 updateCard: (id, patch) => {
-                    set((s) => ({ cards: s.cards.map((c) => (c.id === id ? { ...c, ...patch } : c)) }));
+                    update((d) => ({ cards: d.cards.map((c) => (c.id === id ? { ...c, ...patch } : c)) }));
                     toast.success(t("cardUpdated"));
                 },
 
                 deleteCard: (id) => {
-                    const target = get().cards.find((c) => c.id === id);
-                    set((s) => ({
-                        cards: s.cards.filter((c) => c.id !== id),
-                        entries: s.entries.map((e) => (e.cardId === id ? { ...e, cardId: undefined } : e)),
+                    const target = current().cards.find((c) => c.id === id);
+                    update((d) => ({
+                        cards: d.cards.filter((c) => c.id !== id),
+                        entries: d.entries.map((e) => (e.cardId === id ? { ...e, cardId: undefined } : e)),
                     }));
                     if (target) toast.success(t("deleted", { name: target.label }));
                 },
 
                 adjustCardBalance: (id, delta) =>
-                    set((s) => ({ cards: s.cards.map((c) => (c.id === id ? { ...c, balance: c.balance + delta } : c)) })),
+                    update((d) => ({ cards: d.cards.map((c) => (c.id === id ? { ...c, balance: c.balance + delta } : c)) })),
 
                 transferBetweenCards: (fromId, toId, amount) => {
-                    const { cards } = get();
+                    const { cards } = current();
                     const from = cards.find((c) => c.id === fromId);
                     const to = cards.find((c) => c.id === toId);
 
@@ -255,7 +287,7 @@ export const useKhataStore = create<KhataState>()(
                         toast.error(t("notEnoughBalance", { name: from.label }));
                         return;
                     }
-                    set({
+                    update({
                         cards: cards.map((c) =>
                             c.id === fromId ? { ...c, balance: c.balance - amount }
                                 : c.id === toId ? { ...c, balance: c.balance + amount }
@@ -268,15 +300,27 @@ export const useKhataStore = create<KhataState>()(
         },
         {
             name: "filernow-khata",
-            version: 1, // bump + add `migrate` when stored shapes are renamed/removed
+            version: 2,
             storage: createJSONStorage(() => AsyncStorage),
-            partialize: (s) => ({
-                entries: s.entries,
-                categories: s.categories,
-                cards: s.cards,
-                parties: s.parties,
-                dataMode: s.dataMode,
-            }),
+            partialize: (s): Persisted => ({ categories: s.categories, data: s.data }),
+            // v1 kept one global list; move it into the default business so nothing is lost.
+            migrate: (persisted, version): Persisted => {
+                if (version < 2) {
+                    const old = persisted as PersistedV1;
+                    return {
+                        categories: old.categories ?? defaultCategories,
+                        data: {
+                            [DEFAULT_BUSINESS_ID]: {
+                                entries: old.entries ?? [],
+                                parties: old.parties ?? [],
+                                cards: old.cards ?? [],
+                                dataMode: old.dataMode ?? "blank",
+                            },
+                        },
+                    };
+                }
+                return persisted as Persisted;
+            },
         },
     ),
 );

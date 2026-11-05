@@ -1,4 +1,4 @@
-// nativeApp\src\features\khata\lib\cardDelta.ts
+// nativeApp\src\features\khata\lib\card-delta.ts
 
 import { IExpenseEntry } from "../types";
 

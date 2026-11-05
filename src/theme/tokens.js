@@ -16,7 +16,13 @@ const colors = {
     "text-secondary": "#463C40",
     "text-secondary-muted": "#6B7280",
     "text-secondary-muter": "#9CA3AF",
+    "secondary": "#34B08D", // dashboard --brand-secondary
+    "secondary-light": "#65C5AA",
+    "text-tertiary": "#F9FAFB",
+    "text-muted": "rgba(17, 17, 17, 0.5)",
+    "text-link": "#0059D9",
     "page-bg": "#FBFCF9",
+    "card-bg-clr": "#F8F9FA",
     "surface-muted": "#F6F1F2",
     "border-clr": "#ECE5E7",
     "border-strong": "#DED2D6",
@@ -29,6 +35,15 @@ const colors = {
     "warning-bg": "#FFFBEB",
     info: "#2563EB",
     "info-bg": "#EFF6FF",
+
+    "chip-green-bg": "#DCFCE7",
+    "chip-green": "#16A34A",
+    "chip-blue-bg": "#DBEAFE",
+    "chip-blue": "#2563EB",
+    "chip-purple-bg": "#EDE9FE",
+    "chip-purple": "#7C3AED",
+    "chip-red-bg": "#FEE2E2",
+    "chip-red": "#DC2626",
 };
 
 const fontFamily = {

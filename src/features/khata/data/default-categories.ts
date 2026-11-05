@@ -1,4 +1,4 @@
-// nativeApp\src\features\khata\data\defaultCategoriesData.ts
+// nativeApp\src\features\khata\data\default-categories.ts
 
 import { DEBT_TYPE_META, EntryKind, ICategory } from "../types";
 

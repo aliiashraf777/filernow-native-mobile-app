@@ -29,7 +29,6 @@ export function AdvanceServices() {
             title={t("advancedTools")}
             titleClassName="font-jakarta text-heading-h5 text-[#454545]"
             action={<PremiumBadge />}
-            className="rounded-[20px] p-3.5"
         >
             <View className="-m-[5px] flex-row flex-wrap">
                 {ADVANCE_SERVICES.map((item) => (
