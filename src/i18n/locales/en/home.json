@@ -1,0 +1,27 @@
+{
+  "khataServices": "Khata Services",
+  "viewDashboard": "View Dashboard",
+  "advancedTools": "Advanced Tools",
+  "premium": "PREMIUM",
+  "featuredServices": "Featured services",
+  "showBanner": "Show {{title}} banner",
+  "services": {
+    "party": "Party",
+    "cash": "Cash",
+    "stock": "Stock",
+    "bills": "Bills",
+    "staff": "Staff",
+    "expense": "Expense",
+    "aiAssistant": "AI Assistant",
+    "scanReceipt": "Scan Receipt",
+    "recurring": "Recurring",
+    "multiCurrency": "Multi-Currency",
+    "exportPdf": "Export PDF",
+    "teamSharing": "Team Sharing"
+  },
+  "features": {
+    "expenseManager": "Expense Manager",
+    "under18": "Under 18",
+    "savings": "Savings"
+  }
+}

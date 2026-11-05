@@ -1,6 +1,7 @@
 // nativeApp\src\features\party\components\ledger.tsx
 
 import { SymbolView } from "expo-symbols";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { type LedgerRow, debtLabel, pkr } from "@/features/khata/lib/debt";
@@ -12,11 +13,12 @@ import { colors } from "@/theme/tokens";
 const AMOUNT_COL = "w-[84px]";
 
 export function LedgerHeader({ count }: { count: number }) {
+    const { t } = useTranslation("party", { keyPrefix: "ledger" });
     return (
         <View className="flex-row border-b border-border-clr bg-white">
-            <Text className="flex-1 px-3 py-2 font-jakarta-semibold text-xs text-text-secondary">Entries ({count})</Text>
-            <Text className={cn(AMOUNT_COL, "bg-danger-bg px-3 py-2 text-right font-jakarta-semibold text-xs text-danger")}>You Gave</Text>
-            <Text className={cn(AMOUNT_COL, "bg-success-bg px-3 py-2 text-right font-jakarta-semibold text-xs text-success")}>You Got</Text>
+            <Text className="flex-1 px-3 py-2 font-jakarta-semibold text-xs text-text-secondary">{t("entries", { count })}</Text>
+            <Text className={cn(AMOUNT_COL, "bg-danger-bg px-3 py-2 text-right font-jakarta-semibold text-xs text-danger")}>{t("gave")}</Text>
+            <Text className={cn(AMOUNT_COL, "bg-success-bg px-3 py-2 text-right font-jakarta-semibold text-xs text-success")}>{t("got")}</Text>
         </View>
     );
 }
@@ -28,6 +30,7 @@ type Props = {
 };
 
 export function LedgerRowItem({ row: { entry, sign, balance }, onEdit, onDelete }: Props) {
+    const { t } = useTranslation("party", { keyPrefix: "ledger" });
     const amount = entry.amount.toLocaleString("en-PK");
     const chip =
         balance > 0 ? ["bg-danger-bg", "text-danger"] : balance < 0 ? ["bg-success-bg", "text-success"] : ["bg-page-bg", "text-text-secondary"];
@@ -42,15 +45,15 @@ export function LedgerRowItem({ row: { entry, sign, balance }, onEdit, onDelete 
                 ) : null}
                 <View className="mt-1 flex-row items-center gap-3">
                     <View className={cn("rounded-brand-8 px-1.5 py-0.5", chip[0])}>
-                        <Text className={cn("font-jakarta-medium text-[11px]", chip[1])}>Bal. {pkr(Math.abs(balance))}</Text>
+                        <Text className={cn("font-jakarta-medium text-[11px]", chip[1])}>{t("balance", { amount: pkr(Math.abs(balance)) })}</Text>
                     </View>
                     {onEdit ? (
-                        <Pressable accessibilityRole="button" accessibilityLabel="Edit entry" onPress={() => onEdit(entry)} hitSlop={10}>
+                        <Pressable accessibilityRole="button" accessibilityLabel={t("editA11y")} onPress={() => onEdit(entry)} hitSlop={10}>
                             <SymbolView name={{ ios: "pencil", android: "edit", web: "edit" }} size={15} tintColor={colors["text-secondary"]} />
                         </Pressable>
                     ) : null}
                     {onDelete ? (
-                        <Pressable accessibilityRole="button" accessibilityLabel="Delete entry" onPress={() => onDelete(entry)} hitSlop={10}>
+                        <Pressable accessibilityRole="button" accessibilityLabel={t("deleteA11y")} onPress={() => onDelete(entry)} hitSlop={10}>
                             <SymbolView name={{ ios: "trash", android: "delete", web: "delete" }} size={15} tintColor={colors["text-secondary-muted"]} />
                         </Pressable>
                     ) : null}

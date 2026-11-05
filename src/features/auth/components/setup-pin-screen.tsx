@@ -2,6 +2,7 @@
 
 import { ShieldCheck } from "lucide-react-native";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
 import { PIN_LENGTH, usePinEntry } from "../hooks/use-pin-entry";
@@ -26,6 +27,7 @@ type Props = {
 
 /** Registration: create a PIN, then confirm it. */
 export default function SetupPinScreen({ phone, onBack, onComplete }: Props) {
+  const { t } = useTranslation("auth");
   const [step, setStep] = useState<"create" | "confirm">("create");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -35,14 +37,14 @@ export default function SetupPinScreen({ phone, onBack, onComplete }: Props) {
     disabled: loading || done,
     onComplete: async (pin, { fail, reset }) => {
       if (step === "create") {
-        if (isWeak(pin)) return fail("Choose a less predictable PIN.");
+        if (isWeak(pin)) return fail(t("pin.weak"));
         firstPin.current = pin;
         reset();
         setStep("confirm");
         return;
       }
 
-      if (pin !== firstPin.current) return fail("PINs don't match. Try again.");
+      if (pin !== firstPin.current) return fail(t("pin.mismatch"));
 
       setLoading(true);
       try {
@@ -50,7 +52,7 @@ export default function SetupPinScreen({ phone, onBack, onComplete }: Props) {
         setDone(true);
         onComplete();
       } catch {
-        fail("Something went wrong. Please try again.");
+        fail(t("pin.createFailed"));
       } finally {
         setLoading(false);
       }
@@ -67,11 +69,11 @@ export default function SetupPinScreen({ phone, onBack, onComplete }: Props) {
   return (
     <PinScreenLayout
       icon={ShieldCheck}
-      title={step === "create" ? "Create your PIN" : "Confirm your PIN"}
+      title={step === "create" ? t("pin.createTitle") : t("pin.confirmTitle")}
       subtitle={
         step === "create"
-          ? `Choose a ${PIN_LENGTH}-digit PIN to secure your account.`
-          : "Enter your PIN once more."
+          ? t("pin.createSubtitle", { length: PIN_LENGTH })
+          : t("pin.confirmSubtitle")
       }
       onBack={step === "confirm" || onBack ? goBack : undefined}
       top={
@@ -88,7 +90,7 @@ export default function SetupPinScreen({ phone, onBack, onComplete }: Props) {
         error={entry.error}
         shake={entry.shake}
         loading={loading}
-        success={done ? "Your account is ready." : null}
+        success={done ? t("pin.accountReady") : null}
       />
     </PinScreenLayout>
   );

@@ -1,0 +1,44 @@
+{
+  "title": "Digital Khata",
+  "sections": {
+    "daily": { "title": "Rozana Khata", "description": "Apni rozana ki bikri aur kharche likhein." },
+    "business": { "title": "Karobari Khata", "description": "Stock, bills aur cash ek hi jagah sambhalein." },
+    "udhaar": { "title": "Udhaar Khata", "description": "Diya gaya udhaar aur baqaya raqam sambhalein." },
+    "party": { "title": "Party", "description": "Customers aur suppliers, balance ke saath." }
+  },
+  "mode": {
+    "label": "Mode: {{mode}}",
+    "demo": "Demo",
+    "blank": "Khaali",
+    "startFresh": "Naye sire se shuru karein",
+    "loadDemo": "Demo data load karein",
+    "replaceTitle": "Maujooda data replace hoga",
+    "replaceMessage": "Pakka?"
+  },
+  "toast": {
+    "cardBalance": "{{card}}: {{change}} (naya balance {{balance}})",
+    "demoLoaded": "Demo data load ho gaya",
+    "cleared": "Khata saaf ho gaya. Naye sire se shuru karein",
+    "saved": "{{name}} save ho gaya",
+    "updated": "{{name}} update ho gaya",
+    "deleted": "{{name}} delete ho gaya",
+    "partyAdded": "{{name}} add ho gaya",
+    "partiesAdded_one": "{{count}} party add ho gayi",
+    "partiesAdded_other": "{{count}} parties add ho gayin",
+    "partyHasEntries": "Is party ki entries maujood hain, pehle woh delete karein",
+    "partyDeletedWithEntries_one": "Party aur {{count}} entry delete ho gayi",
+    "partyDeletedWithEntries_other": "Party aur {{count}} entries delete ho gayin",
+    "partyDeleted": "Party delete ho gayi",
+    "categoryExists": "\"{{name}}\" pehle se maujood hai",
+    "categoryAdded": "{{name}} category add ho gayi",
+    "debtCategoryLocked": "Udhaar categories delete nahi ho sakti",
+    "otherCategoryLocked": "\"Other\" category delete nahi ho sakti",
+    "categoryDeleted": "{{name}} delete ho gayi (entries \"Other\" me chali gayin)",
+    "maxCards": "Sirf {{count}} cards add ho sakte hain",
+    "cardAdded": "{{name}} add ho gaya",
+    "cardUpdated": "Card update ho gaya",
+    "differentCards": "Alag alag cards chunein",
+    "notEnoughBalance": "{{name}} me itna balance nahi hai",
+    "transferred": "{{amount}} {{from}} se {{to}} me transfer hue"
+  }
+}

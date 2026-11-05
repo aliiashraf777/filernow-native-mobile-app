@@ -1,0 +1,27 @@
+{
+  "khataServices": "کھاتہ سروسز",
+  "viewDashboard": "ڈیش بورڈ دیکھیں",
+  "advancedTools": "ایڈوانس ٹولز",
+  "premium": "پریمیم",
+  "featuredServices": "نمایاں سروسز",
+  "showBanner": "{{title}} بینر دکھائیں",
+  "services": {
+    "party": "پارٹی",
+    "cash": "کیش",
+    "stock": "اسٹاک",
+    "bills": "بلز",
+    "staff": "عملہ",
+    "expense": "اخراجات",
+    "aiAssistant": "AI اسسٹنٹ",
+    "scanReceipt": "رسید اسکین کریں",
+    "recurring": "بار بار کے اخراجات",
+    "multiCurrency": "ملٹی کرنسی",
+    "exportPdf": "PDF ایکسپورٹ",
+    "teamSharing": "ٹیم شیئرنگ"
+  },
+  "features": {
+    "expenseManager": "ایکسپینس مینیجر",
+    "under18": "18 سال سے کم",
+    "savings": "بچت"
+  }
+}

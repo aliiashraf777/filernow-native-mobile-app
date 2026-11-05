@@ -1,0 +1,14 @@
+{
+  "screenTitle": "Choose Your <highlight>Language</highlight>",
+  "screenSubtitle": "You can change this anytime in More → Settings.",
+  "sheetTitle": "Select language",
+  "globeA11y": "Multilingual globe illustration",
+  "backgroundA11y": "Welcome background",
+  "restart": {
+    "title": "Restart to switch language?",
+    "message": "{{language}} reads right to left, so the app will restart to flip the layout. Your data stays safe.",
+    "messageLtr": "{{language}} reads left to right, so the app will restart to flip the layout. Your data stays safe.",
+    "confirm": "Restart"
+  },
+  "changed": "Language changed to {{language}}"
+}

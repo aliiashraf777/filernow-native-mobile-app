@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { Lock } from "lucide-react-native";
 import { useEffect, useState, type ReactNode } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import {
   AccessibilityInfo,
   ActivityIndicator,
@@ -22,8 +23,8 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { checkPhone } from "../lib/mock-auth";
 import { formatPhone, isValidPhone } from "../lib/phone";
 
-const CHIPS = ["Hisaab", "Bachat", "Taraqqi"];
-const WORDS = ["ab digital.", "ab mehfooz.", "ab aasaan."];
+// texts live in auth:register.chips / rotatingWords; every language has 3 rotating words
+const WORD_COUNT = 3;
 const WORD_H = 46;
 
 /** Fade + slide-up entrance. Runs once when the screen appears. */
@@ -66,6 +67,9 @@ export default function RegisterScreen({
   onContinue: (phone: string, exists: boolean) => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation(["auth", "common"]);
+  const words = t("register.rotatingWords", { returnObjects: true });
+  const chips = t("register.chips", { returnObjects: true });
   const [phone, setPhone] = useState(""); // digits only, without 0 / +92
   const [focused, setFocused] = useState(false);
   const [touched, setTouched] = useState(false);
@@ -87,7 +91,7 @@ export default function RegisterScreen({
         Animated.timing(wordY, { toValue: -WORD_H, duration: 280, easing: Easing.in(Easing.cubic), useNativeDriver: true }),
       ]).start(({ finished }) => {
         if (!finished || cancelled) return;
-        setWordIdx((i) => (i + 1) % WORDS.length);
+        setWordIdx((i) => (i + 1) % WORD_COUNT);
         wordY.setValue(WORD_H);
         Animated.parallel([
           Animated.timing(wordOpacity, { toValue: 1, duration: 380, easing: Easing.out(Easing.cubic), useNativeDriver: true }),
@@ -126,7 +130,7 @@ export default function RegisterScreen({
       const { exists } = await checkPhone(phone);
       onContinue(phone, exists);
     } catch {
-      setRequestError("Couldn't reach the server. Please try again.");
+      setRequestError(t("register.networkError"));
     } finally {
       setLoading(false);
     }
@@ -171,7 +175,7 @@ export default function RegisterScreen({
               <View>
                 <Reveal delay={100}>
                   <Text className="font-jakarta-bold text-[36px] leading-[44px] tracking-[-1px] text-[#151A23]">
-                    Apna hisaab,
+                    {t("register.headline")}
                   </Text>
                 </Reveal>
 
@@ -179,14 +183,14 @@ export default function RegisterScreen({
                   <View style={{ height: WORD_H, overflow: "hidden" }}>
                     <Animated.View style={{ opacity: wordOpacity, transform: [{ translateY: wordY }] }}>
                       <Text className="font-jakarta-bold text-[36px] leading-[44px] tracking-[-1px] text-[#D3222C]">
-                        {WORDS[wordIdx]}
+                        {words[wordIdx]}
                       </Text>
                     </Animated.View>
                   </View>
                 </Reveal>
 
                 <View className="mt-4 flex-row gap-2">
-                  {CHIPS.map((c, i) => (
+                  {chips.map((c, i) => (
                     <Reveal key={c} delay={620 + i * 120} distance={12} duration={500}>
                       <View className="rounded-full border border-[#F3D3D6] bg-white/85 px-3.5 py-[7px]">
                         <Text className="font-jakarta-bold text-xs text-[#463C40]">{c}</Text>
@@ -203,15 +207,19 @@ export default function RegisterScreen({
               style={{ paddingBottom: Math.max(insets.bottom, 12) + 16 }}
             >
               <Text className="font-jakarta-bold text-[20px] leading-[38px] tracking-[-0.5px] text-[#151A23]">
-                Let&apos;s get started
+                {t("register.title")}
               </Text>
               <Text className="mt-1.5 font-jakarta-medium text-[15px] leading-[22px] text-gray-500">
-                Enter your mobile number to log in or create an account.
+                {t("register.subtitle")}
               </Text>
 
               {/* Phone field */}
-              <Text className="mb-2 mt-6 font-jakarta-bold text-[13px] text-[#151A23]">Mobile number</Text>
-              <View className={`h-14 flex-row items-center rounded-2xl border-[1.5px] px-4 ${fieldClass}`}>
+              <Text className="mb-2 mt-6 font-jakarta-bold text-[13px] text-[#151A23]">{t("register.phoneLabel")}</Text>
+              {/* phone numbers read left to right in Urdu too: keep +92 before the digits */}
+              <View
+                className={`h-14 flex-row items-center rounded-2xl border-[1.5px] px-4 ${fieldClass}`}
+                style={{ direction: "ltr" }}
+              >
                 <Text className="font-jakarta-bold text-base text-[#151A23]">+92</Text>
                 <View className="mx-3 h-6 w-px bg-gray-200" />
                 <TextInput
@@ -224,18 +232,19 @@ export default function RegisterScreen({
                     setTouched(true);
                   }}
                   placeholder="300 1234567"
+                  textAlign="left"
                   placeholderTextColor="#9CA3AF"
                   keyboardType="number-pad"
                   returnKeyType="done"
                   onSubmitEditing={handleContinue}
                   selectionColor="#D3222C"
-                  accessibilityLabel="Mobile number"
+                  accessibilityLabel={t("register.phoneLabel")}
                 />
               </View>
 
               {showError ? (
                 <Text className="mt-3 font-jakarta-medium text-[13px] text-red-500">
-                  Enter a valid 10-digit number, e.g. 300 1234567
+                  {t("register.invalidPhone")}
                 </Text>
               ) : requestError ? (
                 <Text className="mt-3 font-jakarta-medium text-[13px] text-red-500">{requestError}</Text>
@@ -243,7 +252,7 @@ export default function RegisterScreen({
                 <View className="mt-3 flex-row items-center gap-1.5">
                   <Lock size={13} color="#9CA3AF" strokeWidth={2} />
                   <Text className="font-jakarta-medium text-[13px] text-gray-500">
-                    Only used to verify your account.
+                    {t("register.privacyNote")}
                   </Text>
                 </View>
               )}
@@ -263,13 +272,16 @@ export default function RegisterScreen({
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text className="font-jakarta-bold text-base text-white">Continue</Text>
+                  <Text className="font-jakarta-bold text-base text-white">{t("common:actions.continue")}</Text>
                 )}
               </Pressable>
 
               <Text className="mt-4 text-center font-jakarta-medium text-xs leading-[18px] text-gray-500">
-                By continuing, you agree to our <Text className="font-jakarta-bold text-[#151A23]">Terms</Text> and{" "}
-                <Text className="font-jakarta-bold text-[#151A23]">Privacy Policy</Text>.
+                <Trans
+                  t={t}
+                  i18nKey="register.terms"
+                  components={{ bold: <Text className="font-jakarta-bold text-[#151A23]" /> }}
+                />
               </Text>
             </View>
           </ScrollView>

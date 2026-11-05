@@ -1,6 +1,7 @@
 // nativeApp\src\features\auth\components\pin-dots.tsx
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Animated, Text, View } from "react-native";
 
 function PinDot({ filled, error }: { filled: boolean; error: boolean }) {
@@ -46,10 +47,11 @@ type Props = {
 
 /** PIN progress dots with the status line underneath (error, loading or success). */
 export function PinDots({ length, filled, error, shake, loading, success }: Props) {
+  const { t } = useTranslation("auth");
   return (
     <View className="mt-8 items-center">
       <Animated.View style={{ transform: [{ translateX: shake }] }}>
-        <View className="flex-row gap-5" accessibilityLabel={`${filled} of ${length} digits entered`}>
+        <View className="flex-row gap-5" accessibilityLabel={t("pin.digitsEntered", { filled, length })}>
           {Array.from({ length }).map((_, index) => (
             <PinDot key={index} filled={index < filled} error={!!error} />
           ))}

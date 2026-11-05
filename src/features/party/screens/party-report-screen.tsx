@@ -2,6 +2,7 @@
 
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 
 import { DateTimeField } from "@/components/ui/date-time-field";
@@ -19,11 +20,8 @@ import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 type Side = "all" | "gave" | "got";
 type ExportKind = "pdf" | "xlsx" | "csv";
 
-const SIDES: { key: Side; label: string }[] = [
-    { key: "all", label: "Sab" },
-    { key: "gave", label: "You Gave" },
-    { key: "got", label: "You Got" },
-];
+// labels: party:report.all, party:ledger.gave / got
+const SIDES: Side[] = ["all", "gave", "got"];
 const EXPORTS: { key: ExportKind; label: string }[] = [
     { key: "pdf", label: "PDF" },
     { key: "xlsx", label: "Excel" },
@@ -31,6 +29,8 @@ const EXPORTS: { key: ExportKind; label: string }[] = [
 ];
 
 export default function PartyReportScreen() {
+    const { t } = useTranslation("party");
+    const sideLabel = (side: Side) => (side === "all" ? t("report.all") : t(`ledger.${side}`));
     const { slug } = useLocalSearchParams<{ slug: string }>();
     // const party = useKhataStore((s) => s.parties.find((p) => p.slug === slug || p.id === slug));
     // const entries = useKhataStore((s) => s.entries);
@@ -57,7 +57,7 @@ export default function PartyReportScreen() {
         });
     }, [all, side, from, to, q]);
 
-    if (!party) return <PlaceholderScreen title="Party nahi mili" headerTitle="Report" />;
+    if (!party) return <PlaceholderScreen title={t("notFound")} headerTitle={t("report.headerTitle")} />;
 
     const gave = rows.filter((r) => r.sign > 0).reduce((s, r) => s + r.entry.amount, 0);
     const got = rows.filter((r) => r.sign < 0).reduce((s, r) => s + r.entry.amount, 0);
@@ -65,7 +65,7 @@ export default function PartyReportScreen() {
     const filtered = Boolean(q || from || to || side !== "all");
 
     const run = async (kind: ExportKind) => {
-        if (!rows.length) return toast("In filters mein koi entry nahi hai");
+        if (!rows.length) return toast(t("report.noEntries"));
         setBusy(kind);
         try {
             const input: ExportInput = { party, rows, net, range: { from, to } };
@@ -75,7 +75,7 @@ export default function PartyReportScreen() {
             else await exportCsv(input, `${base}.csv`);
         } catch (e) {
             console.warn("export failed", e);
-            toast.error("Export nahi ho saka. Dobara koshish karein.");
+            toast.error(t("report.exportFailed"));
         } finally {
             setBusy(null);
         }
@@ -83,7 +83,7 @@ export default function PartyReportScreen() {
 
     return (
         <View className="flex-1 bg-page-bg">
-            <Stack.Screen options={{ title: `Report: ${party.name}` }} />
+            <Stack.Screen options={{ title: t("report.title", { name: party.name }) }} />
 
             <FlatList
                 data={[...rows].reverse()}
@@ -94,30 +94,30 @@ export default function PartyReportScreen() {
                     <>
                         <View className="gap-3 p-4">
                             <View className="rounded-brand-12 border border-border-clr bg-white p-3">
-                                <Field label="Entry dhoondein">
+                                <Field label={t("report.search")}>
                                     <Input
                                         icon={{ ios: "magnifyingglass", android: "search", web: "search" }}
-                                        placeholder="qism ya note likhein"
+                                        placeholder={t("report.searchPlaceholder")}
                                         value={q}
                                         onChangeText={setQ}
                                         autoCorrect={false}
                                     />
                                 </Field>
 
-                                <Text className="mb-1.5 font-jakarta-semibold text-xs text-text-dark">Kaun si entries?</Text>
+                                <Text className="mb-1.5 font-jakarta-semibold text-xs text-text-dark">{t("report.which")}</Text>
                                 <View className="mb-4 flex-row gap-2">
                                     {SIDES.map((s) => (
                                         <Pressable
-                                            key={s.key}
+                                            key={s}
                                             accessibilityRole="radio"
-                                            accessibilityState={{ checked: side === s.key }}
-                                            onPress={() => setSide(s.key)}
+                                            accessibilityState={{ checked: side === s }}
+                                            onPress={() => setSide(s)}
                                             className={cn(
                                                 "min-h-10 flex-1 items-center justify-center rounded-full border",
-                                                side === s.key ? "border-primary bg-primary" : "border-border-clr bg-white",
+                                                side === s ? "border-primary bg-primary" : "border-border-clr bg-white",
                                             )}>
-                                            <Text className={cn("font-jakarta-semibold text-xs", side === s.key ? "text-white" : "text-text-secondary")}>
-                                                {s.label}
+                                            <Text className={cn("font-jakarta-semibold text-xs", side === s ? "text-white" : "text-text-secondary")}>
+                                                {sideLabel(s)}
                                             </Text>
                                         </Pressable>
                                     ))}
@@ -125,13 +125,13 @@ export default function PartyReportScreen() {
 
                                 <View className="flex-row gap-3">
                                     <View className="flex-1">
-                                        <Field label="Shuru ki tareekh">
-                                            <DateTimeField mode="date" value={from} onChange={setFrom} placeholder="Shuru" />
+                                        <Field label={t("report.from")}>
+                                            <DateTimeField mode="date" value={from} onChange={setFrom} placeholder={t("report.fromPlaceholder")} />
                                         </Field>
                                     </View>
                                     <View className="flex-1">
-                                        <Field label="Akhri tareekh">
-                                            <DateTimeField mode="date" value={to} min={from || undefined} onChange={setTo} placeholder="Akhir" />
+                                        <Field label={t("report.to")}>
+                                            <DateTimeField mode="date" value={to} min={from || undefined} onChange={setTo} placeholder={t("report.toPlaceholder")} />
                                         </Field>
                                     </View>
                                 </View>
@@ -146,7 +146,7 @@ export default function PartyReportScreen() {
                                             setTo("");
                                         }}
                                         className="min-h-9 self-start justify-center">
-                                        <Text className="font-jakarta-semibold text-xs text-primary">Filters reset karein</Text>
+                                        <Text className="font-jakarta-semibold text-xs text-primary">{t("report.reset")}</Text>
                                     </Pressable>
                                 ) : null}
                             </View>
@@ -155,7 +155,7 @@ export default function PartyReportScreen() {
 
                             <View>
                                 <Text className="mb-2 font-jakarta-semibold text-xs text-text-secondary-muted">
-                                    Report share karein (WhatsApp, Drive, Email, ...)
+                                    {t("report.share")}
                                 </Text>
                                 <View className="flex-row gap-2">
                                     {EXPORTS.map((x) => (
@@ -177,7 +177,7 @@ export default function PartyReportScreen() {
                     </>
                 }
                 ListEmptyComponent={
-                    <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">Is filter mein koi entry nahi mili.</Text>
+                    <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">{t("report.empty")}</Text>
                 }
                 renderItem={({ item }) => <LedgerRowItem row={item} />}
             />

@@ -6,25 +6,11 @@ export const SLIDE_ICONS = {
     laptop: { ios: "laptopcomputer", android: "laptop", web: "laptop" },
 } as const;
 
-export type Slide = { image: number; icon: keyof typeof SLIDE_ICONS; title: string; text: string };
+/** Title and text live in onboarding:slides.<key>. */
+export type Slide = { key: "control" | "business" | "devices"; image: number; icon: keyof typeof SLIDE_ICONS };
 
 export const SLIDES: Slide[] = [
-    {
-        image: require("@/assets/images/slide_1.jpg"),
-        icon: "chart",
-        title: "Apne paison par apna control",
-        text: "Kharche track karein, aamdani sambhalein — sab kuch ek hi jagah.",
-    },
-    {
-        image: require("@/assets/images/slide_2.jpg"),
-        icon: "people",
-        title: "Poora karobar, ek hi app mein",
-        text: "Grahak, bank, bikri, amla aur kharche — sab kuch Digital Khata mein.",
-    },
-    {
-        image: require("@/assets/images/slide_3.jpg"),
-        icon: "laptop",
-        title: "Har device par aapka hisaab",
-        text: "Mobile aur laptop, dono par Digital Khata — data hamesha sync.",
-    },
+    { key: "control", image: require("@/assets/images/slide_1.jpg"), icon: "chart" },
+    { key: "business", image: require("@/assets/images/slide_2.jpg"), icon: "people" },
+    { key: "devices", image: require("@/assets/images/slide_3.jpg"), icon: "laptop" },
 ];

@@ -1,0 +1,27 @@
+{
+  "khataServices": "Khata Services",
+  "viewDashboard": "Dashboard dekhein",
+  "advancedTools": "Advanced Tools",
+  "premium": "PREMIUM",
+  "featuredServices": "Khaas services",
+  "showBanner": "{{title}} banner dikhayein",
+  "services": {
+    "party": "Party",
+    "cash": "Cash",
+    "stock": "Stock",
+    "bills": "Bills",
+    "staff": "Amla",
+    "expense": "Kharcha",
+    "aiAssistant": "AI Assistant",
+    "scanReceipt": "Receipt Scan",
+    "recurring": "Recurring",
+    "multiCurrency": "Multi-Currency",
+    "exportPdf": "PDF Export",
+    "teamSharing": "Team Sharing"
+  },
+  "features": {
+    "expenseManager": "Expense Manager",
+    "under18": "Under 18",
+    "savings": "Bachat"
+  }
+}

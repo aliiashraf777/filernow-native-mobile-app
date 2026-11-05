@@ -1,0 +1,38 @@
+{
+  "title": "Notifications",
+  "subtitle": "Stay on top of your spending",
+  "markAllRead": "Mark all read",
+  "filters": {
+    "all": "All",
+    "unread": "Unread",
+    "alerts": "Alerts"
+  },
+  "today": "Today",
+  "earlier": "Earlier",
+  "caughtUp": "You're all caught up!",
+  "empty": "No notifications yet.",
+  "unreadA11y": "Unread. {{title}}. {{body}}",
+  "readA11y": "{{title}}. {{body}}",
+  "demo": {
+    "budget-90": {
+      "title": "Budget almost reached",
+      "body": "Food & Dining is at 90% of this month's budget."
+    },
+    "expense-added": {
+      "title": "Expense added",
+      "body": "Rs 2,450 spent at Imtiaz Super Market."
+    },
+    "bill-due": {
+      "title": "Recurring bill due tomorrow",
+      "body": "Electricity bill · Rs 8,200 is due on 24 Oct."
+    },
+    "weekly-report": {
+      "title": "Weekly report is ready",
+      "body": "You saved 12% more than last week. Nice work!"
+    },
+    "savings-goal": {
+      "title": "Savings goal reached",
+      "body": "You hit your “New Phone” goal of Rs 60,000."
+    }
+  }
+}

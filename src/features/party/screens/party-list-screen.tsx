@@ -3,6 +3,7 @@
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, FlatList, Pressable, Text, View } from "react-native";
 
 import { Input } from "@/components/ui/form";
@@ -13,7 +14,6 @@ import {
     type IParty,
     type NewParty,
     PARTY_TYPES,
-    PARTY_TYPE_LABELS,
     type PartyType,
 } from "@/features/khata/types";
 import { BalanceOverview } from "@/features/party/components/balance-overview";
@@ -31,12 +31,11 @@ import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 type Row = { party: IParty; balance: number; last?: IExpenseEntry; count: number };
 type Tab = "all" | PartyType;
 
-const TABS: { key: Tab; label: string }[] = [
-    { key: "all", label: "All" },
-    ...PARTY_TYPES.map((t) => ({ key: t as Tab, label: `${PARTY_TYPE_LABELS[t]}s` })),
-];
+// labels: party:typesPlural.<key>
+const TABS: Tab[] = ["all", ...PARTY_TYPES];
 
 export default function PartyListScreen() {
+    const { t } = useTranslation(["party", "common"]);
     const router = useRouter();
     // const parties = useKhataStore((s) => s.parties);
     // const entries = useKhataStore((s) => s.entries);
@@ -116,7 +115,7 @@ export default function PartyListScreen() {
     const handleSaved = (v: NewParty) => {
         if (editing) {
             updateParty(editing.id, v);
-            toast.success("Party update ho gayi");
+            toast.success(t("list.updated"));
         } else {
             addParty(v);
         }
@@ -124,28 +123,28 @@ export default function PartyListScreen() {
 
     const confirmDelete = (r: Row) =>
         Alert.alert(
-            "Party delete karein?",
-            r.count > 0 ? `${r.party.name} aur uski ${r.count} entries delete ho jayengi.` : r.party.name,
+            t("list.deleteTitle"),
+            r.count > 0 ? t("list.deleteWithEntries", { name: r.party.name, count: r.count }) : r.party.name,
             [
-                { text: "Nahi", style: "cancel" },
-                { text: "Haan, delete", style: "destructive", onPress: () => deleteParty(r.party.id, true) },
+                { text: t("common:actions.no"), style: "cancel" },
+                { text: t("list.yesDelete"), style: "destructive", onPress: () => deleteParty(r.party.id, true) },
             ],
         );
 
     const openMenu = (r: Row) =>
         Alert.alert(r.party.name, undefined, [
-            { text: "Edit", onPress: () => { setEditing(r.party); setFormOpen(true); } },
-            { text: "Delete", style: "destructive", onPress: () => confirmDelete(r) },
-            { text: "Cancel", style: "cancel" },
+            { text: t("common:actions.edit"), onPress: () => { setEditing(r.party); setFormOpen(true); } },
+            { text: t("common:actions.delete"), style: "destructive", onPress: () => confirmDelete(r) },
+            { text: t("common:actions.cancel"), style: "cancel" },
         ]);
 
     return (
         <View className="flex-1 bg-page-bg">
             <Stack.Screen
                 options={{
-                    title: "Party",
+                    title: t("title"),
                     headerRight: () => (
-                        <Pressable accessibilityRole="button" accessibilityLabel="Bulk add parties" onPress={() => setBulkOpen(true)} hitSlop={12}>
+                        <Pressable accessibilityRole="button" accessibilityLabel={t("list.bulkAddA11y")} onPress={() => setBulkOpen(true)} hitSlop={12}>
                             <SymbolView
                                 name={{ ios: "person.3.fill", android: "groups", web: "groups" }}
                                 size={22}
@@ -157,18 +156,18 @@ export default function PartyListScreen() {
             />
 
             <View className="flex-row gap-2 px-4 pt-3">
-                {TABS.map((t) => (
+                {TABS.map((key) => (
                     <Pressable
-                        key={t.key}
+                        key={key}
                         accessibilityRole="tab"
-                        accessibilityState={{ selected: tab === t.key }}
-                        onPress={() => setTab(t.key)}
+                        accessibilityState={{ selected: tab === key }}
+                        onPress={() => setTab(key)}
                         className={cn(
                             "min-h-10 justify-center rounded-full border px-4",
-                            tab === t.key ? "border-primary bg-primary" : "border-border-clr bg-white",
+                            tab === key ? "border-primary bg-primary" : "border-border-clr bg-white",
                         )}>
-                        <Text className={cn("font-jakarta-semibold text-xs", tab === t.key ? "text-white" : "text-text-secondary")}>
-                            {t.label}
+                        <Text className={cn("font-jakarta-semibold text-xs", tab === key ? "text-white" : "text-text-secondary")}>
+                            {t(`typesPlural.${key}`)}
                         </Text>
                     </Pressable>
                 ))}
@@ -178,7 +177,7 @@ export default function PartyListScreen() {
                 <View className="flex-1">
                     <Input
                         icon={{ ios: "magnifyingglass", android: "search", web: "search" }}
-                        placeholder={`${shown.length} parties mein naam ya number se dhoondein`}
+                        placeholder={t("list.search", { count: shown.length })}
                         value={q}
                         onChangeText={setQ}
                         autoCorrect={false}
@@ -186,7 +185,7 @@ export default function PartyListScreen() {
                 </View>
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Filters"
+                    accessibilityLabel={t("list.filtersA11y")}
                     onPress={() => setFilterOpen(true)}
                     className="h-12 w-12 items-center justify-center rounded-brand-8 border border-border-clr bg-white active:bg-page-bg">
                     <SymbolView
@@ -215,16 +214,14 @@ export default function PartyListScreen() {
                 }
                 ListEmptyComponent={
                     <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">
-                        {parties.length === 0
-                            ? 'Abhi koi party nahi hai. "Add Party" se shuru karein.'
-                            : "Is filter mein koi party nahi mili."}
+                        {parties.length === 0 ? t("list.empty") : t("list.noMatch")}
                     </Text>
                 }
                 renderItem={({ item }) => (
                     <PartyRow
                         party={item.party}
                         balance={item.balance}
-                        lastLabel={item.last ? entryDateTime(item.last) : "Koi entry nahi"}
+                        lastLabel={item.last ? entryDateTime(item.last) : t("list.noEntries")}
                         hidden={hidden}
                         onPress={() => router.push(partyHref(item.party))}
                         onMenu={() => openMenu(item)}
@@ -237,7 +234,7 @@ export default function PartyListScreen() {
                 onPress={() => { setEditing(null); setFormOpen(true); }}
                 className="absolute bottom-4 right-4 min-h-12 flex-row items-center gap-2 rounded-full bg-primary px-5 shadow-lg shadow-black/20 active:opacity-80">
                 <SymbolView name={{ ios: "plus", android: "add", web: "add" }} size={18} tintColor="#FFFFFF" />
-                <Text className="font-jakarta-bold text-sm text-white">Add Party</Text>
+                <Text className="font-jakarta-bold text-sm text-white">{t("list.add")}</Text>
             </Pressable>
 
             <PartyFormSheet

@@ -1,6 +1,7 @@
 // nativeApp\src\features\party\components\party-row.tsx
 
 import { SymbolView } from "expo-symbols";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import type { IParty } from "@/features/khata/types";
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function PartyRow({ party, balance, lastLabel, hidden, onPress, onMenu }: Props) {
+    const { t } = useTranslation("party");
     const initials = party.name
         .split(" ")
         .filter(Boolean)
@@ -39,11 +41,11 @@ export function PartyRow({ party, balance, lastLabel, hidden, onPress, onMenu }:
                     {party.name}
                 </Text>
                 <Text numberOfLines={1} className="font-jakarta text-xs text-text-secondary-muted">
-                    {party.phone ?? "No number"} · {lastLabel}
+                    {party.phone ?? t("noNumber")} · {lastLabel}
                 </Text>
             </View>
             <BalanceText value={balance} hidden={hidden} />
-            <Pressable accessibilityRole="button" accessibilityLabel="Party options" onPress={onMenu} hitSlop={12}>
+            <Pressable accessibilityRole="button" accessibilityLabel={t("list.optionsA11y")} onPress={onMenu} hitSlop={12}>
                 <SymbolView
                     name={{ ios: "ellipsis", android: "more_vert", web: "more_vert" }}
                     size={18}

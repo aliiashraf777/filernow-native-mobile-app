@@ -2,6 +2,7 @@
 
 import { Link } from "expo-router";
 import { ChartNoAxesColumn } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { SectionCard } from "@/features/home/components/section-card";
@@ -11,11 +12,12 @@ import { useOpenService } from "@/features/home/hooks/use-open-service";
 import { colors } from "@/theme/tokens";
 
 function ViewDashboardLink() {
+    const { t } = useTranslation("home");
     return (
         <Link href="/khata" asChild>
             <Pressable accessibilityRole="link" hitSlop={8} className="flex-row items-center gap-1 active:opacity-70">
                 <ChartNoAxesColumn size={16} color={colors.primary} strokeWidth={2.4} />
-                <Text className="font-jakarta-medium text-para-small text-primary">View Dashboard</Text>
+                <Text className="font-jakarta-medium text-para-small text-primary">{t("viewDashboard")}</Text>
             </Pressable>
         </Link>
     );
@@ -23,17 +25,19 @@ function ViewDashboardLink() {
 
 /** Expense Manager tools as soft grey tiles in a 3-column grid. */
 export function KhataServices() {
+    const { t } = useTranslation("home");
     const openService = useOpenService();
 
     return (
         <SectionCard
-            title="Khata Services"
+            title={t("khataServices")}
+            titleClassName="font-jakarta text-heading-h6 text-[#454545]"
             action={<ViewDashboardLink />}
         >
             <View className="-m-[5px] flex-row flex-wrap">
                 {KHATA_SERVICES.map((item) => (
                     <View key={item.id} className="w-1/3 p-[5px]">
-                        <ServiceTile item={item} onPress={() => openService(item.label, item.href)} />
+                        <ServiceTile item={item} onPress={() => openService(t(`services.${item.labelKey}`), item.href)} />
                     </View>
                 ))}
             </View>

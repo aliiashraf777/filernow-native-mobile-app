@@ -1,0 +1,45 @@
+{
+  "actions": {
+    "back": "Go back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "continue": "Continue",
+    "delete": "Delete",
+    "edit": "Edit",
+    "logOut": "Log out",
+    "no": "No",
+    "yes": "Yes"
+  },
+  "comingSoon": "Coming soon.",
+  "serviceComingSoon": "{{name}} is coming soon",
+  "tabs": {
+    "home": "Home",
+    "khata": "Khata",
+    "askAi": "Ask AI",
+    "myAdvocate": "My Advocate",
+    "taxAdvisor": "Tax Advisor"
+  },
+  "header": {
+    "premium": "Premium",
+    "notifications": "Notifications",
+    "notificationsUnread_one": "Notifications, {{count}} unread",
+    "notificationsUnread_other": "Notifications, {{count}} unread",
+    "more": "More"
+  },
+  "date": {
+    "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "am": "AM",
+    "pm": "PM"
+  },
+  "timeAgo": {
+    "justNow": "Just now",
+    "minutes_one": "{{count}} min ago",
+    "minutes_other": "{{count}} min ago",
+    "hours_one": "{{count}} hour ago",
+    "hours_other": "{{count}} hours ago",
+    "yesterday": "Yesterday",
+    "days_one": "{{count}} day ago",
+    "days_other": "{{count}} days ago"
+  }
+}

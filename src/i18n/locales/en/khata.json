@@ -1,0 +1,44 @@
+{
+  "title": "Digital Khata",
+  "sections": {
+    "daily": { "title": "Daily Khata", "description": "Record your daily sales and spending." },
+    "business": { "title": "Business Khata", "description": "Track stock, bills and cash in one place." },
+    "udhaar": { "title": "Udhaar Khata", "description": "Manage credit given and payments due." },
+    "party": { "title": "Party", "description": "Customers and suppliers, with balances." }
+  },
+  "mode": {
+    "label": "Mode: {{mode}}",
+    "demo": "Demo",
+    "blank": "Blank",
+    "startFresh": "Start Fresh",
+    "loadDemo": "Load Demo Data",
+    "replaceTitle": "Your current data will be replaced",
+    "replaceMessage": "Are you sure?"
+  },
+  "toast": {
+    "cardBalance": "{{card}}: {{change}} (new balance {{balance}})",
+    "demoLoaded": "Demo data loaded",
+    "cleared": "Khata cleared. Start fresh.",
+    "saved": "{{name}} saved",
+    "updated": "{{name}} updated",
+    "deleted": "{{name}} deleted",
+    "partyAdded": "{{name}} added",
+    "partiesAdded_one": "{{count}} party added",
+    "partiesAdded_other": "{{count}} parties added",
+    "partyHasEntries": "This party has entries. Delete them first.",
+    "partyDeletedWithEntries_one": "Party and {{count}} entry deleted",
+    "partyDeletedWithEntries_other": "Party and {{count}} entries deleted",
+    "partyDeleted": "Party deleted",
+    "categoryExists": "\"{{name}}\" already exists",
+    "categoryAdded": "{{name}} category added",
+    "debtCategoryLocked": "Udhaar categories can't be deleted",
+    "otherCategoryLocked": "The \"Other\" category can't be deleted",
+    "categoryDeleted": "{{name}} deleted (its entries moved to \"Other\")",
+    "maxCards": "You can add up to {{count}} cards",
+    "cardAdded": "{{name}} added",
+    "cardUpdated": "Card updated",
+    "differentCards": "Choose two different cards",
+    "notEnoughBalance": "{{name}} doesn't have enough balance",
+    "transferred": "{{amount}} moved from {{from}} to {{to}}"
+  }
+}

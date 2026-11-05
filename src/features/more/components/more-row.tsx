@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 
 import { type EmIconName, emIcons } from "@/constants/expense-manager-icons";
+import { flipInRTL } from "@/i18n/direction";
 import { colors } from "@/theme/tokens";
 
 type Props = {
@@ -61,6 +62,7 @@ export function MoreRow({ icon, tint, label, labelExtra, onPress, chevron = "red
                         size={20}
                         color={chevron === "red" ? colors.primary : "#8A8285"}
                         strokeWidth={chevron === "red" ? 2.6 : 2.2}
+                        style={flipInRTL}
                     />
                 ))}
         </Pressable>

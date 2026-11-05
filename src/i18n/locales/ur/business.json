@@ -1,0 +1,50 @@
+{
+  "myExpenses": "میرے اخراجات",
+  "switchTitle": "کاروبار تبدیل کریں",
+  "switchSubtitle": "منتخب کریں کہ آپ اخراجات کہاں ریکارڈ کرنا چاہتے ہیں",
+  "addTitle": "نیا کاروبار شامل کریں",
+  "addSubtitle": "اس کے اخراجات کے لیے الگ جگہ بنائیں",
+  "create": "کاروبار بنائیں",
+  "addBusiness": "کاروبار شامل کریں",
+  "addA11y": "کاروبار شامل کریں، {{max}} میں سے {{used}} استعمال ہو چکے",
+  "limitReached": "کاروبار کی حد پوری ہو گئی ({{max}}/{{max}})",
+  "maxBusinesses": "آپ زیادہ سے زیادہ {{count}} کاروبار رکھ سکتے ہیں",
+  "exists": "\"{{name}}\" پہلے سے موجود ہے",
+  "created": "{{name}} بن گیا",
+  "currentA11y": "موجودہ کاروبار: {{name}}۔ کاروبار تبدیل کریں",
+  "rowA11y": "{{name}}، {{type}}، {{currency}}",
+  "name": "کاروبار کا نام",
+  "namePlaceholder": "مثلاً: علی ٹریڈرز",
+  "nameA11y": "کاروبار کا نام",
+  "type": "کاروبار کی قسم",
+  "currency": "کرنسی",
+  "currencyA11y": "کرنسی: {{name}}۔ کرنسی تبدیل کریں",
+  "theme": "تھیم کا رنگ",
+  "themeA11y": "{{color}} تھیم",
+  "types": {
+    "personal": { "label": "ذاتی", "caption": "ذاتی" },
+    "shop": { "label": "دکان", "caption": "کاروبار" },
+    "freelance": { "label": "فری لانس", "caption": "فری لانس" },
+    "household": { "label": "گھریلو", "caption": "گھریلو" }
+  },
+  "currencies": {
+    "PKR": "پاکستانی روپیہ",
+    "USD": "امریکی ڈالر",
+    "AED": "اماراتی درہم",
+    "SAR": "سعودی ریال",
+    "GBP": "برطانوی پاؤنڈ",
+    "EUR": "یورو"
+  },
+  "themes": {
+    "red": "سرخ",
+    "purple": "جامنی",
+    "green": "سبز",
+    "amber": "زرد",
+    "blue": "نیلا"
+  },
+  "currencySheet": {
+    "title": "کاروباری کرنسی",
+    "subtitle": "{{name}} کی کرنسی",
+    "changed": "{{name}} اب {{code}} استعمال کرتا ہے"
+  }
+}

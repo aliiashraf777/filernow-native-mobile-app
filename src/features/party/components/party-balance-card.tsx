@@ -1,5 +1,6 @@
 // nativeApp\src\features\party\components\party-balance-card.tsx
 
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 
 import { pkr } from "@/features/khata/lib/debt";
@@ -8,12 +9,13 @@ import { cn } from "@/lib/cn";
 type Props = { balance: number; gave: number; got: number; count: number };
 
 export function PartyBalanceCard({ balance, gave, got, count }: Props) {
+    const { t: tr } = useTranslation("party", { keyPrefix: "balance" });
     const t =
         balance > 0
-            ? { box: "border-danger/25 bg-danger-bg", val: "text-danger", label: "You will get", sub: "Is party se aap ko paise milenge" }
+            ? { box: "border-danger/25 bg-danger-bg", val: "text-danger", label: tr("youWillGet"), sub: tr("getSub") }
             : balance < 0
-                ? { box: "border-success/25 bg-success-bg", val: "text-success", label: "You will give", sub: "Aap ko is party ko paise dene hain" }
-                : { box: "border-border-clr bg-white", val: "text-text-secondary", label: "Settled up", sub: "Hisaab barabar hai" };
+                ? { box: "border-success/25 bg-success-bg", val: "text-success", label: tr("youWillGive"), sub: tr("giveSub") }
+                : { box: "border-border-clr bg-white", val: "text-text-secondary", label: tr("settled"), sub: tr("settledSub") };
 
     return (
         <View className={cn("overflow-hidden rounded-brand-12 border", t.box)}>
@@ -23,9 +25,9 @@ export function PartyBalanceCard({ balance, gave, got, count }: Props) {
                 <Text className="font-jakarta text-xs text-text-secondary-muter">{t.sub}</Text>
             </View>
             <View className="flex-row border-t border-border-clr bg-white/70">
-                <Stat label="Total You Gave" value={pkr(gave)} tone="text-danger" />
-                <Stat label="Total You Got" value={pkr(got)} tone="text-success" />
-                <Stat label="Entries" value={String(count)} tone="text-text-dark" last />
+                <Stat label={tr("totalGave")} value={pkr(gave)} tone="text-danger" />
+                <Stat label={tr("totalGot")} value={pkr(got)} tone="text-success" />
+                <Stat label={tr("entries")} value={String(count)} tone="text-text-dark" last />
             </View>
         </View>
     );

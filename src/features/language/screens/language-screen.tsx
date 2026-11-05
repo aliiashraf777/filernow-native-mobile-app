@@ -4,31 +4,39 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SymbolView } from "expo-symbols";
-import type { LanguageCode } from "iso-639-1";
 import { useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PrimaryButton } from "@/components/ui/primary-button";
 import { images } from "@/constants/images";
-import { LanguageSheet } from "@/features/language/components/language-sheet";
-import { MoreLanguagesButton } from "@/features/language/components/more-languages-button";
-import { PopularLanguages } from "@/features/language/components/popular-languages";
-import { getLanguage, isFeaturedLanguage } from "@/features/language/data/languages";
-import { colors } from "@/theme/tokens";
+import { LanguageList } from "@/features/language/components/language-list";
+import { switchLanguage } from "@/features/language/lib/switch-language";
+import { flipInRTL, needsDirectionChange } from "@/i18n/direction";
+import type { AppLanguage } from "@/i18n/languages";
 import { useAppStore } from "@/stores/app-store";
+import { colors } from "@/theme/tokens";
 
+/** Onboarding: pick the app language, then continue to the phone number screen. */
 export default function LanguageScreen() {
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation(["language", "common"]);
 
     const storedLanguage = useAppStore((s) => s.language);
-    const setLanguage = useAppStore((s) => s.setLanguage);
     const completeOnboarding = useAppStore((s) => s.completeOnboarding);
-    const [selectedCode, setSelectedCode] = useState<LanguageCode>(storedLanguage);
-    const [sheetOpen, setSheetOpen] = useState(false);
+    const [selectedCode, setSelectedCode] = useState<AppLanguage>(storedLanguage);
+    const [saving, setSaving] = useState(false);
 
-    const selected = getLanguage(selectedCode);
+    const onContinue = async () => {
+        setSaving(true);
+        completeOnboarding();
+        // Urdu ↔ LTR restarts the app; the launch route then sends an onboarded user to /register
+        const restarts = needsDirectionChange(selectedCode);
+        await switchLanguage(selectedCode);
+        if (!restarts) router.replace("/register");
+    };
 
     return (
         // top only: the white card runs to the bottom edge and handles the bottom inset itself
@@ -37,21 +45,23 @@ export default function LanguageScreen() {
             <Image
                 source={images.welcomeBg}
                 contentFit="cover"
-                accessibilityLabel="Welcome background"
+                accessibilityLabel={t("backgroundA11y")}
                 style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
             />
 
             <View className="flex-row items-center justify-between px-6 pb-5 pt-2">
                 <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel="Go back"
+                    accessibilityLabel={t("common:actions.back")}
                     onPress={() => router.back()}
                     className="h-10 w-10 items-start justify-center">
-                    <SymbolView
-                        name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
-                        tintColor={colors["text-dark"]}
-                        size={22}
-                    />
+                    <View style={flipInRTL}>
+                        <SymbolView
+                            name={{ ios: "chevron.left", android: "arrow_back", web: "arrow_back" }}
+                            tintColor={colors["text-dark"]}
+                            size={22}
+                        />
+                    </View>
                 </Pressable>
                 <Text className="font-jakarta-bold text-xl text-primary">Filernow</Text>
             </View>
@@ -60,14 +70,14 @@ export default function LanguageScreen() {
                 <Image
                     source={images.languageGlobe}
                     contentFit="contain"
-                    accessibilityLabel="Multilingual globe illustration"
+                    accessibilityLabel={t("globeA11y")}
                     style={{ width: "90%", height: "90%" }}
                 />
             </View>
 
             <View className="mt-auto">
                 {/* floating globe badge, half on the card */}
-                <View className="z-10 -mb-8 ml-6 h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-primary">
+                <View className="z-10 -mb-8 ms-6 h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-primary">
                     <SymbolView
                         name={{ ios: "globe", android: "language", web: "language" }}
                         tintColor="#FFFFFF"
@@ -79,38 +89,24 @@ export default function LanguageScreen() {
                     style={{ paddingBottom: insets.bottom + 16 }}
                     className="rounded-t-brand-32 bg-white px-6 pt-12">
                     <Text className="font-jakarta-extrabold text-[25px] text-text-dark">
-                        Choose Your <Text className="text-primary">Language</Text>
+                        <Trans
+                            t={t}
+                            i18nKey="screenTitle"
+                            components={{ highlight: <Text className="text-primary" /> }}
+                        />
                     </Text>
+                    <Text className="mt-1 font-jakarta-medium text-sm text-text-secondary">{t("screenSubtitle")}</Text>
 
-                    <PopularLanguages selectedCode={selectedCode} onSelect={setSelectedCode} />
-
-                    {isFeaturedLanguage(selectedCode) ? null : (
-                        <Text className="mt-3 font-jakarta-medium text-sm text-text-secondary">
-                            Selected: {selected.nativeName || selected.name}
-                        </Text>
-                    )}
-
-                    <MoreLanguagesButton onPress={() => setSheetOpen(true)} />
+                    <LanguageList selectedCode={selectedCode} onSelect={setSelectedCode} className="mt-5" />
 
                     <PrimaryButton
-                        label="Continue"
+                        label={t("common:actions.continue")}
                         className="mt-5"
-                        onPress={() => {
-                            setLanguage(selectedCode);
-                            completeOnboarding();
-                            // router.replace("/home");
-                            router.replace("/register");
-                        }}
+                        disabled={saving}
+                        onPress={onContinue}
                     />
                 </View>
             </View>
-
-            <LanguageSheet
-                visible={sheetOpen}
-                selectedCode={selectedCode}
-                onSelect={setSelectedCode}
-                onClose={() => setSheetOpen(false)}
-            />
         </SafeAreaView>
     );
 }

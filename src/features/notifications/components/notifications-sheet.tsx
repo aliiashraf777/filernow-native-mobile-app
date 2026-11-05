@@ -2,6 +2,7 @@
 
 import { BellOff } from "lucide-react-native";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -17,11 +18,8 @@ import { NotificationCard } from "./notification-card";
 
 type Filter = "all" | "unread" | "alerts";
 
-const FILTERS: { key: Filter; label: string }[] = [
-    { key: "all", label: "All" },
-    { key: "unread", label: "Unread" },
-    { key: "alerts", label: "Alerts" },
-];
+// labels: notifications:filters.<key>
+const FILTERS: Filter[] = ["all", "unread", "alerts"];
 
 const matches = (n: INotification, f: Filter) => f === "all" || (f === "unread" ? !n.read : n.kind === "alert");
 
@@ -74,6 +72,7 @@ type Props = { visible: boolean; onClose: () => void };
 
 /** Notifications list with All / Unread / Alerts filters, grouped into Today and Earlier. */
 export function NotificationsSheet({ visible, onClose }: Props) {
+    const { t } = useTranslation("notifications");
     const items = useNotificationsStore((s) => s.items);
     const markRead = useNotificationsStore((s) => s.markRead);
     const markAllRead = useNotificationsStore((s) => s.markAllRead);
@@ -84,16 +83,16 @@ export function NotificationsSheet({ visible, onClose }: Props) {
         .filter((n) => matches(n, filter))
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     const groups = [
-        { title: "Today", data: shown.filter((n) => isToday(n.createdAt)) },
-        { title: "Earlier", data: shown.filter((n) => !isToday(n.createdAt)) },
+        { title: t("today"), data: shown.filter((n) => isToday(n.createdAt)) },
+        { title: t("earlier"), data: shown.filter((n) => !isToday(n.createdAt)) },
     ].filter((g) => g.data.length > 0);
 
     return (
         <BottomSheet
             visible={visible}
             onClose={onClose}
-            title="Notifications"
-            subtitle="Stay on top of your spending"
+            title={t("title")}
+            subtitle={t("subtitle")}
             headerAction={
                 <Pressable
                     onPress={markAllRead}
@@ -101,17 +100,17 @@ export function NotificationsSheet({ visible, onClose }: Props) {
                     accessibilityRole="button"
                     hitSlop={8}
                     className={cn("mt-1 active:opacity-70", unread === 0 && "opacity-40")}>
-                    <Text className="font-jakarta-semibold text-para-18 text-primary">Mark all read</Text>
+                    <Text className="font-jakarta-semibold text-para-18 text-primary">{t("markAllRead")}</Text>
                 </Pressable>
             }>
             <View className="mb-4 flex-row gap-2.5" accessibilityRole="tablist">
                 {FILTERS.map((f) => (
                     <FilterChip
-                        key={f.key}
-                        label={f.label}
-                        active={filter === f.key}
-                        count={f.key === "all" ? unread : undefined}
-                        onPress={() => setFilter(f.key)}
+                        key={f}
+                        label={t(`filters.${f}`)}
+                        active={filter === f}
+                        count={f === "all" ? unread : undefined}
+                        onPress={() => setFilter(f)}
                     />
                 ))}
             </View>
@@ -120,7 +119,7 @@ export function NotificationsSheet({ visible, onClose }: Props) {
                 <View className="items-center py-12">
                     <BellOff size={32} color="#B5ADB0" strokeWidth={1.8} />
                     <Text className="mt-3 font-jakarta-medium text-para-base text-[#8A8285]">
-                        {filter === "unread" ? "You're all caught up!" : "No notifications yet."}
+                        {filter === "unread" ? t("caughtUp") : t("empty")}
                     </Text>
                 </View>
             ) : (

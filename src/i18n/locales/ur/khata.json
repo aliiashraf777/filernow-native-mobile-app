@@ -1,0 +1,44 @@
+{
+  "title": "ڈیجیٹل کھاتہ",
+  "sections": {
+    "daily": { "title": "روزانہ کھاتہ", "description": "اپنی روزانہ کی فروخت اور اخراجات درج کریں۔" },
+    "business": { "title": "کاروباری کھاتہ", "description": "اسٹاک، بلز اور کیش ایک ہی جگہ پر سنبھالیں۔" },
+    "udhaar": { "title": "ادھار کھاتہ", "description": "دیا گیا ادھار اور بقایا ادائیگیاں سنبھالیں۔" },
+    "party": { "title": "پارٹی", "description": "گاہک اور سپلائرز، بیلنس کے ساتھ۔" }
+  },
+  "mode": {
+    "label": "موڈ: {{mode}}",
+    "demo": "ڈیمو",
+    "blank": "خالی",
+    "startFresh": "نئے سرے سے شروع کریں",
+    "loadDemo": "ڈیمو ڈیٹا لوڈ کریں",
+    "replaceTitle": "موجودہ ڈیٹا تبدیل ہو جائے گا",
+    "replaceMessage": "کیا آپ کو یقین ہے؟"
+  },
+  "toast": {
+    "cardBalance": "{{card}}: {{change}} (نیا بیلنس {{balance}})",
+    "demoLoaded": "ڈیمو ڈیٹا لوڈ ہو گیا",
+    "cleared": "کھاتہ صاف ہو گیا۔ نئے سرے سے شروع کریں۔",
+    "saved": "{{name}} محفوظ ہو گیا",
+    "updated": "{{name}} اپ ڈیٹ ہو گیا",
+    "deleted": "{{name}} حذف ہو گیا",
+    "partyAdded": "{{name}} شامل ہو گیا",
+    "partiesAdded_one": "{{count}} پارٹی شامل ہو گئی",
+    "partiesAdded_other": "{{count}} پارٹیاں شامل ہو گئیں",
+    "partyHasEntries": "اس پارٹی کے اندراجات موجود ہیں، پہلے انہیں حذف کریں۔",
+    "partyDeletedWithEntries_one": "پارٹی اور {{count}} اندراج حذف ہو گئے",
+    "partyDeletedWithEntries_other": "پارٹی اور {{count}} اندراجات حذف ہو گئے",
+    "partyDeleted": "پارٹی حذف ہو گئی",
+    "categoryExists": "\"{{name}}\" پہلے سے موجود ہے",
+    "categoryAdded": "{{name}} کیٹیگری شامل ہو گئی",
+    "debtCategoryLocked": "ادھار کی کیٹیگریز حذف نہیں ہو سکتیں",
+    "otherCategoryLocked": "\"Other\" کیٹیگری حذف نہیں ہو سکتی",
+    "categoryDeleted": "{{name}} حذف ہو گئی (اس کے اندراجات \"Other\" میں منتقل ہو گئے)",
+    "maxCards": "صرف {{count}} کارڈز شامل ہو سکتے ہیں",
+    "cardAdded": "{{name}} شامل ہو گیا",
+    "cardUpdated": "کارڈ اپ ڈیٹ ہو گیا",
+    "differentCards": "دو مختلف کارڈز منتخب کریں",
+    "notEnoughBalance": "{{name}} میں اتنا بیلنس نہیں ہے",
+    "transferred": "{{amount}} {{from}} سے {{to}} میں منتقل ہو گئے"
+  }
+}

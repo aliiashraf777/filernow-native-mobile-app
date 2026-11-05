@@ -3,6 +3,7 @@
 import * as DocumentPicker from "expo-document-picker";
 import { SymbolView, type SymbolViewProps } from "expo-symbols";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -29,6 +30,7 @@ type Props = {
 };
 
 export function BulkPartySheet({ visible, existing, defaultType = "customer", onClose, onImport }: Props) {
+    const { t } = useTranslation("party", { keyPrefix: "bulk" });
     const [text, setText] = useState("");
     const [type, setType] = useState<PartyType>(defaultType);
 
@@ -49,13 +51,13 @@ export function BulkPartySheet({ visible, existing, defaultType = "customer", on
         if (res.canceled) return;
         const asset = res.assets[0];
         if (!/\.(csv|txt)$/i.test(asset.name)) {
-            toast.error("Abhi sirf CSV ya TXT file chal sakti hai");
+            toast.error(t("onlyCsv"));
             return;
         }
         try {
             setText(await (await fetch(asset.uri)).text());
         } catch {
-            toast.error("File parhi nahi ja saki");
+            toast.error(t("readFailed"));
         }
     };
 
@@ -68,20 +70,20 @@ export function BulkPartySheet({ visible, existing, defaultType = "customer", on
         <BottomSheet
             visible={visible}
             onClose={onClose}
-            title="Bulk Party Add"
-            subtitle="Ek saath kai parties add karein"
+            title={t("title")}
+            subtitle={t("subtitle")}
             footer={
                 <FormButton
-                    label={ok.length ? `${ok.length} parties import karein` : "Pehle list likhein ya file upload karein"}
+                    label={ok.length ? t("import", { count: ok.length }) : t("empty")}
                     disabled={ok.length === 0}
                     onPress={run}
                 />
             }>
-            <Field label="Sab ki qism (jahan alag na likhi ho)">
+            <Field label={t("typeAll")}>
                 <PartyTypeToggle value={type} onChange={setType} />
             </Field>
 
-            <Field label="Parties ki list" hint="Har line mein ek party: Naam, Phone, Qism. Phone aur qism optional hain.">
+            <Field label={t("list")} hint={t("listHint")}>
                 <TextInput
                     value={text}
                     onChangeText={setText}
@@ -104,15 +106,15 @@ export function BulkPartySheet({ visible, existing, defaultType = "customer", on
                     size={15}
                     tintColor={colors["text-secondary"]}
                 />
-                <Text className="font-jakarta-semibold text-xs text-text-secondary">CSV / TXT upload karein</Text>
+                <Text className="font-jakarta-semibold text-xs text-text-secondary">{t("upload")}</Text>
             </Pressable>
 
             {rows.length > 0 ? (
                 <View className="mb-4">
                     <Text className="mb-2 font-jakarta-semibold text-xs text-text-dark">
-                        <Text className="text-success">{ok.length} tayyar</Text>
-                        {dups > 0 ? <Text className="text-warning"> · {dups} duplicate (skip honge)</Text> : null}
-                        {errs > 0 ? <Text className="text-danger"> · {errs} ghalat (skip honge)</Text> : null}
+                        <Text className="text-success">{t("ready", { count: ok.length })}</Text>
+                        {dups > 0 ? <Text className="text-warning"> · {t("duplicates", { count: dups })}</Text> : null}
+                        {errs > 0 ? <Text className="text-danger"> · {t("errors", { count: errs })}</Text> : null}
                     </Text>
                     <View className="rounded-brand-8 border border-border-clr">
                         {rows.slice(0, PREVIEW_LIMIT).map((r) => (
@@ -122,11 +124,11 @@ export function BulkPartySheet({ visible, existing, defaultType = "customer", on
                                 <SymbolView name={STATUS[r.status].icon} size={15} tintColor={STATUS[r.status].color} />
                                 <View className="min-w-0 flex-1">
                                     <Text numberOfLines={1} className="font-jakarta-medium text-xs text-text-dark">
-                                        {r.name || "(naam nahi)"} {r.phone ?? ""}
+                                        {r.name || t("noName")} {r.phone ?? ""}
                                     </Text>
                                     {r.message ? (
                                         <Text numberOfLines={1} className="font-jakarta text-[11px] text-text-secondary-muted">
-                                            {r.message}
+                                            {t(r.message)}
                                         </Text>
                                     ) : null}
                                 </View>
@@ -134,7 +136,7 @@ export function BulkPartySheet({ visible, existing, defaultType = "customer", on
                         ))}
                         {rows.length > PREVIEW_LIMIT ? (
                             <Text className="p-2 text-center font-jakarta text-[11px] text-text-secondary-muted">
-                                ...aur {rows.length - PREVIEW_LIMIT} lines
+                                {t("moreLines", { count: rows.length - PREVIEW_LIMIT })}
                             </Text>
                         ) : null}
                     </View>

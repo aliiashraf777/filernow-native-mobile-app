@@ -1,6 +1,7 @@
 // nativeApp\src\features\party\components\party-filter-sheet.tsx
 
 import { SymbolView } from "expo-symbols";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -10,17 +11,9 @@ import { colors } from "@/theme/tokens";
 export type BalanceFilter = "all" | "get" | "give" | "settled";
 export type SortBy = "recent" | "name" | "balance";
 
-const BALANCE_FILTERS: { value: BalanceFilter; label: string }[] = [
-    { value: "all", label: "Sab parties" },
-    { value: "get", label: "You will get (aap ko milenge)" },
-    { value: "give", label: "You will give (aap ko dene hain)" },
-    { value: "settled", label: "Settled (hisaab barabar)" },
-];
-const SORTS: { value: SortBy; label: string }[] = [
-    { value: "recent", label: "Recent activity" },
-    { value: "name", label: "Naam (A-Z)" },
-    { value: "balance", label: "Sab se bara balance" },
-];
+// labels: party:filter.<value>
+const BALANCE_FILTERS: BalanceFilter[] = ["all", "get", "give", "settled"];
+const SORTS: SortBy[] = ["recent", "name", "balance"];
 
 function Option({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
     return (
@@ -48,21 +41,22 @@ type Props = {
 };
 
 export function PartyFilterSheet({ visible, balanceFilter, sortBy, onBalanceChange, onSortChange, onReset, onClose }: Props) {
+    const { t } = useTranslation("party", { keyPrefix: "filter" });
     const active = balanceFilter !== "all" || sortBy !== "recent";
     return (
-        <BottomSheet visible={visible} onClose={onClose} title="Filters">
-            <Text className="mb-1 font-jakarta-semibold text-xs text-text-secondary-muted">Balance ke mutabiq</Text>
+        <BottomSheet visible={visible} onClose={onClose} title={t("title")}>
+            <Text className="mb-1 font-jakarta-semibold text-xs text-text-secondary-muted">{t("byBalance")}</Text>
             {BALANCE_FILTERS.map((f) => (
-                <Option key={f.value} label={f.label} selected={balanceFilter === f.value} onPress={() => onBalanceChange(f.value)} />
+                <Option key={f} label={t(f)} selected={balanceFilter === f} onPress={() => onBalanceChange(f)} />
             ))}
-            <Text className="mb-1 mt-4 font-jakarta-semibold text-xs text-text-secondary-muted">Tarteeb</Text>
+            <Text className="mb-1 mt-4 font-jakarta-semibold text-xs text-text-secondary-muted">{t("sort")}</Text>
             {SORTS.map((s) => (
-                <Option key={s.value} label={s.label} selected={sortBy === s.value} onPress={() => onSortChange(s.value)} />
+                <Option key={s} label={t(s)} selected={sortBy === s} onPress={() => onSortChange(s)} />
             ))}
             {active ? (
                 <View className="mt-3 items-center">
                     <Pressable accessibilityRole="button" onPress={onReset} className="min-h-11 justify-center px-4">
-                        <Text className="font-jakarta-bold text-sm text-primary">Filters reset karein</Text>
+                        <Text className="font-jakarta-bold text-sm text-primary">{t("reset")}</Text>
                     </Pressable>
                 </View>
             ) : null}

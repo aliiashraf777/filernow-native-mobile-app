@@ -13,11 +13,8 @@ export type IBusiness = {
     createdAt: string;
 };
 
+// Chip label and switcher caption ("Business · PKR") live in business:types.<type>.
 type BusinessTypeOption = {
-    /** Chip label in the "Add New Business" form. */
-    label: string;
-    /** Shown in the switcher row: "Business · PKR". */
-    caption: string;
     /** Background of the rounded icon tile. */
     tint: string;
     /** Emoji glyph; `personal` uses the wallet illustration instead. */
@@ -26,21 +23,22 @@ type BusinessTypeOption = {
 
 // Order = chip order in the form.
 export const BUSINESS_TYPES: Record<BusinessType, BusinessTypeOption> = {
-    personal: { label: "Personal", caption: "Personal", tint: "#E3F6EE" },
-    shop: { label: "Shop", caption: "Business", tint: "#FFF2DE", emoji: "🏪" },
-    freelance: { label: "Freelance", caption: "Freelance", tint: "#E4EFFF", emoji: "💻" },
-    household: { label: "Household", caption: "Household", tint: "#FFE5EA", emoji: "🏠" },
+    personal: { tint: "#E3F6EE" },
+    shop: { tint: "#FFF2DE", emoji: "🏪" },
+    freelance: { tint: "#E4EFFF", emoji: "💻" },
+    household: { tint: "#FFE5EA", emoji: "🏠" },
 };
 
 export const BUSINESS_TYPE_KEYS = Object.keys(BUSINESS_TYPES) as BusinessType[];
 
-export const CURRENCIES: { code: CurrencyCode; name: string; symbol: string; color: string; flag: string }[] = [
-    { code: "PKR", name: "Pakistani Rupee", symbol: "Rs", color: "#16B582", flag: "🇵🇰" },
-    { code: "USD", name: "US Dollar", symbol: "$", color: "#2E7BEF", flag: "🇺🇸" },
-    { code: "AED", name: "UAE Dirham", symbol: "Dh", color: "#8B5CF6", flag: "🇦🇪" },
-    { code: "SAR", name: "Saudi Riyal", symbol: "SR", color: "#0E9F6E", flag: "🇸🇦" },
-    { code: "GBP", name: "British Pound", symbol: "£", color: "#E0457B", flag: "🇬🇧" },
-    { code: "EUR", name: "Euro", symbol: "€", color: "#F29B0C", flag: "🇪🇺" },
+// Currency names live in business:currencies.<code>.
+export const CURRENCIES: { code: CurrencyCode; symbol: string; color: string; flag: string }[] = [
+    { code: "PKR", symbol: "Rs", color: "#16B582", flag: "🇵🇰" },
+    { code: "USD", symbol: "$", color: "#2E7BEF", flag: "🇺🇸" },
+    { code: "AED", symbol: "Dh", color: "#8B5CF6", flag: "🇦🇪" },
+    { code: "SAR", symbol: "SR", color: "#0E9F6E", flag: "🇸🇦" },
+    { code: "GBP", symbol: "£", color: "#E0457B", flag: "🇬🇧" },
+    { code: "EUR", symbol: "€", color: "#F29B0C", flag: "🇪🇺" },
 ];
 
 export const currencyOf = (code: CurrencyCode) => CURRENCIES.find((c) => c.code === code) ?? CURRENCIES[0];

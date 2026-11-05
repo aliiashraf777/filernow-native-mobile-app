@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 
 import SetupPinScreen from "@/features/auth/components/setup-pin-screen";
 import { useAuthStore } from "@/features/auth/store/auth-store";
+import { offerBiometricLogin } from "@/features/biometric/lib/offer-biometric-login";
 import { useAppStore } from "@/stores/app-store";
 
 export default function SetupPinRoute() {
@@ -18,7 +19,10 @@ export default function SetupPinRoute() {
       onComplete={() => {
         signIn(phone);
         completeOnboarding();
-        setTimeout(() => router.replace("/home"), 500);
+        setTimeout(async () => {
+          await offerBiometricLogin(phone);
+          router.replace("/home");
+        }, 500);
       }}
     />
   );

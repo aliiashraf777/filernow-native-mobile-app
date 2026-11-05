@@ -3,13 +3,14 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { SymbolView, type SymbolViewProps } from "expo-symbols";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, FlatList, Pressable, Text, View } from "react-native";
 
 import { Input } from "@/components/ui/form";
 import { PlaceholderScreen } from "@/components/ui/placeholder-screen";
-import { buildLedger, debtLabel } from "@/features/khata/lib/debt";
+import { buildLedger, debtLabel, partyTypeLabel } from "@/features/khata/lib/debt";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import { DEBT_TYPE_META, type IExpenseEntry, PARTY_TYPE_LABELS } from "@/features/khata/types";
+import { DEBT_TYPE_META, type IExpenseEntry } from "@/features/khata/types";
 import { DebtEntrySheet } from "@/features/party/components/debt-entry-sheet";
 import { LedgerHeader, LedgerRowItem } from "@/features/party/components/ledger";
 import { PartyBalanceCard } from "@/features/party/components/party-balance-card";
@@ -40,6 +41,7 @@ function ActionButton({ icon, label, sub, disabled, onPress }: { icon: IconName;
 }
 
 export default function PartyDetailScreen() {
+    const { t } = useTranslation(["party", "common"]);
     const { slug } = useLocalSearchParams<{ slug: string }>();
     const router = useRouter();
     // const party = useKhataStore((s) => s.parties.find((p) => p.slug === slug || p.id === slug));
@@ -73,7 +75,7 @@ export default function PartyDetailScreen() {
         return [...list].reverse(); // newest first
     }, [rows, q]);
 
-    if (!party) return <PlaceholderScreen title="Party nahi mili" headerTitle="Party" />;
+    if (!party) return <PlaceholderScreen title={t("notFound")} headerTitle={t("title")} />;
 
     const blocked = contactBlockReason(party, balance);
     const contact = async (kind: "wa" | "sms") => {
@@ -83,18 +85,18 @@ export default function PartyDetailScreen() {
             if (kind === "wa") await openWhatsApp(waDigits(party.phone)!, text);
             else await openSms(party.phone!, text);
         } catch {
-            toast.error("App khul nahi saki");
+            toast.error(t("detail.couldNotOpenApp"));
         }
     };
 
     const confirmDeleteParty = () =>
         Alert.alert(
-            "Party delete karein?",
-            rows.length > 0 ? `${party.name} aur uski ${rows.length} entries delete ho jayengi.` : party.name,
+            t("list.deleteTitle"),
+            rows.length > 0 ? t("list.deleteWithEntries", { name: party.name, count: rows.length }) : party.name,
             [
-                { text: "Nahi", style: "cancel" },
+                { text: t("common:actions.no"), style: "cancel" },
                 {
-                    text: "Haan, delete",
+                    text: t("list.yesDelete"),
                     style: "destructive",
                     onPress: () => {
                         if (deleteParty(party.id, true)) router.replace(PARTY_BASE as never);
@@ -104,9 +106,9 @@ export default function PartyDetailScreen() {
         );
 
     const confirmDeleteEntry = (entry: IExpenseEntry) =>
-        Alert.alert("Entry delete karein?", `${debtLabel(entry.categoryId)} · Rs ${entry.amount.toLocaleString("en-PK")}`, [
-            { text: "Nahi", style: "cancel" },
-            { text: "Haan, delete", style: "destructive", onPress: () => deleteEntry(entry.id) },
+        Alert.alert(t("detail.deleteEntryTitle"), `${debtLabel(entry.categoryId)} · Rs ${entry.amount.toLocaleString("en-PK")}`, [
+            { text: t("common:actions.no"), style: "cancel" },
+            { text: t("list.yesDelete"), style: "destructive", onPress: () => deleteEntry(entry.id) },
         ]);
 
     const defaultCategoryId =
@@ -128,10 +130,10 @@ export default function PartyDetailScreen() {
                     title: party.name,
                     headerRight: () => (
                         <View className="flex-row items-center gap-5">
-                            <Pressable accessibilityRole="button" accessibilityLabel="Edit party" onPress={() => setPartyFormOpen(true)} hitSlop={10}>
+                            <Pressable accessibilityRole="button" accessibilityLabel={t("detail.editA11y")} onPress={() => setPartyFormOpen(true)} hitSlop={10}>
                                 <SymbolView name={{ ios: "pencil", android: "edit", web: "edit" }} size={20} tintColor={colors["text-secondary"]} />
                             </Pressable>
-                            <Pressable accessibilityRole="button" accessibilityLabel="Delete party" onPress={confirmDeleteParty} hitSlop={10}>
+                            <Pressable accessibilityRole="button" accessibilityLabel={t("detail.deleteA11y")} onPress={confirmDeleteParty} hitSlop={10}>
                                 <SymbolView name={{ ios: "trash", android: "delete", web: "delete" }} size={20} tintColor={colors["text-secondary-muted"]} />
                             </Pressable>
                         </View>
@@ -148,31 +150,31 @@ export default function PartyDetailScreen() {
                     <>
                         <View className="gap-3 p-4">
                             <Text className="font-jakarta text-xs text-text-secondary-muted">
-                                {PARTY_TYPE_LABELS[party.type]} · {party.phone ?? "No number"}
+                                {partyTypeLabel(party.type)} · {party.phone ?? t("noNumber")}
                             </Text>
                             <PartyBalanceCard balance={balance} gave={gave} got={got} count={rows.length} />
 
                             <View className="flex-row flex-wrap gap-2">
                                 <ActionButton
                                     icon={{ ios: "doc.text", android: "description", web: "description" }}
-                                    label="Report"
+                                    label={t("detail.report")}
                                     onPress={() => router.push(partyHref(party, "/report"))}
                                 />
                                 <ActionButton
                                     icon={{ ios: "calendar.badge.plus", android: "event", web: "event" }}
-                                    label="Set Reminder Date"
+                                    label={t("detail.setReminder")}
                                     sub={party.reminderDate ? formatDateTime(party.reminderDate) : undefined}
                                     onPress={() => setReminderOpen(true)}
                                 />
                                 <ActionButton
                                     icon={{ ios: "message.fill", android: "chat", web: "chat" }}
-                                    label="WhatsApp Reminder"
+                                    label={t("detail.whatsapp")}
                                     disabled={!!blocked}
                                     onPress={() => contact("wa")}
                                 />
                                 <ActionButton
                                     icon={{ ios: "text.bubble.fill", android: "sms", web: "sms" }}
-                                    label="SMS"
+                                    label={t("detail.sms")}
                                     disabled={!!blocked}
                                     onPress={() => contact("sms")}
                                 />
@@ -180,7 +182,7 @@ export default function PartyDetailScreen() {
 
                             <Input
                                 icon={{ ios: "magnifyingglass", android: "search", web: "search" }}
-                                placeholder="Entries mein dhoondein (qism ya note)"
+                                placeholder={t("detail.searchEntries")}
                                 value={q}
                                 onChangeText={setQ}
                                 autoCorrect={false}
@@ -191,7 +193,7 @@ export default function PartyDetailScreen() {
                 }
                 ListEmptyComponent={
                     <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">
-                        Koi entry nahi mili. Neeche se pehli entry add karein.
+                        {t("detail.empty")}
                     </Text>
                 }
                 renderItem={({ item }) => <LedgerRowItem row={item} onEdit={setEditing} onDelete={confirmDeleteEntry} />}
@@ -202,13 +204,13 @@ export default function PartyDetailScreen() {
                     accessibilityRole="button"
                     onPress={() => setTxn(1)}
                     className="min-h-12 flex-1 items-center justify-center rounded-full bg-danger active:opacity-80">
-                    <Text className="font-jakarta-bold text-xs uppercase text-white">Apne Diye (Gave) Rs</Text>
+                    <Text className="font-jakarta-bold text-xs uppercase text-white">{t("detail.gaveButton")}</Text>
                 </Pressable>
                 <Pressable
                     accessibilityRole="button"
                     onPress={() => setTxn(-1)}
                     className="min-h-12 flex-1 items-center justify-center rounded-full bg-success active:opacity-80">
-                    <Text className="font-jakarta-bold text-xs uppercase text-white">Apne Liye (Got) Rs</Text>
+                    <Text className="font-jakarta-bold text-xs uppercase text-white">{t("detail.gotButton")}</Text>
                 </Pressable>
             </View>
 
@@ -227,7 +229,7 @@ export default function PartyDetailScreen() {
                 onClose={() => setPartyFormOpen(false)}
                 onSaved={(v) => {
                     updateParty(party.id, v);
-                    toast.success("Party update ho gayi");
+                    toast.success(t("list.updated"));
                 }}
             />
             <ReminderDateSheet
@@ -237,11 +239,11 @@ export default function PartyDetailScreen() {
                 onClose={() => setReminderOpen(false)}
                 onSave={(d) => {
                     updateParty(party.id, { reminderDate: d });
-                    toast.success(`Reminder date set: ${d}`);
+                    toast.success(t("detail.reminderSet", { date: formatDateTime(d) }));
                 }}
                 onClear={() => {
                     updateParty(party.id, { reminderDate: undefined });
-                    toast.success("Reminder date hata di gayi");
+                    toast.success(t("detail.reminderCleared"));
                 }}
             />
         </View>

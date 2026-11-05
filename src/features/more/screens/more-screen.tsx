@@ -6,14 +6,17 @@ import { Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ChevronDown, ChevronLeft } from "lucide-react-native";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { emIcons } from "@/constants/expense-manager-icons";
 import { images } from "@/constants/images";
+import { useLogout } from "@/features/auth/hooks/use-logout";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { currencyOf } from "@/features/business/data/business-options";
+import { businessName } from "@/features/business/lib/business-name";
 import { useActiveBusiness, useBusinessStore } from "@/features/business/store/business-store";
 import { useOpenService } from "@/features/home/hooks/use-open-service";
 import { LanguageSheet } from "@/features/language/components/language-sheet";
@@ -23,6 +26,7 @@ import { MoreCard, MoreDivider } from "@/features/more/components/more-card";
 import { MoreRow } from "@/features/more/components/more-row";
 import { MoreTile } from "@/features/more/components/more-tile";
 import { SOCIAL_LINKS, type SocialLink } from "@/features/more/data/social-links";
+import { flipInRTL } from "@/i18n/direction";
 import { toast } from "@/lib/toast";
 import { useAppStore } from "@/stores/app-store";
 import { colors } from "@/theme/tokens";
@@ -35,11 +39,10 @@ type Sheet = "language" | "currency" | "app-lock" | null;
 /** "More" page (header Apps button): backup, shortcuts, settings, support, logout, socials. */
 export default function MoreScreen() {
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation(["more", "common", "auth"]);
     const openService = useOpenService();
     const isSignedIn = useAuthStore((s) => s.phone !== null);
-    const signOut = useAuthStore((s) => s.signOut);
-    const language = useAppStore((s) => s.language);
-    const setLanguage = useAppStore((s) => s.setLanguage);
+    const logout = useLogout();
     const quickNotification = useAppStore((s) => s.quickNotification);
     const setQuickNotification = useAppStore((s) => s.setQuickNotification);
     const business = useActiveBusiness();
@@ -50,42 +53,39 @@ export default function MoreScreen() {
     const [sheet, setSheet] = useState<Sheet>(null);
     const closeSheet = () => setSheet(null);
 
-    if (!isSignedIn) return <Redirect href="/" />;
+    if (!isSignedIn) return <Redirect href="/welcome" />;
 
     const soon = (name: string) => openService(name);
 
     const confirmDeleteBusiness = () => {
         if (businessCount <= 1) {
-            toast.error("You need at least one business");
+            toast.error(t("needOneBusiness"));
             return;
         }
-        Alert.alert(`Delete "${business.name}"?`, "This business will be removed from this phone.", [
-            { text: "Cancel", style: "cancel" },
+        Alert.alert(t("deleteBusinessTitle", { name: businessName(business) }), t("deleteBusinessMessage"), [
+            { text: t("common:actions.cancel"), style: "cancel" },
             {
-                text: "Delete",
+                text: t("common:actions.delete"),
                 style: "destructive",
                 onPress: () => {
-                    if (deleteBusiness(business.id)) toast.success(`${business.name} deleted`);
+                    if (deleteBusiness(business.id)) toast.success(t("businessDeleted", { name: businessName(business) }));
                 },
             },
         ]);
     };
 
     const confirmLogout = () =>
-        Alert.alert("Log out?", "Aap ko dobara PIN se login karna hoga.", [
-            { text: "Cancel", style: "cancel" },
+        Alert.alert(t("auth:logout.title"), t("auth:logout.message"), [
+            { text: t("common:actions.cancel"), style: "cancel" },
             {
-                text: "Log out",
+                text: t("common:actions.logOut"),
                 style: "destructive",
-                onPress: () => {
-                    signOut();
-                    router.replace("/");
-                },
+                onPress: logout,
             },
         ]);
 
     const openSocial = (s: SocialLink) => {
-        if (s.url) Linking.openURL(s.url).catch(() => toast.error(`Couldn't open ${s.label}`));
+        if (s.url) Linking.openURL(s.url).catch(() => toast.error(t("couldNotOpen", { name: s.label })));
         else soon(s.label);
     };
 
@@ -104,13 +104,13 @@ export default function MoreScreen() {
                     <Pressable
                         onPress={() => (router.canGoBack() ? router.back() : router.replace("/home"))}
                         accessibilityRole="button"
-                        accessibilityLabel="Go back"
+                        accessibilityLabel={t("common:actions.back")}
                         hitSlop={10}
                         className="h-10 w-10 items-start justify-center active:opacity-60">
-                        <ChevronLeft size={20} color={NAVY} strokeWidth={2.6} />
+                        <ChevronLeft size={20} color={NAVY} strokeWidth={2.6} style={flipInRTL} />
                     </Pressable>
                     <Text accessibilityRole="header" className="font-jakarta-extrabold text-heading-h3" style={{ color: NAVY }}>
-                        More
+                        {t("title")}
                     </Text>
                 </View>
 
@@ -120,13 +120,13 @@ export default function MoreScreen() {
                         <MoreRow
                             icon="backup"
                             tint="#E8F2FF"
-                            label="Backup"
+                            label={t("backup")}
                             labelExtra={
                                 <Text className="font-jakarta-medium text-[#16A34A]" style={{ fontSize: 14 }}>
-                                    (Successful)
+                                    {t("backupSuccessful")}
                                 </Text>
                             }
-                            onPress={() => soon("Backup")}
+                            onPress={() => soon(t("backup"))}
                         />
                         {/* <View
                             className="flex-row items-center bg-[#FFF1EC]"
@@ -140,9 +140,9 @@ export default function MoreScreen() {
 
                     {/* Shortcuts */}
                     <View className="flex-row gap-3">
-                        <MoreTile icon="expenseCard" label="Expense Card" onPress={() => soon("Expense Card")} />
-                        <MoreTile icon="recycleBin" label="Recycle Bin" onPress={() => soon("Recycle Bin")} />
-                        <MoreTile icon="calculator" label="Calculator" onPress={() => soon("Calculator")} />
+                        <MoreTile icon="expenseCard" label={t("expenseCard")} onPress={() => soon(t("expenseCard"))} />
+                        <MoreTile icon="recycleBin" label={t("recycleBin")} onPress={() => soon(t("recycleBin"))} />
+                        <MoreTile icon="calculator" label={t("calculator")} onPress={() => soon(t("calculator"))} />
                     </View>
 
                     {/* Settings */}
@@ -150,7 +150,7 @@ export default function MoreScreen() {
                         <MoreRow
                             icon="settings"
                             tint="#EFEAFF"
-                            label="Settings"
+                            label={t("settings")}
                             onPress={() => setSettingsOpen((o) => !o)}
                             right={
                                 <View style={{ transform: [{ rotate: settingsOpen ? "0deg" : "-90deg" }] }}>
@@ -165,12 +165,12 @@ export default function MoreScreen() {
                                     nested
                                     icon="quickNotification"
                                     tint="#FFF4DC"
-                                    label="Quick notification entry"
+                                    label={t("quickNotification")}
                                     right={
                                         <ToggleSwitch
                                             value={quickNotification}
                                             onValueChange={setQuickNotification}
-                                            accessibilityLabel="Quick notification entry"
+                                            accessibilityLabel={t("quickNotification")}
                                         />
                                     }
                                 />
@@ -179,7 +179,7 @@ export default function MoreScreen() {
                                     nested
                                     icon="appLock"
                                     tint="#FFF4DC"
-                                    label="App Lock"
+                                    label={t("appLock")}
                                     chevron="grey"
                                     onPress={() => setSheet("app-lock")}
                                 />
@@ -188,7 +188,7 @@ export default function MoreScreen() {
                                     nested
                                     icon="language"
                                     tint="#E8F2FF"
-                                    label="Language"
+                                    label={t("language")}
                                     chevron="grey"
                                     onPress={() => setSheet("language")}
                                 />
@@ -197,7 +197,7 @@ export default function MoreScreen() {
                                     nested
                                     icon="businessCurrency"
                                     tint="#FFF4DC"
-                                    label="Business Currency:"
+                                    label={t("businessCurrency")}
                                     labelExtra={
                                         <Text allowFontScaling={false} style={{ fontSize: 20 }}>
                                             {currencyOf(business.currency).flag}
@@ -211,7 +211,7 @@ export default function MoreScreen() {
                                     nested
                                     icon="deleteBusiness"
                                     tint="#FFF4DC"
-                                    label="Delete Business"
+                                    label={t("deleteBusiness")}
                                     chevron="grey"
                                     onPress={confirmDeleteBusiness}
                                 />
@@ -220,9 +220,9 @@ export default function MoreScreen() {
                                     nested
                                     icon="deleteAccount"
                                     tint="#EFEAFF"
-                                    label="Delete Account"
+                                    label={t("deleteAccount")}
                                     chevron="grey"
-                                    onPress={() => soon("Delete Account")}
+                                    onPress={() => soon(t("deleteAccount"))}
                                 />
                             </>
                         ) : null}
@@ -230,17 +230,17 @@ export default function MoreScreen() {
 
                     {/* Support */}
                     <MoreCard>
-                        <MoreRow icon="helpSupport" tint="#E3F6EE" label="Help & Support" onPress={() => soon("Help & Support")} />
+                        <MoreRow icon="helpSupport" tint="#E3F6EE" label={t("helpSupport")} onPress={() => soon(t("helpSupport"))} />
                         <MoreDivider />
-                        <MoreRow icon="aboutUs" tint="#E8F2FF" label="About us" onPress={() => soon("About us")} />
+                        <MoreRow icon="aboutUs" tint="#E8F2FF" label={t("aboutUs")} onPress={() => soon(t("aboutUs"))} />
                         <MoreDivider />
-                        <MoreRow icon="logout" tint="#FFE8EC" label="Logout" chevron="none" onPress={confirmLogout} />
+                        <MoreRow icon="logout" tint="#FFE8EC" label={t("logout")} chevron="none" onPress={confirmLogout} />
                     </MoreCard>
 
                     {/* Socials */}
                     <View className="mt-4 flex-row items-center justify-center gap-6">
                         <Text className="font-jakarta-semibold text-text-dark" style={{ fontSize: 17 }}>
-                            Follow us on
+                            {t("followUs")}
                         </Text>
                         {SOCIAL_LINKS.map((s) => (
                             <Pressable
@@ -256,17 +256,12 @@ export default function MoreScreen() {
                     </View>
 
                     <Text className="text-center font-jakarta text-para-small text-[#A39B9E]">
-                        Expense Manager · v{Constants.expoConfig?.version ?? "1.0.0"}
+                        {t("version", { version: Constants.expoConfig?.version ?? "1.0.0" })}
                     </Text>
                 </View>
             </ScrollView>
 
-            <LanguageSheet
-                visible={sheet === "language"}
-                selectedCode={language}
-                onSelect={setLanguage}
-                onClose={closeSheet}
-            />
+            <LanguageSheet visible={sheet === "language"} onClose={closeSheet} />
             <CurrencySheet visible={sheet === "currency"} onClose={closeSheet} />
             <AppLockSheet visible={sheet === "app-lock"} onClose={closeSheet} />
         </View>

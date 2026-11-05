@@ -1,0 +1,19 @@
+{
+  "slides": {
+    "control": {
+      "title": "Your money, your control",
+      "text": "Track spending and manage income, all in one place."
+    },
+    "business": {
+      "title": "Your whole business in one app",
+      "text": "Customers, banks, sales, staff and expenses, all in your Digital Khata."
+    },
+    "devices": {
+      "title": "Your accounts on every device",
+      "text": "Digital Khata on mobile and laptop, always in sync."
+    }
+  },
+  "getStarted": "Let's get started!",
+  "haveAccount": "Already have an account?",
+  "logIn": "Log in"
+}

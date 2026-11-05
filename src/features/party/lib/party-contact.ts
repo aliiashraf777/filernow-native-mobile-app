@@ -3,21 +3,21 @@
 import { Linking, Platform } from "react-native";
 
 import type { IParty } from "@/features/khata/types";
+import i18n from "@/i18n";
 
 /** "03001234567" or "+923001234567" -> "923001234567" (wa.me format). */
 export const waDigits = (phone?: string) => phone?.replace(/\D/g, "").replace(/^0/, "92");
 
 export function contactBlockReason(party: IParty, balance: number) {
-    if (!waDigits(party.phone)) return "Is party ka phone number save nahi hai";
-    if (balance === 0) return "Hisaab barabar hai, reminder ki zaroorat nahi";
+    if (!waDigits(party.phone)) return i18n.t("party:contact.noPhone");
+    if (balance === 0) return i18n.t("party:contact.settled");
     return null;
 }
 
 export function reminderText(party: IParty, balance: number) {
     const amount = Math.abs(balance).toLocaleString("en-PK");
-    return balance > 0
-        ? `Assalam o Alaikum ${party.name}, hamare khate ke mutabiq aap ki taraf Rs ${amount} baqaya hain. Meherbani karke ada kar dein.`
-        : `Assalam o Alaikum ${party.name}, hamare khate ke mutabiq mujh par aap ke Rs ${amount} baqaya hain.`;
+    // sent in the app language of whoever sends it
+    return i18n.t(balance > 0 ? "party:contact.reminderGet" : "party:contact.reminderGive", { name: party.name, amount });
 }
 
 export const openWhatsApp = (digits: string, text: string) =>

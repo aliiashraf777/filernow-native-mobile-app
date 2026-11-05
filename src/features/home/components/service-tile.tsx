@@ -1,6 +1,7 @@
 // nativeApp\src\features\home\components\service-tile.tsx
 
 import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text } from "react-native";
 
 import { serviceIcons } from "@/constants/service-icons";
@@ -16,13 +17,15 @@ type Props = {
 
 /** Illustrated icon over a label — one cell of a service grid. */
 export function ServiceTile({ item, onPress, variant = "boxed" }: Props) {
+    const { t } = useTranslation("home");
+    const label = t(`services.${item.labelKey}`);
     const boxed = variant === "boxed";
 
     return (
         <Pressable
             onPress={onPress}
             accessibilityRole="button"
-            accessibilityLabel={item.label}
+            accessibilityLabel={label}
             className={cn(
                 "items-center justify-center active:opacity-70",
                 boxed
@@ -40,7 +43,7 @@ export function ServiceTile({ item, onPress, variant = "boxed" }: Props) {
                 adjustsFontSizeToFit
                 className={boxed ? "font-jakarta text-para-small text-[#2B2B2B]" : "font-jakarta-medium text-para-small text-text-dark"}
             >
-                {item.label}
+                {label}
             </Text>
         </Pressable>
     );

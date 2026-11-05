@@ -4,8 +4,11 @@ import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { ChevronLeft, type LucideIcon } from "lucide-react-native";
 import { useEffect, useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Animated, Easing, Pressable, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { flipInRTL } from "@/i18n/direction";
 
 type Props = {
   icon: LucideIcon;
@@ -22,6 +25,7 @@ type Props = {
 
 /** Shared shell for the PIN screens: background, back button, heading and keypad sheet. */
 export function PinScreenLayout({ icon: Icon, title, subtitle, onBack, top, children, keypad }: Props) {
+  const { t } = useTranslation("auth");
   const insets = useSafeAreaInsets();
   const compact = useWindowDimensions().height < 700;
   const [reveal] = useState(() => new Animated.Value(0));
@@ -54,10 +58,10 @@ export function PinScreenLayout({ icon: Icon, title, subtitle, onBack, top, chil
             <Pressable
               onPress={onBack}
               accessibilityRole="button"
-              accessibilityLabel="Back"
+              accessibilityLabel={t("pin.back")}
               className="h-10 w-10 items-center justify-center rounded-full bg-white/90 active:opacity-80"
             >
-              <ChevronLeft size={22} color="#151A23" strokeWidth={2.2} />
+              <ChevronLeft size={22} color="#151A23" strokeWidth={2.2} style={flipInRTL} />
             </Pressable>
           )}
         </View>

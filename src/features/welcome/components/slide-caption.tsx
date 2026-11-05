@@ -1,6 +1,7 @@
 // nativeApp\src\features\welcome\components\slide-caption.tsx
 
 import { SymbolView } from "expo-symbols";
+import { useTranslation } from "react-i18next";
 import { Animated, Text, View } from "react-native";
 
 import { SLIDE_ICONS, type Slide } from "@/features/welcome/data/slides";
@@ -10,6 +11,7 @@ type Props = { slide: Slide; index: number; scrollX: Animated.Value; width: numb
 
 /** Caption that cross-fades and slides in sync with its banner. */
 export function SlideCaption({ slide, index, scrollX, width }: Props) {
+    const { t } = useTranslation("onboarding");
     const at = (offset: number) => (index + offset) * width;
 
     const opacity = scrollX.interpolate({
@@ -32,11 +34,11 @@ export function SlideCaption({ slide, index, scrollX, width }: Props) {
                     <SymbolView name={SLIDE_ICONS[slide.icon]} size={24} tintColor={colors.primary} />
                 </View>
                 <Text className="flex-1 font-jakarta-extrabold text-[20px] leading-[26px] tracking-[-0.3px] text-text-dark">
-                    {slide.title}
+                    {t(`slides.${slide.key}.title`)}
                 </Text>
             </View>
             <Text className="mt-3 font-jakarta-medium text-[14px] leading-[21px] text-text-secondary">
-                {slide.text}
+                {t(`slides.${slide.key}.text`)}
             </Text>
         </Animated.View>
     );

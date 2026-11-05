@@ -8,7 +8,8 @@ export type BulkRow = {
     phone?: string;
     type?: PartyType;
     status: "ok" | "duplicate" | "error";
-    message?: string;
+    /** Key under party:bulk. */
+    message?: "errName" | "errPhone" | "errDuplicate";
 };
 
 const PHONE_RE = /^(\+92|0)3\d{9}$/;
@@ -39,12 +40,12 @@ export function parseBulkParties(text: string, existing: IParty[]): BulkRow[] {
         const type = (PARTY_TYPES as readonly string[]).includes(typeRaw) ? (typeRaw as PartyType) : undefined;
         const base = { line: i + 1, name, phone, type };
 
-        if (name.length < 2) { out.push({ ...base, status: "error", message: "Naam kam az kam 2 huroof ka ho" }); continue; }
-        if (phone && !PHONE_RE.test(phone)) { out.push({ ...base, status: "error", message: "Number sahi nahi (03001234567)" }); continue; }
+        if (name.length < 2) { out.push({ ...base, status: "error", message: "errName" }); continue; }
+        if (phone && !PHONE_RE.test(phone)) { out.push({ ...base, status: "error", message: "errPhone" }); continue; }
 
         const key = name.toLowerCase();
         const dup = phone ? phones.has(phone) : names.has(key);
-        if (dup) { out.push({ ...base, status: "duplicate", message: "Pehle se maujood" }); continue; }
+        if (dup) { out.push({ ...base, status: "duplicate", message: "errDuplicate" }); continue; }
 
         names.add(key);
         if (phone) phones.add(phone);

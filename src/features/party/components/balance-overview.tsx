@@ -1,6 +1,7 @@
 // nativeApp\src\features\party\components\balance-overview.tsx
 
 import { SymbolView, type SymbolViewProps } from "expo-symbols";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { pkr } from "@/features/khata/lib/debt";
@@ -39,29 +40,30 @@ const EYE: SymbolViewProps["name"] = { ios: "eye", android: "visibility", web: "
 const EYE_OFF: SymbolViewProps["name"] = { ios: "eye.slash", android: "visibility_off", web: "visibility_off" };
 
 export function BalanceOverview({ get, give, getCount, giveCount, hidden, onToggleHidden }: Props) {
+    const { t } = useTranslation("party", { keyPrefix: "balance" });
     const net = get - give;
     const mask = (n: number) => (hidden ? "Rs ••••" : pkr(n));
 
     return (
         <View className="p-4">
             <View className="mb-2 flex-row items-center justify-between">
-                <Text className="font-jakarta-bold text-sm text-text-dark">Balance Overview</Text>
+                <Text className="font-jakarta-bold text-sm text-text-dark">{t("overview")}</Text>
                 <Pressable accessibilityRole="button" onPress={onToggleHidden} hitSlop={8} className="flex-row items-center gap-1.5">
                     <SymbolView name={hidden ? EYE : EYE_OFF} size={14} tintColor={colors.primary} />
                     <Text className="font-jakarta-medium text-xs text-primary">
-                        {hidden ? "Balance Dikhayein" : "Balance Chhupayein"}
+                        {hidden ? t("show") : t("hide")}
                     </Text>
                 </Pressable>
             </View>
             <View className="flex-row gap-2">
-                <Tile tone="get" label="You will get" value={mask(get)} sub={`${getCount} parties se`} className="flex-1" />
-                <Tile tone="give" label="You will give" value={mask(give)} sub={`${giveCount} parties ko`} className="flex-1" />
+                <Tile tone="get" label={t("youWillGet")} value={mask(get)} sub={t("fromParties", { count: getCount })} className="flex-1" />
+                <Tile tone="give" label={t("youWillGive")} value={mask(give)} sub={t("toParties", { count: giveCount })} className="flex-1" />
             </View>
             <Tile
                 tone="net"
-                label="Net balance"
+                label={t("net")}
                 value={mask(Math.abs(net))}
-                sub={net > 0 ? "Kul aap ko milenge" : net < 0 ? "Kul aap ko dene hain" : "Hisaab barabar"}
+                sub={net > 0 ? t("netGet") : net < 0 ? t("netGive") : t("netSettled")}
                 className="mt-2"
             />
         </View>

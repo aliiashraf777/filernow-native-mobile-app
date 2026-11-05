@@ -1,6 +1,7 @@
 // nativeApp\src\features\party\components\reminder-date-sheet.tsx
 
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function ReminderDateSheet({ visible, name, current, onSave, onClear, onClose }: Props) {
+    const { t } = useTranslation("party", { keyPrefix: "reminder" });
     const [sel, setSel] = useState("");
 
     useEffect(() => {
@@ -32,19 +34,19 @@ export function ReminderDateSheet({ visible, name, current, onSave, onClear, onC
     }, [visible, current]);
 
     const options = [
-        { label: "Agle hafte", date: addDays(7) },
-        { label: "Agle mahine", date: addDays(30) },
+        { label: t("nextWeek"), date: addDays(7) },
+        { label: t("nextMonth"), date: addDays(30) },
     ];
 
     return (
         <BottomSheet
             visible={visible}
             onClose={onClose}
-            title="Reminder Date"
-            subtitle={`${name} se wapsi ki tareekh yaad rakhein`}
+            title={t("title")}
+            subtitle={t("subtitle", { name })}
             footer={
                 <FormButton
-                    label="Date Save Karein"
+                    label={t("save")}
                     disabled={!sel}
                     onPress={() => {
                         onSave(sel);
@@ -72,7 +74,7 @@ export function ReminderDateSheet({ visible, name, current, onSave, onClear, onC
                 })}
             </View>
 
-            <Field label="Ya apni tareekh chunein">
+            <Field label={t("custom")}>
                 <DateTimeField mode="date" value={sel} min={localDate()} onChange={setSel} />
             </Field>
 
@@ -84,7 +86,7 @@ export function ReminderDateSheet({ visible, name, current, onSave, onClear, onC
                         onClose();
                     }}
                     className="mb-2 min-h-11 items-center justify-center">
-                    <Text className="font-jakarta-semibold text-xs text-text-secondary-muted">Date hatayein</Text>
+                    <Text className="font-jakarta-semibold text-xs text-text-secondary-muted">{t("clear")}</Text>
                 </Pressable>
             ) : null}
         </BottomSheet>

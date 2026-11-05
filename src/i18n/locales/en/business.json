@@ -1,0 +1,50 @@
+{
+  "myExpenses": "My Expenses",
+  "switchTitle": "Switch Business",
+  "switchSubtitle": "Choose where you want to track expenses",
+  "addTitle": "Add New Business",
+  "addSubtitle": "Set up a separate space for its expenses",
+  "create": "Create Business",
+  "addBusiness": "Add Business",
+  "addA11y": "Add business, {{used}} of {{max}} used",
+  "limitReached": "Business limit reached ({{max}}/{{max}})",
+  "maxBusinesses": "You can have up to {{count}} businesses",
+  "exists": "\"{{name}}\" already exists",
+  "created": "{{name}} created",
+  "currentA11y": "Current business: {{name}}. Switch business",
+  "rowA11y": "{{name}}, {{type}}, {{currency}}",
+  "name": "Business Name",
+  "namePlaceholder": "e.g. Ali Traders",
+  "nameA11y": "Business name",
+  "type": "Business Type",
+  "currency": "Currency",
+  "currencyA11y": "Currency: {{name}}. Change currency",
+  "theme": "Theme Color",
+  "themeA11y": "{{color}} theme",
+  "types": {
+    "personal": { "label": "Personal", "caption": "Personal" },
+    "shop": { "label": "Shop", "caption": "Business" },
+    "freelance": { "label": "Freelance", "caption": "Freelance" },
+    "household": { "label": "Household", "caption": "Household" }
+  },
+  "currencies": {
+    "PKR": "Pakistani Rupee",
+    "USD": "US Dollar",
+    "AED": "UAE Dirham",
+    "SAR": "Saudi Riyal",
+    "GBP": "British Pound",
+    "EUR": "Euro"
+  },
+  "themes": {
+    "red": "Red",
+    "purple": "Purple",
+    "green": "Green",
+    "amber": "Amber",
+    "blue": "Blue"
+  },
+  "currencySheet": {
+    "title": "Business Currency",
+    "subtitle": "Currency for {{name}}",
+    "changed": "{{name}} now uses {{code}}"
+  }
+}

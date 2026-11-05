@@ -1,6 +1,7 @@
 // nativeApp\src\features\business\components\business-switcher-sheet.tsx
 
 import { Plus } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -25,6 +26,7 @@ type Props = {
 
 /** "Switch Business" list and "Add New Business" form, shown as two steps of one bottom sheet. */
 export function BusinessSwitcherSheet({ visible, mode, onModeChange, onClose }: Props) {
+    const { t } = useTranslation("business");
     const businesses = useBusinessStore((s) => s.businesses);
     const activeId = useBusinessStore((s) => s.activeId);
     const setActive = useBusinessStore((s) => s.setActive);
@@ -46,14 +48,14 @@ export function BusinessSwitcherSheet({ visible, mode, onModeChange, onClose }: 
         const name = form.values.name.trim().replace(/\s+/g, " ");
         if (!name) return;
         if (businesses.some((b) => b.name.toLowerCase() === name.toLowerCase())) {
-            toast.error(`"${name}" already exists`);
+            toast.error(t("exists", { name }));
             return;
         }
         if (!addBusiness({ ...form.values, name })) {
-            toast.error(`You can have up to ${MAX_BUSINESSES} businesses`);
+            toast.error(t("maxBusinesses", { count: MAX_BUSINESSES }));
             return;
         }
-        toast.success(`${name} created`);
+        toast.success(t("created", { name }));
         close();
     };
 
@@ -62,9 +64,9 @@ export function BusinessSwitcherSheet({ visible, mode, onModeChange, onClose }: 
             <BottomSheet
                 visible={visible}
                 onClose={close}
-                title="Add New Business"
-                subtitle="Set up a separate space for its expenses"
-                footer={<GradientButton label="Create Business" icon={Plus} onPress={create} disabled={!form.canSubmit} />}>
+                title={t("addTitle")}
+                subtitle={t("addSubtitle")}
+                footer={<GradientButton label={t("create")} icon={Plus} onPress={create} disabled={!form.canSubmit} />}>
                 <AddBusinessFields form={form} onSubmitEditing={create} />
             </BottomSheet>
         );
@@ -74,8 +76,8 @@ export function BusinessSwitcherSheet({ visible, mode, onModeChange, onClose }: 
         <BottomSheet
             visible={visible}
             onClose={close}
-            title="Switch Business"
-            subtitle="Choose where you want to track expenses">
+            title={t("switchTitle")}
+            subtitle={t("switchSubtitle")}>
             <View className="gap-3">
                 {businesses.map((b) => (
                     <BusinessRow key={b.id} business={b} selected={b.id === activeId} onPress={select} />
@@ -86,17 +88,17 @@ export function BusinessSwitcherSheet({ visible, mode, onModeChange, onClose }: 
                         accessibilityRole="text"
                         className="h-[68px] items-center justify-center rounded-brand-24 border-[1.5px] border-dashed border-[#DCD6D4] bg-[#F7F5F4] px-4">
                         <Text className="font-jakarta-semibold text-para-base text-[#5F5A5C]">
-                            Business limit reached ({MAX_BUSINESSES}/{MAX_BUSINESSES})
+                            {t("limitReached", { max: MAX_BUSINESSES })}
                         </Text>
                         <Text className="mt-0.5 font-jakarta text-para-tiny text-[#8A8285]">
-                            You can have up to {MAX_BUSINESSES} businesses
+                            {t("maxBusinesses", { count: MAX_BUSINESSES })}
                         </Text>
                     </View>
                 ) : (
                     <Pressable
                         onPress={() => onModeChange("add")}
                         accessibilityRole="button"
-                        accessibilityLabel={`Add business, ${businesses.length} of ${MAX_BUSINESSES} used`}
+                        accessibilityLabel={t("addA11y", { used: businesses.length, max: MAX_BUSINESSES })}
                         className="h-[68px] flex-row items-center justify-center gap-3 rounded-brand-24 border-[1.5px] border-dashed border-[#E8A0AE] bg-[#FFF6F7] active:opacity-80">
                         <View
                             className="h-9 w-9 rounded-brand-12 bg-primary"
@@ -113,7 +115,7 @@ export function BusinessSwitcherSheet({ visible, mode, onModeChange, onClose }: 
                             </View>
                         </View>
                         <Text className="font-jakarta-extrabold text-primary" style={{ fontSize: 17 }}>
-                            Add Business
+                            {t("addBusiness")}
                         </Text>
                         <Text className="font-jakarta-medium text-para-small text-[#C77A88]">
                             {businesses.length}/{MAX_BUSINESSES}

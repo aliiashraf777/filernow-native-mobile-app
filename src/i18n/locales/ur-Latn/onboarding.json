@@ -1,0 +1,19 @@
+{
+  "slides": {
+    "control": {
+      "title": "Apne paison par apna control",
+      "text": "Kharche track karein, aamdani sambhalein — sab kuch ek hi jagah."
+    },
+    "business": {
+      "title": "Poora karobar, ek hi app mein",
+      "text": "Grahak, bank, bikri, amla aur kharche — sab kuch Digital Khata mein."
+    },
+    "devices": {
+      "title": "Har device par aapka hisaab",
+      "text": "Mobile aur laptop, dono par Digital Khata — data hamesha sync."
+    }
+  },
+  "getStarted": "Chaliye shuru karein!",
+  "haveAccount": "Pehle se account hai?",
+  "logIn": "Log in"
+}

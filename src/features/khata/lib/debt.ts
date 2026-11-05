@@ -1,6 +1,7 @@
 // nativeApp\src\features\khata\lib\debt.ts
 
-import { DEBT_CATEGORY_TYPE, DEBT_TYPE_META, IExpenseEntry } from "../types";
+import { DEBT_CATEGORY_TYPE, DEBT_TYPE_META, IExpenseEntry, type PartyType } from "../types";
+import i18n from "@/i18n";
 import { entrySortKey } from "@/lib/date-format";
 
 // Formats a raw numerical value into a standard Pakistani Rupee currency string layout with comma groups.
@@ -15,8 +16,13 @@ export function debtSign(e: Pick<IExpenseEntry, "kind" | "categoryId">): 1 | -1 
     return t ? DEBT_TYPE_META[t].sign : 0;
 }
 
-export const debtLabel = (categoryId: string) =>
-    DEBT_TYPE_META[DEBT_CATEGORY_TYPE[categoryId]]?.label ?? "Udhaar";
+// Translated names (party namespace). Components showing them call useTranslation() so they re-render.
+export const debtLabel = (categoryId: string) => {
+    const type = DEBT_CATEGORY_TYPE[categoryId];
+    return type ? i18n.t(`party:debtTypes.${type}.label`) : i18n.t("party:debtTypes.fallback");
+};
+
+export const partyTypeLabel = (type: PartyType) => i18n.t(`party:types.${type}`);
 
 // Generates a lookup identity grouping key mapping directly to a specific account profile identifier or a lowercase text fallback.
 export const debtKey = (e: Pick<IExpenseEntry, "partyId" | "subject">) =>

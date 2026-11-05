@@ -2,13 +2,13 @@
 
 import { Check, ChevronDown } from "lucide-react-native";
 import { type ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, TextInput, View } from "react-native";
 
 import { GradientFill } from "@/components/ui/gradient-fill";
 import {
     BUSINESS_NAME_MAX,
     BUSINESS_TYPE_KEYS,
-    BUSINESS_TYPES,
     CURRENCIES,
     THEME_COLOR_KEYS,
     THEME_COLORS,
@@ -57,6 +57,7 @@ type Props = { form: AddBusinessFormState; onSubmitEditing?: () => void };
 
 /** Fields of the "Add New Business" sheet: name, type chips, currency select, theme swatches. */
 export function AddBusinessFields({ form, onSubmitEditing }: Props) {
+    const { t } = useTranslation("business");
     const { values, set } = form;
     const [focused, setFocused] = useState(false);
     const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -66,7 +67,7 @@ export function AddBusinessFields({ form, onSubmitEditing }: Props) {
         <View className="gap-5 pb-2">
             {/* Business name */}
             <View>
-                <FieldLabel>Business Name</FieldLabel>
+                <FieldLabel>{t("name")}</FieldLabel>
                 <View className={cn("rounded-[22px] p-1", focused ? "bg-[#FDE9ED]" : "bg-transparent")}>
                     <TextInput
                         value={values.name}
@@ -74,14 +75,14 @@ export function AddBusinessFields({ form, onSubmitEditing }: Props) {
                         onFocus={() => setFocused(true)}
                         onBlur={() => setFocused(false)}
                         onSubmitEditing={onSubmitEditing}
-                        placeholder="e.g. Ali Traders"
+                        placeholder={t("namePlaceholder")}
                         placeholderTextColor="#A9A1A4"
                         maxLength={BUSINESS_NAME_MAX}
                         autoCapitalize="words"
                         returnKeyType="done"
                         selectionColor={colors.primary}
                         cursorColor={colors.primary}
-                        accessibilityLabel="Business name"
+                        accessibilityLabel={t("nameA11y")}
                         className={cn(
                             "h-14 rounded-[18px] border bg-white px-5 font-jakarta text-text-dark",
                             focused ? "border-[#E0566E]" : "border-[#E6E0DE]",
@@ -93,7 +94,7 @@ export function AddBusinessFields({ form, onSubmitEditing }: Props) {
 
             {/* Business type */}
             <View>
-                <FieldLabel>Business Type</FieldLabel>
+                <FieldLabel>{t("type")}</FieldLabel>
                 <View className="flex-row flex-wrap gap-2.5">
                     {BUSINESS_TYPE_KEYS.map((key: BusinessType) => {
                         const selected = values.type === key;
@@ -113,7 +114,7 @@ export function AddBusinessFields({ form, onSubmitEditing }: Props) {
                                         "text-para-base",
                                         selected ? "font-jakarta-semibold text-primary" : "font-jakarta text-[#3A3537]",
                                     )}>
-                                    {BUSINESS_TYPES[key].label}
+                                    {t(`types.${key}.label`)}
                                 </Text>
                             </Pressable>
                         );
@@ -123,17 +124,17 @@ export function AddBusinessFields({ form, onSubmitEditing }: Props) {
 
             {/* Currency */}
             <View>
-                <FieldLabel>Currency</FieldLabel>
+                <FieldLabel>{t("currency")}</FieldLabel>
                 <View className="overflow-hidden rounded-[22px] border border-[#ECE7E5] bg-[#F7F5F4]">
                     <Pressable
                         onPress={() => setCurrencyOpen((o) => !o)}
                         accessibilityRole="button"
                         accessibilityState={{ expanded: currencyOpen }}
-                        accessibilityLabel={`Currency: ${currency.name}. Change currency`}
+                        accessibilityLabel={t("currencyA11y", { name: t(`currencies.${currency.code}`) })}
                         className="h-16 flex-row items-center gap-3 px-4 active:opacity-80">
                         <CurrencyBadge code={currency.code} />
                         <Text className="flex-1 font-jakarta-medium text-text-dark" style={{ fontSize: 16 }}>
-                            {currency.name} ({currency.code})
+                            {t(`currencies.${currency.code}`)} ({currency.code})
                         </Text>
                         <View style={{ transform: [{ rotate: currencyOpen ? "180deg" : "0deg" }] }}>
                             <ChevronDown size={20} color="#5F5A5C" strokeWidth={2.2} />
@@ -152,7 +153,7 @@ export function AddBusinessFields({ form, onSubmitEditing }: Props) {
                                   className="h-14 flex-row items-center gap-3 border-t border-[#ECE7E5] px-4 active:bg-[#EFEBEA]">
                                   <CurrencyBadge code={c.code} />
                                   <Text className="flex-1 font-jakarta text-[#3A3537]" style={{ fontSize: 15 }}>
-                                      {c.name} ({c.code})
+                                      {t(`currencies.${c.code}`)} ({c.code})
                                   </Text>
                               </Pressable>
                           ))
@@ -162,7 +163,7 @@ export function AddBusinessFields({ form, onSubmitEditing }: Props) {
 
             {/* Theme color */}
             <View>
-                <FieldLabel>Theme Color</FieldLabel>
+                <FieldLabel>{t("theme")}</FieldLabel>
                 <View className="flex-row items-center gap-2">
                     {THEME_COLOR_KEYS.map((key: ThemeColor) => {
                         const selected = values.theme === key;
@@ -173,7 +174,7 @@ export function AddBusinessFields({ form, onSubmitEditing }: Props) {
                                 onPress={() => set("theme", key)}
                                 accessibilityRole="radio"
                                 accessibilityState={{ selected }}
-                                accessibilityLabel={`${key} theme`}
+                                accessibilityLabel={t("themeA11y", { color: t(`themes.${key}`) })}
                                 hitSlop={4}
                                 className="h-[54px] w-[54px] items-center justify-center rounded-full border-[3px]"
                                 style={{ borderColor: selected ? deep : "transparent" }}>

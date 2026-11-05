@@ -1,0 +1,45 @@
+{
+  "actions": {
+    "back": "واپس جائیں",
+    "cancel": "منسوخ کریں",
+    "close": "بند کریں",
+    "continue": "جاری رکھیں",
+    "delete": "حذف کریں",
+    "edit": "ترمیم کریں",
+    "logOut": "لاگ آؤٹ",
+    "no": "نہیں",
+    "yes": "ہاں"
+  },
+  "comingSoon": "جلد آ رہا ہے۔",
+  "serviceComingSoon": "{{name}} جلد آ رہا ہے",
+  "tabs": {
+    "home": "ہوم",
+    "khata": "کھاتہ",
+    "askAi": "AI سے پوچھیں",
+    "myAdvocate": "میرا وکیل",
+    "taxAdvisor": "ٹیکس مشیر"
+  },
+  "header": {
+    "premium": "پریمیم",
+    "notifications": "اطلاعات",
+    "notificationsUnread_one": "اطلاعات، {{count}} نئی",
+    "notificationsUnread_other": "اطلاعات، {{count}} نئی",
+    "more": "مزید"
+  },
+  "date": {
+    "days": ["اتوار", "پیر", "منگل", "بدھ", "جمعرات", "جمعہ", "ہفتہ"],
+    "months": ["جنوری", "فروری", "مارچ", "اپریل", "مئی", "جون", "جولائی", "اگست", "ستمبر", "اکتوبر", "نومبر", "دسمبر"],
+    "am": "AM",
+    "pm": "PM"
+  },
+  "timeAgo": {
+    "justNow": "ابھی ابھی",
+    "minutes_one": "{{count}} منٹ پہلے",
+    "minutes_other": "{{count}} منٹ پہلے",
+    "hours_one": "{{count}} گھنٹہ پہلے",
+    "hours_other": "{{count}} گھنٹے پہلے",
+    "yesterday": "کل",
+    "days_one": "{{count}} دن پہلے",
+    "days_other": "{{count}} دن پہلے"
+  }
+}

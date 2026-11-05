@@ -1,0 +1,50 @@
+{
+  "myExpenses": "Mere Kharche",
+  "switchTitle": "Karobar Badlein",
+  "switchSubtitle": "Chunein ke aap kharche kahan track karna chahte hain",
+  "addTitle": "Naya Karobar Add Karein",
+  "addSubtitle": "Is ke kharchon ke liye alag jagah banayein",
+  "create": "Karobar Banayein",
+  "addBusiness": "Karobar Add Karein",
+  "addA11y": "Karobar add karein, {{max}} mein se {{used}} istemal ho chuke",
+  "limitReached": "Karobar ki had poori ho gayi ({{max}}/{{max}})",
+  "maxBusinesses": "Aap zyada se zyada {{count}} karobar rakh sakte hain",
+  "exists": "\"{{name}}\" pehle se maujood hai",
+  "created": "{{name}} ban gaya",
+  "currentA11y": "Maujooda karobar: {{name}}. Karobar badlein",
+  "rowA11y": "{{name}}, {{type}}, {{currency}}",
+  "name": "Karobar ka Naam",
+  "namePlaceholder": "jaise: Ali Traders",
+  "nameA11y": "Karobar ka naam",
+  "type": "Karobar ki Qism",
+  "currency": "Currency",
+  "currencyA11y": "Currency: {{name}}. Currency badlein",
+  "theme": "Theme ka Rang",
+  "themeA11y": "{{color}} theme",
+  "types": {
+    "personal": { "label": "Zaati", "caption": "Zaati" },
+    "shop": { "label": "Dukaan", "caption": "Karobar" },
+    "freelance": { "label": "Freelance", "caption": "Freelance" },
+    "household": { "label": "Gharelu", "caption": "Gharelu" }
+  },
+  "currencies": {
+    "PKR": "Pakistani Rupee",
+    "USD": "US Dollar",
+    "AED": "UAE Dirham",
+    "SAR": "Saudi Riyal",
+    "GBP": "British Pound",
+    "EUR": "Euro"
+  },
+  "themes": {
+    "red": "Laal",
+    "purple": "Jamni",
+    "green": "Hara",
+    "amber": "Peela",
+    "blue": "Neela"
+  },
+  "currencySheet": {
+    "title": "Karobari Currency",
+    "subtitle": "{{name}} ki currency",
+    "changed": "{{name}} ab {{code}} istemal karta hai"
+  }
+}

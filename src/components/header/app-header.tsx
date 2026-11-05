@@ -3,6 +3,7 @@
 import { router } from "expo-router";
 import { Bell, Crown, LayoutGrid } from "lucide-react-native";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -20,6 +21,7 @@ type Props = {
 /** Top bar shared by the tab screens: active business switcher, premium, notifications sheet, "More" page. */
 export function AppHeader({ onPremiumPress }: Props) {
     const insets = useSafeAreaInsets();
+    const { t } = useTranslation();
     const unread = useUnreadCount();
     const [notificationsOpen, setNotificationsOpen] = useState(false);
 
@@ -43,7 +45,7 @@ export function AppHeader({ onPremiumPress }: Props) {
                 <View className="flex-1 flex-row items-center justify-end gap-1">
                     <HeaderIconButton
                         icon={Crown}
-                        label="Premium"
+                        label={t("header.premium")}
                         color={colors["accent-gold"]}
                         filled
                         size={34}
@@ -51,13 +53,13 @@ export function AppHeader({ onPremiumPress }: Props) {
                     />
                     <HeaderIconButton
                         icon={Bell}
-                        label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+                        label={unread > 0 ? t("header.notificationsUnread", { count: unread }) : t("header.notifications")}
                         filled
                         size={34}
                         badge={unread > 0}
                         onPress={() => setNotificationsOpen(true)}
                     />
-                    <HeaderIconButton icon={LayoutGrid} label="More" filled size={34} onPress={() => router.push("/more")} />
+                    <HeaderIconButton icon={LayoutGrid} label={t("header.more")} filled size={34} onPress={() => router.push("/more")} />
                 </View>
             </View>
 

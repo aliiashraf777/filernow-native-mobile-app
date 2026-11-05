@@ -1,0 +1,14 @@
+{
+  "screenTitle": "Apni <highlight>Zubaan</highlight> Chunein",
+  "screenSubtitle": "Aap ise baad mein Settings se kabhi bhi badal sakte hain.",
+  "sheetTitle": "Zubaan chunein",
+  "globeA11y": "Mukhtalif zubaanon wala globe",
+  "backgroundA11y": "Welcome screen ka background",
+  "restart": {
+    "title": "Zubaan badalne ke liye restart karein?",
+    "message": "{{language}} daayein se baayein parhi jati hai, is liye layout badalne ke liye app restart hogi. Aap ka data mehfooz rahega.",
+    "messageLtr": "{{language}} baayein se daayein parhi jati hai, is liye layout badalne ke liye app restart hogi. Aap ka data mehfooz rahega.",
+    "confirm": "Restart karein"
+  },
+  "changed": "Zubaan {{language}} mein badal di gayi"
+}

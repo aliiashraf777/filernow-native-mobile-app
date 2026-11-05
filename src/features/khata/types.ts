@@ -176,7 +176,7 @@ export const PARTY_TYPES = ["customer", "supplier"] as const;
 
 export type PartyType = (typeof PARTY_TYPES)[number];
 
-export const PARTY_TYPE_LABELS: Record<PartyType, string> = { customer: "Customer", supplier: "Supplier" };
+// Display names live in party:types.<type> (see partyTypeLabel in khata/lib/debt).
 
 export interface IParty {
     id: string;
@@ -188,14 +188,7 @@ export interface IParty {
     reminderDate?: string; // YYYY-MM-DD
 }
 
-export const DEBT_TYPE_HINTS: Record<DebtType, string> = {
-    liya: "Aap ne udhaar liya, paise aap ko mile. (You Got)",
-    diya: "Aap ne udhaar diya, paise aap ne diye. (You Gave)",
-    liya_wapis_diya: "Aap ne liya hua udhaar wapis kiya. (You Gave)",
-    diya_wapis_liya: "Aap ka diya hua udhaar wapis mila. (You Got)",
-    liya_maaf: "Samne wale ne aap ka liya hua udhaar maaf kar diya. Cash nahi hilta.",
-    diya_maaf: "Aap ne diya hua udhaar maaf kar diya. Cash nahi hilta.",
-};
+// Labels and hints for each debt type live in party:debtTypes.<type> (translated).
 
 // APPENDED: Clean partial type matching your request configuration parameters
 export type NewParty = Pick<IParty, "name" | "phone" | "type">;

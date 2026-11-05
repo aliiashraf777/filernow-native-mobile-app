@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react-native";
 import { type ReactNode, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withSpring, withTiming } from "react-native-reanimated";
@@ -9,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 
 import { useSheetKeyboardLayout } from "@/hooks/use-sheet-keyboard-layout";
+import { SHEET_TOASTER, Toaster, ToasterIdProvider } from "@/lib/toast";
 
 const OPEN_MS = 300;
 const CLOSE_MS = 220;
@@ -39,6 +41,7 @@ type Props = {
  * Controlled: flip `visible` to open/close; the exit animation plays before the modal unmounts.
  */
 export function BottomSheet({ visible, onClose, title, subtitle, children, footer, headerAction, hideCloseButton }: Props) {
+    const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const { height } = useWindowDimensions();
     const { onAreaLayout, resetBase, keyboardOpen, overlap, maxSheet } = useSheetKeyboardLayout();
@@ -90,7 +93,7 @@ export function BottomSheet({ visible, onClose, title, subtitle, children, foote
                 <View style={{ flex: 1, justifyContent: "flex-end" }} onLayout={onAreaLayout}>
                     <Animated.View style={[StyleSheet.absoluteFill, backdropStyle]}>
                         <Pressable
-                            accessibilityLabel="Close"
+                            accessibilityLabel={t("actions.close")}
                             onPress={onClose}
                             className="flex-1 bg-text-dark/50"
                         />
@@ -125,7 +128,7 @@ export function BottomSheet({ visible, onClose, title, subtitle, children, foote
                                                 <Pressable
                                                     onPress={onClose}
                                                     accessibilityRole="button"
-                                                    accessibilityLabel="Close"
+                                                    accessibilityLabel={t("actions.close")}
                                                     hitSlop={6}
                                                     className="h-11 w-11 items-center justify-center rounded-brand-12 bg-[#F3F1F0] active:opacity-70">
                                                     <X size={20} color="#3A3A3A" strokeWidth={2.2} />
@@ -143,13 +146,14 @@ export function BottomSheet({ visible, onClose, title, subtitle, children, foote
                                 keyboardDismissMode="on-drag"
                                 showsVerticalScrollIndicator={false}
                                 bounces={false}>
-                                {children}
+                                <ToasterIdProvider value={SHEET_TOASTER}>{children}</ToasterIdProvider>
                             </ScrollView>
 
                             {footer ? <View className="px-5 pt-3">{footer}</View> : null}
                         </View>
                     </Animated.View>
                 </View>
+                <Toaster id={SHEET_TOASTER} fullWindowOverlay={false} />
             </GestureHandlerRootView>
         </Modal>
     );

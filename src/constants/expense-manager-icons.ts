@@ -47,6 +47,16 @@ export const emIcons = {
     settings: require("@/assets/images/expense-manager/more/settings.png"),
     whatsapp: require("@/assets/images/expense-manager/more/whatsapp.png"),
     youtube: require("@/assets/images/expense-manager/more/youtube.png"),
+    // nav (bottom tab bar); "-inactive" = greyscale for unselected tabs
+    navHome: require("@/assets/images/expense-manager/nav/home.png"),
+    navHomeInactive: require("@/assets/images/expense-manager/nav/home-inactive.png"),
+    navKhata: require("@/assets/images/expense-manager/nav/khata.png"),
+    navKhataInactive: require("@/assets/images/expense-manager/nav/khata-inactive.png"),
+    navMyAdvocate: require("@/assets/images/expense-manager/nav/my-advocate.png"),
+    navMyAdvocateInactive: require("@/assets/images/expense-manager/nav/my-advocate-inactive.png"),
+    navTaxAdvisor: require("@/assets/images/expense-manager/nav/tax-advisor.png"),
+    navTaxAdvisorInactive: require("@/assets/images/expense-manager/nav/tax-advisor-inactive.png"),
+    navAiCircle: require("@/assets/images/expense-manager/nav/ai-circle.png"),
 } as const;
 
 export type EmIconName = keyof typeof emIcons;

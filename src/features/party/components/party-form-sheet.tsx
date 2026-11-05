@@ -3,12 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Field, FormButton, Input } from "@/components/ui/form";
 import type { IParty, NewParty, PartyType } from "@/features/khata/types";
 import { PartyTypeToggle } from "@/features/party/components/party-type-toggle";
-import { type PartyFormValues, partySchema } from "@/features/party/schemas";
+import { type PartyFormErrorKey, type PartyFormValues, partySchema } from "@/features/party/schemas";
 
 type Props = {
     visible: boolean;
@@ -19,6 +20,8 @@ type Props = {
 };
 
 export function PartyFormSheet({ visible, party, defaultType = "customer", onClose, onSaved }: Props) {
+    const { t } = useTranslation("party");
+    const errorText = (message?: string) => (message ? t(message as PartyFormErrorKey) : undefined);
     const { control, handleSubmit, reset, formState: { errors } } = useForm<PartyFormValues>({
         resolver: zodResolver(partySchema),
         defaultValues: { name: "", phone: "", type: defaultType },
@@ -42,22 +45,22 @@ export function PartyFormSheet({ visible, party, defaultType = "customer", onClo
         <BottomSheet
             visible={visible}
             onClose={onClose}
-            title={party ? "Party Edit Karein" : "Nayi Party Add Karein"}
-            subtitle="Customer ya supplier ki detail likhein"
+            title={party ? t("form.editTitle") : t("form.addTitle")}
+            subtitle={t("form.subtitle")}
             footer={
                 <FormButton
-                    label={party ? "Tabdeeliyan Save Karein" : "Party Save Karein"}
+                    label={party ? t("form.saveChanges") : t("form.save")}
                     onPress={handleSubmit(submit)}
                 />
             }>
-            <Field label="Party ka naam" required error={errors.name?.message}>
+            <Field label={t("form.name")} required error={errorText(errors.name?.message)}>
                 <Controller
                     control={control}
                     name="name"
                     render={({ field: { value, onChange, onBlur } }) => (
                         <Input
                             icon={{ ios: "person", android: "person", web: "person" }}
-                            placeholder="jaise: Ali Ashraf"
+                            placeholder={t("form.namePlaceholder")}
                             value={value}
                             onChangeText={onChange}
                             onBlur={onBlur}
@@ -68,9 +71,9 @@ export function PartyFormSheet({ visible, party, defaultType = "customer", onClo
             </Field>
 
             <Field
-                label="Phone number"
-                hint="Optional. WhatsApp/SMS reminder ke liye zaroori hai"
-                error={errors.phone?.message}>
+                label={t("form.phone")}
+                hint={t("form.phoneHint")}
+                error={errorText(errors.phone?.message)}>
                 <Controller
                     control={control}
                     name="phone"
@@ -87,7 +90,7 @@ export function PartyFormSheet({ visible, party, defaultType = "customer", onClo
                 />
             </Field>
 
-            <Field label="Party ki qism">
+            <Field label={t("form.type")}>
                 <Controller
                     control={control}
                     name="type"

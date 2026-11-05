@@ -1,36 +1,23 @@
 // nativeApp\src\features\more\components\app-lock-sheet.tsx
 
-import { Image } from "expo-image";
-import { Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { BottomSheet } from "@/components/ui/bottom-sheet";
-import { ToggleSwitch } from "@/components/ui/toggle-switch";
-import { emIcons } from "@/constants/expense-manager-icons";
-import { useAppStore } from "@/stores/app-store";
+import { AppLockToggleRow } from "@/features/app-lock/components/app-lock-toggle-row";
+import { useAuthStore } from "@/features/auth/store/auth-store";
+import { BiometricToggleRow } from "@/features/biometric/components/biometric-toggle-row";
 
 type Props = { visible: boolean; onClose: () => void };
 
-/** App Lock on/off. */
+/** App Lock on/off, plus biometric login when the device supports it. */
 export function AppLockSheet({ visible, onClose }: Props) {
-    const appLock = useAppStore((s) => s.appLock);
-    const setAppLock = useAppStore((s) => s.setAppLock);
+    const { t } = useTranslation("auth", { keyPrefix: "appLock" });
+    const phone = useAuthStore((s) => s.phone);
 
     return (
-        <BottomSheet visible={visible} onClose={onClose} title="App Lock" subtitle="Keep your expenses private">
-            <View className="flex-row items-center gap-4 rounded-brand-24 border border-[#ECE7E5] bg-[#F7F5F4] p-4">
-                <View className="h-12 w-12 items-center justify-center rounded-brand-16 bg-[#FFF4DC]">
-                    <Image source={emIcons.appLock} contentFit="contain" style={{ width: 28, height: 28 }} />
-                </View>
-                <View className="flex-1">
-                    <Text className="font-jakarta-semibold text-text-dark" style={{ fontSize: 16 }}>
-                        Lock with PIN
-                    </Text>
-                    <Text className="mt-0.5 font-jakarta text-para-small text-[#8A8285]">
-                        Ask for your PIN every time the app opens
-                    </Text>
-                </View>
-                <ToggleSwitch value={appLock} onValueChange={setAppLock} accessibilityLabel="App Lock" />
-            </View>
+        <BottomSheet visible={visible} onClose={onClose} title={t("title")} subtitle={t("subtitle")}>
+            <AppLockToggleRow />
+            <BiometricToggleRow phone={phone} className="mt-3" />
         </BottomSheet>
     );
 }

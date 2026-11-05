@@ -1,0 +1,45 @@
+{
+  "actions": {
+    "back": "Wapas jayein",
+    "cancel": "Cancel",
+    "close": "Band karein",
+    "continue": "Jari rakhein",
+    "delete": "Delete karein",
+    "edit": "Edit",
+    "logOut": "Log out",
+    "no": "Nahi",
+    "yes": "Haan"
+  },
+  "comingSoon": "Jald aa raha hai.",
+  "serviceComingSoon": "{{name}} jald aa raha hai",
+  "tabs": {
+    "home": "Home",
+    "khata": "Khata",
+    "askAi": "AI se poochein",
+    "myAdvocate": "Mera Wakeel",
+    "taxAdvisor": "Tax Mushir"
+  },
+  "header": {
+    "premium": "Premium",
+    "notifications": "Notifications",
+    "notificationsUnread_one": "Notifications, {{count}} nayi",
+    "notificationsUnread_other": "Notifications, {{count}} nayi",
+    "more": "Mazeed"
+  },
+  "date": {
+    "days": ["Itwar", "Peer", "Mangal", "Budh", "Jumerat", "Juma", "Hafta"],
+    "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    "am": "AM",
+    "pm": "PM"
+  },
+  "timeAgo": {
+    "justNow": "Abhi abhi",
+    "minutes_one": "{{count}} minute pehle",
+    "minutes_other": "{{count}} minute pehle",
+    "hours_one": "{{count}} ghanta pehle",
+    "hours_other": "{{count}} ghante pehle",
+    "yesterday": "Kal",
+    "days_one": "{{count}} din pehle",
+    "days_other": "{{count}} din pehle"
+  }
+}

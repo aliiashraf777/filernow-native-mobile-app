@@ -2,6 +2,7 @@
 
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
+import { useTranslation } from "react-i18next";
 import { useMemo, useState } from "react";
 import { Alert, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 
@@ -64,6 +65,7 @@ const TABS: { key: FilterTab; label: string }[] = [
 ];
 
 export default function DailyKhataScreen() {
+    const { t } = useTranslation("khata");
     const router = useRouter();
     const business = useActiveBusiness();
     const { entries, parties, cards } = useBusinessData();
@@ -149,7 +151,7 @@ export default function DailyKhataScreen() {
         <View className="flex-1 bg-page-bg">
             <Stack.Screen
                 options={{
-                    title: "Daily Khata",
+                    title: t("sections.daily.title"),
                     headerRight: () => (
                         <View className="flex-row items-center gap-5">
                             <Pressable accessibilityRole="button" accessibilityLabel="Export" onPress={() => setExportOpen(true)} hitSlop={12}>

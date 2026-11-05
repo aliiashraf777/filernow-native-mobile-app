@@ -1,0 +1,38 @@
+{
+  "title": "Notifications",
+  "subtitle": "Apne kharchon par nazar rakhein",
+  "markAllRead": "Sab parh li",
+  "filters": {
+    "all": "Sab",
+    "unread": "Nayi",
+    "alerts": "Alerts"
+  },
+  "today": "Aaj",
+  "earlier": "Pehle",
+  "caughtUp": "Aap sab dekh chuke hain!",
+  "empty": "Abhi koi notification nahi.",
+  "unreadA11y": "Nayi. {{title}}. {{body}}",
+  "readA11y": "{{title}}. {{body}}",
+  "demo": {
+    "budget-90": {
+      "title": "Budget taqreeban poora",
+      "body": "Food & Dining is mahine ke budget ke 90% tak pohanch gaya hai."
+    },
+    "expense-added": {
+      "title": "Kharcha add ho gaya",
+      "body": "Imtiaz Super Market par Rs 2,450 kharch hue."
+    },
+    "bill-due": {
+      "title": "Recurring bill kal due hai",
+      "body": "Bijli ka bill · Rs 8,200 ki adaigi 24 Oct ko hai."
+    },
+    "weekly-report": {
+      "title": "Haftawar report tayyar hai",
+      "body": "Aap ne pichle hafte se 12% zyada bachat ki. Shabash!"
+    },
+    "savings-goal": {
+      "title": "Bachat ka target poora",
+      "body": "Aap ne Rs 60,000 ka “Naya Phone” target poora kar liya."
+    }
+  }
+}

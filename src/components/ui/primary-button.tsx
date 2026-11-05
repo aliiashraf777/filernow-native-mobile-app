@@ -3,6 +3,7 @@
 import { SymbolView } from "expo-symbols";
 import { Pressable, type PressableProps, Text, View } from "react-native";
 
+import { flipInRTL } from "@/i18n/direction";
 import { cn } from "@/lib/cn";
 import { colors } from "@/theme/tokens";
 
@@ -30,7 +31,7 @@ export function PrimaryButton({ label, align = "center", className, ...rest }: P
                 )}>
                 {label}
             </Text>
-            <View className="h-10 w-10 items-center justify-center rounded-full bg-white">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-white" style={flipInRTL}>
                 <SymbolView name={ARROW} tintColor={colors.primary} size={18} />
             </View>
         </Pressable>
