@@ -29,6 +29,18 @@
     "showing": "{{total}} mein se {{from}}–{{to}}",
     "page": "Page {{page}} / {{pages}}"
   },
+  "export": {
+    "modeTitle": "{{format}} export karein",
+    "modeMessage": "Is phone mein save karein ya share karein?",
+    "save": "Phone mein save karein",
+    "share": "Share karein",
+    "saved": "Aap ke chune hue folder mein save ho gaya",
+    "failed": "File export nahi ho saki. Save na ho to Share try karein."
+  },
+  "addEntry": {
+    "label": "Entry add karein",
+    "title": "Kya add karna hai?"
+  },
   "mode": {
     "label": "Mode: {{mode}}",
     "demo": "Demo",

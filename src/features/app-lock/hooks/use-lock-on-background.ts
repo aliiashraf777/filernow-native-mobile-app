@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AppState } from "react-native";
 
 import { useAppLockStore } from "../store/app-lock-store";
+import { isLockSuspended } from "@/features/app-lock/lib/lock-suspension";
 
 // Short trips out (file picker, share sheet, copying an OTP) shouldn't ask for the PIN again.
 const LOCK_AFTER_MS = 30_000;
@@ -18,6 +19,7 @@ export function useLockOnBackground() {
                 backgroundedAt = Date.now();
             } else if (next === "active" && backgroundedAt !== null) {
                 if (Date.now() - backgroundedAt >= LOCK_AFTER_MS) useAppLockStore.getState().lock();
+                if (isLockSuspended()) return;
                 backgroundedAt = null;
             }
         });

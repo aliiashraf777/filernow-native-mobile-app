@@ -6,7 +6,8 @@ import { pkr } from "@/features/khata/lib/debt";
 import type { IExpenseEntry } from "@/features/khata/types";
 import { entryTime } from "@/lib/date-format";
 // import { MIME, shareBytes, sharePdf } from "@/lib/share-file";
-import { MIME, shareBytes, sharePdf } from "./share-file";
+// import { MIME, shareBytes, sharePdf } from "./share-file";
+import { type DeliverMode, MIME, deliverFile, deliverPdf } from "./export-file";
 import { colors } from "@/theme/tokens";
 
 export type TransactionsExport = {
@@ -128,6 +129,9 @@ tr:nth-child(even) td{background:#F9FAFB}.r{text-align:right}th.r{text-align:rig
 </body></html>`;
 }
 
-export const exportTransactionsCsv = (i: TransactionsExport, name: string) => shareBytes(name, csvText(i), MIME.csv);
-export const exportTransactionsXlsx = (i: TransactionsExport, name: string) => shareBytes(name, xlsxBytes(i), MIME.xlsx);
-export const exportTransactionsPdf = (i: TransactionsExport, name: string) => sharePdf(pdfHtml(i), name);
+export const exportTransactionsCsv = (i: TransactionsExport, name: string, mode?: DeliverMode) =>
+    deliverFile({ name, mime: MIME.csv, data: csvText(i) }, mode);
+export const exportTransactionsXlsx = (i: TransactionsExport, name: string, mode?: DeliverMode) =>
+    deliverFile({ name, mime: MIME.xlsx, data: xlsxBytes(i) }, mode);
+export const exportTransactionsPdf = (i: TransactionsExport, name: string, mode?: DeliverMode) =>
+    deliverPdf(pdfHtml(i), name, mode);

@@ -29,6 +29,18 @@
     "showing": "Showing {{from}}–{{to}} of {{total}}",
     "page": "Page {{page}} of {{pages}}"
   },
+  "export": {
+    "modeTitle": "Export {{format}}",
+    "modeMessage": "Save a copy on this phone, or share it?",
+    "save": "Save to device",
+    "share": "Share",
+    "saved": "Saved to the folder you chose",
+    "failed": "Couldn't export the file. Try Share if saving keeps failing."
+  },
+  "addEntry": {
+    "label": "Add Entry",
+    "title": "What do you want to add?"
+  },
   "mode": {
     "label": "Mode: {{mode}}",
     "demo": "Demo",

@@ -15,7 +15,7 @@ import { DailyCharts } from "@/features/khata/components/daily-charts";
 import { DataModeBar } from "@/features/khata/components/data-mode-bar";
 import { DetailedEntrySheet } from "@/features/khata/components/detailed-entry-sheet";
 import { PaginationBar } from "@/features/khata/components/pagination-bar";
-import { StatCard } from "@/features/khata/components/stat-card";
+import { StatCard, type StatCtaVariant } from "@/features/khata/components/stat-card";
 import { StatsToggleBar } from "@/features/khata/components/stats-toggle-bar";
 import { TransactionRow } from "@/features/khata/components/transaction-row";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
@@ -27,8 +27,9 @@ import {
     exportTransactionsPdf,
     exportTransactionsXlsx,
 } from "@/features/khata/lib/export-transactions-data";
+import type { DeliverMode } from "@/features/khata/lib/export-file";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import { type FilterTab, type IExpenseEntry, KHATA_LABELS } from "@/features/khata/types";
+import { type EntryKind, type FilterTab, type IExpenseEntry, KHATA_LABELS } from "@/features/khata/types";
 import { cn } from "@/lib/cn";
 import { entrySortKey, localDate } from "@/lib/date-format";
 import { toast } from "@/lib/toast";
@@ -37,7 +38,12 @@ import { colors } from "@/theme/tokens";
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc" | "subject_asc";
 type ExportKind = "pdf" | "xlsx" | "csv";
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 10;
+/** Add button on the stat cards: "pencil" | "button" | "none". The sticky "+ Add Entry" works either way. */
+const STAT_CTA: StatCtaVariant = "pencil";
+
+// Two native modals can't swap in the same frame on iOS: let the first one finish closing.
+const afterClose = (fn: () => void) => setTimeout(fn, 350);
 
 const SORTS: { value: SortKey; label: string }[] = [
     { value: "date_desc", label: "Newest first" },
@@ -51,6 +57,12 @@ const EXPORTS: { value: ExportKind; label: string }[] = [
     { value: "pdf", label: "PDF" },
     { value: "xlsx", label: "Excel (.xlsx)" },
     { value: "csv", label: "CSV" },
+];
+
+const ADD_OPTIONS: { value: EntryKind; label: string }[] = [
+    { value: "income", label: KHATA_LABELS.income.verb },
+    { value: "expense", label: KHATA_LABELS.expense.verb },
+    { value: "debt", label: KHATA_LABELS.debt.verb },
 ];
 
 const COMPARE: Record<SortKey, (a: IExpenseEntry, b: IExpenseEntry) => number> = {
@@ -69,7 +81,7 @@ const TABS: { key: FilterTab; label: string }[] = [
 ];
 
 export default function DailyKhataScreen() {
-    const { t } = useTranslation("khata");
+    const { t } = useTranslation(["khata", "common"]);
     const router = useRouter();
     const business = useActiveBusiness();
     const { entries, parties, cards } = useBusinessData();
@@ -82,6 +94,7 @@ export default function DailyKhataScreen() {
     const [sortKey, setSortKey] = useState<SortKey>("date_desc");
     const [sortOpen, setSortOpen] = useState(false);
     const [exportOpen, setExportOpen] = useState(false);
+    const [addOpen, setAddOpen] = useState(false);
     const [entryKind, setEntryKind] = useState<"income" | "expense" | null>(null);
     const [editing, setEditing] = useState<IExpenseEntry | null>(null);
     const [categoriesOpen, setCategoriesOpen] = useState(false);
@@ -126,6 +139,7 @@ export default function DailyKhataScreen() {
             { text: "Haan, delete", style: "destructive", onPress: () => deleteEntry(entry.id) },
         ]);
 
+    // ids match both the stat cards and the "Add Entry" picker: income | expense | debt
     const onCta = (id: string) => {
         if (id === "income") setEntryKind("income");
         else if (id === "expense") setEntryKind("expense");
@@ -135,8 +149,7 @@ export default function DailyKhataScreen() {
         }
     };
 
-    const runExport = async (kind: ExportKind) => {
-        if (!shown.length) return toast("Export ke liye koi entry nahi hai");
+    const runExport = async (kind: ExportKind, mode: DeliverMode) => {
         try {
             const input: TransactionsExport = {
                 title: `Daily Khata — ${business.name}`,
@@ -146,13 +159,29 @@ export default function DailyKhataScreen() {
                 cardLabel: (id) => cards.find((c) => c.id === id)?.label ?? "Cash",
             };
             const base = `daily-khata-${localDate()}`;
-            if (kind === "pdf") await exportTransactionsPdf(input, `${base}.pdf`);
-            else if (kind === "xlsx") await exportTransactionsXlsx(input, `${base}.xlsx`);
-            else await exportTransactionsCsv(input, `${base}.csv`);
+            const result =
+                kind === "pdf"
+                    ? await exportTransactionsPdf(input, `${base}.pdf`, mode)
+                    : kind === "xlsx"
+                        ? await exportTransactionsXlsx(input, `${base}.xlsx`, mode)
+                        : await exportTransactionsCsv(input, `${base}.csv`, mode);
+            if (result === "saved") toast.success(t("export.saved"));
         } catch (e) {
             console.warn("export failed", e);
-            toast.error("Export nahi ho saka. Dobara koshish karein.");
+            toast.error(t("export.failed"));
         }
+    };
+
+    // step 2 of export: save a copy on the phone, or share it
+    const askExportMode = (kind: ExportKind) => {
+        if (!shown.length) return toast("Export ke liye koi entry nahi hai");
+        afterClose(() =>
+            Alert.alert(t("export.modeTitle", { format: kind.toUpperCase() }), t("export.modeMessage"), [
+                { text: t("export.save"), onPress: () => runExport(kind, "save") },
+                { text: t("export.share"), onPress: () => runExport(kind, "share") },
+                { text: t("common:actions.cancel"), style: "cancel" },
+            ]),
+        );
     };
 
     const sheetKind: "income" | "expense" = editing ? (editing.kind === "income" ? "income" : "expense") : (entryKind ?? "expense");
@@ -183,7 +212,7 @@ export default function DailyKhataScreen() {
                 data={pageRows}
                 keyExtractor={(e) => e.id}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingBottom: 18 }}
+                contentContainerStyle={{ paddingBottom: 96 }} // room for the sticky Add Entry button
                 ListHeaderComponent={
                     <View>
                         <DataModeBar />
@@ -195,6 +224,7 @@ export default function DailyKhataScreen() {
                                     item={item}
                                     active={item.filter !== "all" && filter === item.filter}
                                     onPress={() => setFilter(item.filter)}
+                                    ctaVariant={STAT_CTA}
                                     ctaLabel={item.ctaLabel}
                                     onCtaPress={item.ctaLabel ? () => onCta(item.id) : undefined}
                                 />
@@ -259,7 +289,7 @@ export default function DailyKhataScreen() {
                 ListEmptyComponent={
                     <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">
                         {entries.length === 0
-                            ? 'Abhi koi entry nahi. Upar "+ Add Aamdani" / "+ Add Kharcha" dabayein ya "Load Demo Data" chalayein.'
+                            ? 'Abhi koi entry nahi. Neeche "+ Add Entry" dabayein ya "Load Demo Data" chalayein.'
                             : "Is filter mein koi entry nahi mili."}
                     </Text>
                 }
@@ -274,15 +304,31 @@ export default function DailyKhataScreen() {
                 ListFooterComponent={<PaginationBar page={safePage} pageSize={PAGE_SIZE} total={shown.length} onChange={setPage} />}
             />
 
+            {/* sticky primary action, same pill as the Party screen */}
+            <Pressable
+                accessibilityRole="button"
+                onPress={() => setAddOpen(true)}
+                className="absolute bottom-4 right-4 min-h-12 flex-row items-center gap-2 rounded-full bg-primary px-5 shadow-lg shadow-black/20 active:opacity-80">
+                <SymbolView name={{ ios: "plus", android: "add", web: "add" }} size={18} tintColor="#FFFFFF" />
+                <Text className="font-jakarta-bold text-sm text-white">{t("addEntry.label")}</Text>
+            </Pressable>
+
             <OptionSheet visible={sortOpen} title="Tarteeb" options={SORTS} value={sortKey} onChange={setSortKey} onClose={() => setSortOpen(false)} />
-                
             <OptionSheet<ExportKind | "">
                 visible={exportOpen}
                 title="Transactions export karein"
                 options={EXPORTS}
                 value=""
-                onChange={(v) => v && runExport(v)}
+                onChange={(v) => v && askExportMode(v)}
                 onClose={() => setExportOpen(false)}
+            />
+            <OptionSheet<EntryKind | "">
+                visible={addOpen}
+                title={t("addEntry.title")}
+                options={ADD_OPTIONS}
+                value=""
+                onChange={(v) => v && afterClose(() => onCta(v))}
+                onClose={() => setAddOpen(false)}
             />
             <DetailedEntrySheet visible={entryKind !== null || editing !== null} kind={sheetKind} editing={editing} onClose={closeEntrySheet} />
             <CategoryManagerSheet visible={categoriesOpen} onClose={() => setCategoriesOpen(false)} />

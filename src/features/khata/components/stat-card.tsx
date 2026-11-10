@@ -1,3 +1,5 @@
+// nativeApp\src\features\khata\components\stat-card.tsx
+
 import { SymbolView } from "expo-symbols";
 import { Pressable, Text, View } from "react-native";
 
@@ -12,19 +14,24 @@ const CHIP: Record<StatChipVariant, { box: string; tint: string }> = {
     red: { box: "bg-chip-red-bg", tint: colors["chip-red"] },
 };
 
+/** none = no add action, pencil = icon at the top-right, button = full-width "+ Add ..." button. */
+export type StatCtaVariant = "none" | "pencil" | "button";
+
 type Props = {
     item: IExpenseStatItem;
     active?: boolean;
     onPress: () => void;
-    /** Used as the accessibility label of the pencil ("Add Aamdani"). */
+    /** Text of the "button" variant; also the accessibility label of the pencil. */
     ctaLabel?: string;
-    /** When set, a pencil button appears at the card's top-right. */
     onCtaPress?: () => void;
+    ctaVariant?: StatCtaVariant;
 };
 
-export function StatCard({ item, active, onPress, ctaLabel, onCtaPress }: Props) {
+export function StatCard({ item, active, onPress, ctaLabel, onCtaPress, ctaVariant = "none" }: Props) {
     const chip = CHIP[item.chip];
     const tone = item.isPositive ? colors.success : colors.danger;
+    // an add action only exists when the caller gave us a handler
+    const variant: StatCtaVariant = onCtaPress ? ctaVariant : "none";
 
     return (
         <Pressable
@@ -35,8 +42,8 @@ export function StatCard({ item, active, onPress, ctaLabel, onCtaPress }: Props)
                 "min-h-[112px] grow basis-[47%] justify-between gap-2 rounded-brand-12 border bg-white p-3 active:opacity-80",
                 active ? "border-primary" : "border-border-clr",
             )}>
-            {/* extra right padding keeps the title clear of the pencil */}
-            <View className={cn("flex-row items-center gap-2", onCtaPress && "pr-8")}>
+            {/* right padding keeps the title clear of the pencil */}
+            <View className={cn("flex-row items-center gap-2", variant === "pencil" && "pr-8")}>
                 <View className={cn("h-7 w-7 items-center justify-center rounded-brand-8", chip.box)}>
                     <SymbolView name={item.icon} size={15} tintColor={chip.tint} />
                 </View>
@@ -69,7 +76,16 @@ export function StatCard({ item, active, onPress, ctaLabel, onCtaPress }: Props)
                 </Text>
             </View>
 
-            {onCtaPress ? (
+            {variant === "button" && ctaLabel ? (
+                <Pressable
+                    accessibilityRole="button"
+                    onPress={onCtaPress}
+                    className="min-h-9 items-center justify-center rounded-brand-8 bg-page-bg active:opacity-80">
+                    <Text className="font-jakarta-semibold text-xs text-primary">+ {ctaLabel}</Text>
+                </Pressable>
+            ) : null}
+
+            {variant === "pencil" ? (
                 <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={ctaLabel}
