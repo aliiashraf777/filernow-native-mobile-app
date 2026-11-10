@@ -1,5 +1,3 @@
-// nativeApp\src\features\khata\components\stat-card.tsx
-
 import { SymbolView } from "expo-symbols";
 import { Pressable, Text, View } from "react-native";
 
@@ -18,7 +16,9 @@ type Props = {
     item: IExpenseStatItem;
     active?: boolean;
     onPress: () => void;
+    /** Used as the accessibility label of the pencil ("Add Aamdani"). */
     ctaLabel?: string;
+    /** When set, a pencil button appears at the card's top-right. */
     onCtaPress?: () => void;
 };
 
@@ -35,7 +35,8 @@ export function StatCard({ item, active, onPress, ctaLabel, onCtaPress }: Props)
                 "min-h-[112px] grow basis-[47%] justify-between gap-2 rounded-brand-12 border bg-white p-3 active:opacity-80",
                 active ? "border-primary" : "border-border-clr",
             )}>
-            <View className="flex-row items-center gap-2">
+            {/* extra right padding keeps the title clear of the pencil */}
+            <View className={cn("flex-row items-center gap-2", onCtaPress && "pr-8")}>
                 <View className={cn("h-7 w-7 items-center justify-center rounded-brand-8", chip.box)}>
                     <SymbolView name={item.icon} size={15} tintColor={chip.tint} />
                 </View>
@@ -68,12 +69,14 @@ export function StatCard({ item, active, onPress, ctaLabel, onCtaPress }: Props)
                 </Text>
             </View>
 
-            {ctaLabel ? (
+            {onCtaPress ? (
                 <Pressable
                     accessibilityRole="button"
+                    accessibilityLabel={ctaLabel}
                     onPress={onCtaPress}
-                    className="min-h-9 items-center justify-center rounded-brand-8 bg-page-bg active:opacity-80">
-                    <Text className="font-jakarta-semibold text-xs text-primary">+ {ctaLabel}</Text>
+                    hitSlop={6}
+                    className="absolute right-2 top-2 h-8 w-8 items-center justify-center rounded-full bg-page-bg active:opacity-70">
+                    <SymbolView name={{ ios: "pencil", android: "edit", web: "edit" }} size={15} tintColor={colors.primary} />
                 </Pressable>
             ) : null}
         </Pressable>

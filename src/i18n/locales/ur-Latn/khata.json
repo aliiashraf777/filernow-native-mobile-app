@@ -1,10 +1,33 @@
 {
   "title": "Digital Khata",
   "sections": {
-    "daily": { "title": "Rozana Khata", "description": "Apni rozana ki bikri aur kharche likhein." },
-    "business": { "title": "Karobari Khata", "description": "Stock, bills aur cash ek hi jagah sambhalein." },
-    "udhaar": { "title": "Udhaar Khata", "description": "Diya gaya udhaar aur baqaya raqam sambhalein." },
-    "party": { "title": "Party", "description": "Customers aur suppliers, balance ke saath." }
+    "daily": {
+      "title": "Rozana Khata",
+      "description": "Apni rozana ki bikri aur kharche likhein."
+    },
+    "business": {
+      "title": "Karobari Khata",
+      "description": "Stock, bills aur cash ek hi jagah sambhalein."
+    },
+    "udhaar": {
+      "title": "Udhaar Khata",
+      "description": "Diya gaya udhaar aur baqaya raqam sambhalein."
+    },
+    "party": {
+      "title": "Party",
+      "description": "Customers aur suppliers, balance ke saath."
+    }
+  },
+  "stats": {
+    "label": "Activity, categories aur mazeed",
+    "view": "Stats dekhein",
+    "hide": "Stats chhupayein"
+  },
+  "pagination": {
+    "prev": "Pichla",
+    "next": "Agla",
+    "showing": "{{total}} mein se {{from}}–{{to}}",
+    "page": "Page {{page}} / {{pages}}"
   },
   "mode": {
     "label": "Mode: {{mode}}",

@@ -1,10 +1,33 @@
 {
   "title": "Digital Khata",
   "sections": {
-    "daily": { "title": "Daily Khata", "description": "Record your daily sales and spending." },
-    "business": { "title": "Business Khata", "description": "Track stock, bills and cash in one place." },
-    "udhaar": { "title": "Udhaar Khata", "description": "Manage credit given and payments due." },
-    "party": { "title": "Party", "description": "Customers and suppliers, with balances." }
+    "daily": {
+      "title": "Daily Khata",
+      "description": "Record your daily sales and spending."
+    },
+    "business": {
+      "title": "Business Khata",
+      "description": "Track stock, bills and cash in one place."
+    },
+    "udhaar": {
+      "title": "Udhaar Khata",
+      "description": "Manage credit given and payments due."
+    },
+    "party": {
+      "title": "Party",
+      "description": "Customers and suppliers, with balances."
+    }
+  },
+  "stats": {
+    "label": "Charts & breakdowns",
+    "view": "View stats",
+    "hide": "Hide stats"
+  },
+  "pagination": {
+    "prev": "Prev",
+    "next": "Next",
+    "showing": "Showing {{from}}–{{to}} of {{total}}",
+    "page": "Page {{page}} of {{pages}}"
   },
   "mode": {
     "label": "Mode: {{mode}}",
