@@ -21,13 +21,15 @@ import { TransactionRow } from "@/features/khata/components/transaction-row";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { useDailyStats } from "@/features/khata/hooks/use-daily-stats";
 import { pkr } from "@/features/khata/lib/debt";
-import {
-    type TransactionsExport,
-    exportTransactionsCsv,
-    exportTransactionsPdf,
-    exportTransactionsXlsx,
-} from "@/features/khata/lib/export-transactions-data";
-import type { DeliverMode } from "@/features/khata/lib/export-file";
+// import {
+//     type TransactionsExport,
+//     exportTransactionsCsv,
+//     exportTransactionsPdf,
+//     exportTransactionsXlsx,
+// } from "@/features/khata/lib/export-transactions-data";
+// import type { DeliverMode } from "@/features/khata/lib/export-file";
+import { ExportFlow } from "@/features/khata/components/export-flow";
+import type { TransactionsExport } from "@/features/khata/lib/export-transactions-data";
 import { useKhataStore } from "@/features/khata/store/khata-store";
 import { type EntryKind, type FilterTab, type IExpenseEntry, KHATA_LABELS } from "@/features/khata/types";
 import { cn } from "@/lib/cn";
@@ -36,7 +38,7 @@ import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
 
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc" | "subject_asc";
-type ExportKind = "pdf" | "xlsx" | "csv";
+// type ExportKind = "pdf" | "xlsx" | "csv";
 
 const PAGE_SIZE = 10;
 /** Add button on the stat cards: "pencil" | "button" | "none". The sticky "+ Add Entry" works either way. */
@@ -53,11 +55,11 @@ const SORTS: { value: SortKey; label: string }[] = [
     { value: "subject_asc", label: "Naam (A-Z)" },
 ];
 
-const EXPORTS: { value: ExportKind; label: string }[] = [
-    { value: "pdf", label: "PDF" },
-    { value: "xlsx", label: "Excel (.xlsx)" },
-    { value: "csv", label: "CSV" },
-];
+// const EXPORTS: { value: ExportKind; label: string }[] = [
+//     { value: "pdf", label: "PDF" },
+//     { value: "xlsx", label: "Excel (.xlsx)" },
+//     { value: "csv", label: "CSV" },
+// ];
 
 const ADD_OPTIONS: { value: EntryKind; label: string }[] = [
     { value: "income", label: KHATA_LABELS.income.verb },
@@ -149,40 +151,48 @@ export default function DailyKhataScreen() {
         }
     };
 
-    const runExport = async (kind: ExportKind, mode: DeliverMode) => {
-        try {
-            const input: TransactionsExport = {
-                title: `Daily Khata — ${business.name}`,
-                entries: shown, // everything that matches the filter, not just the current page
-                categoryLabel: labelOf,
-                partyName: (id) => parties.find((p) => p.id === id)?.name ?? "",
-                cardLabel: (id) => cards.find((c) => c.id === id)?.label ?? "Cash",
-            };
-            const base = `daily-khata-${localDate()}`;
-            const result =
-                kind === "pdf"
-                    ? await exportTransactionsPdf(input, `${base}.pdf`, mode)
-                    : kind === "xlsx"
-                        ? await exportTransactionsXlsx(input, `${base}.xlsx`, mode)
-                        : await exportTransactionsCsv(input, `${base}.csv`, mode);
-            if (result === "saved") toast.success(t("export.saved"));
-        } catch (e) {
-            console.warn("export failed", e);
-            toast.error(t("export.failed"));
-        }
-    };
+    // const runExport = async (kind: ExportKind, mode: DeliverMode) => {
+    //     try {
+    //         const input: TransactionsExport = {
+    //             title: `Daily Khata — ${business.name}`,
+    //             entries: shown, // everything that matches the filter, not just the current page
+    //             categoryLabel: labelOf,
+    //             partyName: (id) => parties.find((p) => p.id === id)?.name ?? "",
+    //             cardLabel: (id) => cards.find((c) => c.id === id)?.label ?? "Cash",
+    //         };
+    //         const base = `daily-khata-${localDate()}`;
+    //         const result =
+    //             kind === "pdf"
+    //                 ? await exportTransactionsPdf(input, `${base}.pdf`, mode)
+    //                 : kind === "xlsx"
+    //                     ? await exportTransactionsXlsx(input, `${base}.xlsx`, mode)
+    //                     : await exportTransactionsCsv(input, `${base}.csv`, mode);
+    //         if (result === "saved") toast.success(t("export.saved"));
+    //     } catch (e) {
+    //         console.warn("export failed", e);
+    //         toast.error(t("export.failed"));
+    //     }
+    // };
 
-    // step 2 of export: save a copy on the phone, or share it
-    const askExportMode = (kind: ExportKind) => {
-        if (!shown.length) return toast("Export ke liye koi entry nahi hai");
-        afterClose(() =>
-            Alert.alert(t("export.modeTitle", { format: kind.toUpperCase() }), t("export.modeMessage"), [
-                { text: t("export.save"), onPress: () => runExport(kind, "save") },
-                { text: t("export.share"), onPress: () => runExport(kind, "share") },
-                { text: t("common:actions.cancel"), style: "cancel" },
-            ]),
-        );
-    };
+    // // step 2 of export: save a copy on the phone, or share it
+    // const askExportMode = (kind: ExportKind) => {
+    //     if (!shown.length) return toast("Export ke liye koi entry nahi hai");
+    //     afterClose(() =>
+    //         Alert.alert(t("export.modeTitle", { format: kind.toUpperCase() }), t("export.modeMessage"), [
+    //             { text: t("export.save"), onPress: () => runExport(kind, "save") },
+    //             { text: t("export.share"), onPress: () => runExport(kind, "share") },
+    //             { text: t("common:actions.cancel"), style: "cancel" },
+    //         ]),
+    //     );
+    // };
+
+    const buildExportInput = (): TransactionsExport => ({
+        title: `Daily Khata — ${business.name}`,
+        entries: shown, // everything that matches the filter, not just the current page
+        categoryLabel: labelOf,
+        partyName: (id) => parties.find((p) => p.id === id)?.name ?? "",
+        cardLabel: (id) => cards.find((c) => c.id === id)?.label ?? "Cash",
+    });
 
     const sheetKind: "income" | "expense" = editing ? (editing.kind === "income" ? "income" : "expense") : (entryKind ?? "expense");
     const closeEntrySheet = () => {
@@ -227,6 +237,7 @@ export default function DailyKhataScreen() {
                                     ctaVariant={STAT_CTA}
                                     ctaLabel={item.ctaLabel}
                                     onCtaPress={item.ctaLabel ? () => onCta(item.id) : undefined}
+                                    showTrendChip={item.showTrend}
                                 />
                             ))}
                         </View>
@@ -314,14 +325,26 @@ export default function DailyKhataScreen() {
             </Pressable>
 
             <OptionSheet visible={sortOpen} title="Tarteeb" options={SORTS} value={sortKey} onChange={setSortKey} onClose={() => setSortOpen(false)} />
-            <OptionSheet<ExportKind | "">
+
+            {/* <OptionSheet<ExportKind | "">
                 visible={exportOpen}
                 title="Transactions export karein"
                 options={EXPORTS}
                 value=""
                 onChange={(v) => v && askExportMode(v)}
                 onClose={() => setExportOpen(false)}
+            /> */}
+
+            <ExportFlow
+                visible={exportOpen}
+                onClose={() => setExportOpen(false)}
+                title="Transactions export karein"
+                baseName={`daily-khata-${localDate()}`}
+                count={shown.length}
+                emptyMessage="Export ke liye koi entry nahi hai"
+                buildInput={buildExportInput}
             />
+
             <OptionSheet<EntryKind | "">
                 visible={addOpen}
                 title={t("addEntry.title")}

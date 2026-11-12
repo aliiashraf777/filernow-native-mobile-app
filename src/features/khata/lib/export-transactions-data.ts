@@ -2,7 +2,8 @@
 
 import * as XLSX from "xlsx";
 
-import { pkr } from "@/features/khata/lib/debt";
+// import { pkr } from "@/features/khata/lib/debt";
+import { debtBalances, debtSign, debtTotals, pkr } from "@/features/khata/lib/debt";
 import type { IExpenseEntry } from "@/features/khata/types";
 import { entryTime } from "@/lib/date-format";
 // import { MIME, shareBytes, sharePdf } from "@/lib/share-file";
@@ -28,6 +29,8 @@ type Row = {
     card: string;
     amount: number;
     note: string;
+    /** true = adds to your cash (income, or a "You Got" udhaar type). */
+    credit: boolean;
 };
 
 const HEAD = ["Date", "Time", "Type", "Subject", "Category", "Party", "Card", "Amount", "Note"];
@@ -43,22 +46,30 @@ const rowsOf = (i: TransactionsExport): Row[] =>
         card: e.kind === "debt" ? "" : i.cardLabel(e.cardId),
         amount: e.amount,
         note: e.description ?? "",
+        credit: e.kind === "income" || debtSign(e) < 0,
     }));
 const asArray = (r: Row) => [r.date, r.time, r.type, r.subject, r.category, r.party, r.card, r.amount, r.note];
 
+// Udhaar-only exports (every row is debt) get Get/Give totals instead of Income/Expense.
+const isUdhaar = (entries: IExpenseEntry[]) => entries.length > 0 && entries.every((e) => e.kind === "debt");
+
 function totals(entries: IExpenseEntry[]) {
+    if (isUdhaar(entries)) {
+        const { youWillGet, youWillGive } = debtTotals(debtBalances(entries));
+        return { labels: ["You Will Get", "You Will Give", "Net (Get - Give)"], first: youWillGet, second: youWillGive, net: youWillGet - youWillGive };
+    }
     const sum = (k: IExpenseEntry["kind"]) => entries.filter((e) => e.kind === k).reduce((s, e) => s + e.amount, 0);
     const income = sum("income");
     const expense = sum("expense");
-    return { income, expense, net: income - expense };
+    return { labels: ["Total Income", "Total Expense", "Net (Income - Expense)"], first: income, second: expense, net: income - expense };
 }
 
 const summaryRows = (entries: IExpenseEntry[]) => {
     const t = totals(entries);
     return [
-        ["", "", "", "Total Income", "", "", "", t.income, ""],
-        ["", "", "", "Total Expense", "", "", "", t.expense, ""],
-        ["", "", "", "Net (Income - Expense)", "", "", "", t.net, ""],
+        ["", "", "", t.labels[0], "", "", "", t.first, ""],
+        ["", "", "", t.labels[1], "", "", "", t.second, ""],
+        ["", "", "", t.labels[2], "", "", "", t.net, ""],
     ];
 };
 
@@ -91,12 +102,15 @@ function xlsxBytes(i: TransactionsExport) {
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 function pdfHtml(i: TransactionsExport) {
-    const { income, expense, net } = totals(i.entries);
+    // const { income, expense, net } = totals(i.entries);
+    const { labels, first, second, net } = totals(i.entries);
     const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
     const body = rowsOf(i)
         .map((r) => {
-            const sign = r.type === "income" ? "+" : "-";
-            const cls = r.type === "income" ? "inc" : r.type === "expense" ? "exp" : "";
+            // const sign = r.type === "income" ? "+" : "-";
+            // const cls = r.type === "income" ? "inc" : r.type === "expense" ? "exp" : "";
+            const sign = r.credit ? "+" : "-";
+            const cls = r.credit ? "inc" : r.type === "expense" ? "exp" : "";
             return (
                 `<tr><td>${esc(r.date)}</td><td>${esc(r.subject)}</td><td style="text-transform:capitalize">${r.type}</td>` +
                 `<td>${esc(r.category)}</td><td class="r ${cls}">${sign}${pkr(r.amount)}</td></tr>`
@@ -120,8 +134,8 @@ tr:nth-child(even) td{background:#F9FAFB}.r{text-align:right}th.r{text-align:rig
 <div class="band"><div><h1>${esc(i.title)}</h1><p>${i.entries.length} transactions</p></div>
 <div class="r"><p>FilerNow Digital Khata</p><p>${today}</p></div></div>
 <div class="boxes">
-<div class="box"><small>TOTAL INCOME</small><b style="color:${colors.success}">${pkr(income)}</b></div>
-<div class="box"><small>TOTAL EXPENSE</small><b style="color:${colors.danger}">${pkr(expense)}</b></div>
+<div class="box"><small>${labels[0].toUpperCase()}</small><b style="color:${colors.success}">${pkr(first)}</b></div>
+<div class="box"><small>${labels[1].toUpperCase()}</small><b style="color:${colors.danger}">${pkr(second)}</b></div>
 <div class="box"><small>NET</small><b>${net < 0 ? "-" : ""}${pkr(Math.abs(net))}</b></div></div>
 <table><thead><tr><th>Date</th><th>Subject</th><th>Type</th><th>Category</th><th class="r">Amount</th></tr></thead>
 <tbody>${body}</tbody></table>

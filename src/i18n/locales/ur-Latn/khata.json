@@ -18,6 +18,71 @@
       "description": "Customers aur suppliers, balance ke saath."
     }
   },
+  "udhaar": {
+    "stats": {
+      "net": "Net Udhaar",
+      "get": "Aap ko milenge",
+      "give": "Aap ko dene hain",
+      "settled": "Barabar hisaab wali parties",
+      "netGet": "aap ko milenge",
+      "netGive": "aap ko dene hain",
+      "netZero": "hisaab barabar",
+      "getHint": "wasool karna hai",
+      "giveHint": "ada karna hai",
+      "settledHint": "clear ho chuki"
+    },
+    "actions": {
+      "gave": "Aap ne diya",
+      "got": "Aap ko mila"
+    },
+    "filter": {
+      "all": "Sab",
+      "gave": "Aap ne diya",
+      "got": "Aap ko mila"
+    },
+    "balances": {
+      "title": "Udhaar Balances",
+      "empty": "Sab hisaab barabar hai",
+      "viewAll": "Sab parties dekhein",
+      "get": "Aap ko milenge",
+      "give": "Aap ko dene hain"
+    },
+    "activity": {
+      "title": "Udhaar Activity",
+      "subtitle": "Diya vs Mila",
+      "empty": "Abhi koi udhaar activity nahi",
+      "gave": "Diya",
+      "got": "Mila",
+      "grain": {
+        "day": "Rozana",
+        "week": "Haftawar",
+        "month": "Mahana"
+      }
+    },
+    "list": {
+      "title": "Transactions ({{total}})",
+      "search": "Party, qism ya note dhoondein",
+      "empty": "Abhi koi udhaar nahi. Upar \"Aap ne diya\" ya \"Aap ko mila\" dabayein ya demo data load karein.",
+      "noMatch": "Is filter mein koi entry nahi mili."
+    },
+    "picker": {
+      "title": "Party chunein",
+      "new": "+ Nayi party"
+    },
+    "delete": {
+      "title": "Entry delete karein?",
+      "confirm": "Haan, delete"
+    },
+    "export": {
+      "title": "Udhaar export karein",
+      "docTitle": "Udhaar Khata — {{name}}",
+      "noEntries": "Export ke liye koi entry nahi hai",
+      "failed": "Export nahi ho saka. Dobara koshish karein."
+    },
+    "a11y": {
+      "export": "Export"
+    }
+  },
   "stats": {
     "label": "Activity, categories aur mazeed",
     "view": "Stats dekhein",
@@ -35,7 +100,8 @@
     "save": "Phone mein save karein",
     "share": "Share karein",
     "saved": "Aap ke chune hue folder mein save ho gaya",
-    "failed": "File export nahi ho saki. Save na ho to Share try karein."
+    "failed": "File export nahi ho saki. Save na ho to Share try karein.",
+    "changeFolder": "Doosre folder mein save karein"
   },
   "addEntry": {
     "label": "Entry add karein",

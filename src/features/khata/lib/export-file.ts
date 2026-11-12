@@ -20,7 +20,7 @@ const UTI: Record<string, string> = {
     [MIME.xlsx]: "org.openxmlformats.spreadsheetml.sheet",
 };
 
-export type DeliverMode = "save" | "share";
+export type DeliverMode = "save" | "save-new" | "share"; // save-new = ignore the remembered folder and ask again
 export type DeliverResult = "saved" | "shared" | "cancelled";
 type Data = string | Uint8Array;
 
@@ -40,8 +40,8 @@ function base64ToBytes(b64: string) {
  * The folder is remembered, so later exports save with no picker (and no trip to the background).
  * If the remembered folder stops working (permission revoked, folder deleted), we ask again.
  */
-async function saveCopy(data: Data, name: string, mime: string): Promise<DeliverResult> {
-    const savedUri = await AsyncStorage.getItem(DIR_KEY);
+async function saveCopy(data: Data, name: string, mime: string, forcePick: boolean): Promise<DeliverResult> {
+    const savedUri = forcePick ? null : await AsyncStorage.getItem(DIR_KEY);
     if (savedUri) {
         try {
             new Directory(savedUri).createFile(name, mime).write(data);
@@ -82,7 +82,7 @@ export async function deliverFile(
     { name, mime, data }: { name: string; mime: string; data: Data },
     mode: DeliverMode = "share",
 ): Promise<DeliverResult> {
-    return mode === "save" ? saveCopy(data, name, mime) : shareCopy(data, name, mime);
+    return mode === "share" ? shareCopy(data, name, mime) : saveCopy(data, name, mime, mode === "save-new");
 }
 
 export async function deliverPdf(html: string, name: string, mode: DeliverMode = "share") {

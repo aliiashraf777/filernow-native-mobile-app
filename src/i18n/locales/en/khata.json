@@ -18,6 +18,71 @@
       "description": "Customers and suppliers, with balances."
     }
   },
+  "udhaar": {
+    "stats": {
+      "net": "Net Udhaar",
+      "get": "You will get",
+      "give": "You will give",
+      "settled": "Settled parties",
+      "netGet": "owed to you",
+      "netGive": "you owe",
+      "netZero": "all settled",
+      "getHint": "to receive",
+      "giveHint": "to pay",
+      "settledHint": "cleared"
+    },
+    "actions": {
+      "gave": "You Gave",
+      "got": "You Got"
+    },
+    "filter": {
+      "all": "All",
+      "gave": "You Gave",
+      "got": "You Got"
+    },
+    "balances": {
+      "title": "Udhaar Balances",
+      "empty": "All accounts are settled",
+      "viewAll": "View all parties",
+      "get": "You will get",
+      "give": "You will give"
+    },
+    "activity": {
+      "title": "Udhaar Activity",
+      "subtitle": "Gave vs Got",
+      "empty": "No udhaar activity yet",
+      "gave": "Gave",
+      "got": "Got",
+      "grain": {
+        "day": "Daily",
+        "week": "Weekly",
+        "month": "Monthly"
+      }
+    },
+    "list": {
+      "title": "Transactions ({{total}})",
+      "search": "Search party, type or note",
+      "empty": "No udhaar yet. Tap \"You Gave\" or \"You Got\" above, or load demo data.",
+      "noMatch": "No entries match this filter."
+    },
+    "picker": {
+      "title": "Choose a party",
+      "new": "+ New party"
+    },
+    "delete": {
+      "title": "Delete this entry?",
+      "confirm": "Yes, delete"
+    },
+    "export": {
+      "title": "Export udhaar",
+      "docTitle": "Udhaar Khata — {{name}}",
+      "noEntries": "No entries to export",
+      "failed": "Couldn't export. Please try again."
+    },
+    "a11y": {
+      "export": "Export"
+    }
+  },
   "stats": {
     "label": "Charts & breakdowns",
     "view": "View stats",
@@ -35,7 +100,8 @@
     "save": "Save to device",
     "share": "Share",
     "saved": "Saved to the folder you chose",
-    "failed": "Couldn't export the file. Try Share if saving keeps failing."
+    "failed": "Couldn't export the file. Try Share if saving keeps failing.",
+    "changeFolder": "Save to a different folder"
   },
   "addEntry": {
     "label": "Add Entry",

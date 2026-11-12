@@ -166,7 +166,8 @@ export default function RegisterScreen({
             {/* Top: brand + headline (the background image shows through) */}
             <View className="flex-1 justify-between px-6 pb-7 pt-4" style={{ minHeight: 220 }}>
               <Image
-                source={require("../../../../assets/images/FILERNOW.COM LOGO-01.svg")}
+                // source={require("../../../../assets/images/FILERNOW.COM LOGO-01.svg")}
+                source={require("../../../../assets/images/khataPilotUp.png")}
                 contentFit="contain"
                 accessibilityLabel="Filernow"
                 style={{ width: 88, height: 88, marginLeft: -4 }}
@@ -265,9 +266,8 @@ export default function RegisterScreen({
                 style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
                 // shadow-* sets CSS variables: keep it on both states so NativeWind doesn't
                 // "upgrade" (remount) the Pressable after the first render, which crashes on native
-                className={`mt-5 h-14 items-center justify-center rounded-full shadow-lg ${
-                  valid ? "bg-[#D3222C] shadow-[#D3222C]/30" : "bg-[#D3222C]/40 shadow-transparent"
-                }`}
+                className={`mt-5 h-14 items-center justify-center rounded-full shadow-lg ${valid ? "bg-[#D3222C] shadow-[#D3222C]/30" : "bg-[#D3222C]/40 shadow-transparent"
+                  }`}
               >
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />

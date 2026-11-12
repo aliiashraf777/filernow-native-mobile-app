@@ -25,9 +25,11 @@ type Props = {
     ctaLabel?: string;
     onCtaPress?: () => void;
     ctaVariant?: StatCtaVariant;
+    /** false = hide the % chip and show only the hint text (for cards with no real month-over-month number). */
+    showTrendChip?: boolean;
 };
 
-export function StatCard({ item, active, onPress, ctaLabel, onCtaPress, ctaVariant = "none" }: Props) {
+export function StatCard({ item, active, onPress, ctaLabel, onCtaPress, ctaVariant = "none", showTrendChip = true }: Props) {
     const chip = CHIP[item.chip];
     const tone = item.isPositive ? colors.success : colors.danger;
     // an add action only exists when the caller gave us a handler
@@ -56,21 +58,24 @@ export function StatCard({ item, active, onPress, ctaLabel, onCtaPress, ctaVaria
                 {item.value}
             </Text>
 
+            {/* trend row */}
             <View className="flex-row items-center gap-1.5">
-                <View className={cn("flex-row items-center gap-0.5 rounded-full px-1.5 py-0.5", item.isPositive ? "bg-success-bg" : "bg-danger-bg")}>
-                    <SymbolView
-                        name={
-                            item.trendDirection === "up"
-                                ? { ios: "arrow.up", android: "arrow_upward", web: "arrow_upward" }
-                                : { ios: "arrow.down", android: "arrow_downward", web: "arrow_downward" }
-                        }
-                        size={10}
-                        tintColor={tone}
-                    />
-                    <Text className={cn("font-jakarta-medium text-[11px]", item.isPositive ? "text-success" : "text-danger")}>
-                        {item.trendPercent}%
-                    </Text>
-                </View>
+                {showTrendChip ? (
+                    <View className={cn("flex-row items-center gap-0.5 rounded-full px-1.5 py-0.5", item.isPositive ? "bg-success-bg" : "bg-danger-bg")}>
+                        <SymbolView
+                            name={
+                                item.trendDirection === "up"
+                                    ? { ios: "arrow.up", android: "arrow_upward", web: "arrow_upward" }
+                                    : { ios: "arrow.down", android: "arrow_downward", web: "arrow_downward" }
+                            }
+                            size={10}
+                            tintColor={tone}
+                        />
+                        <Text className={cn("font-jakarta-medium text-[11px]", item.isPositive ? "text-success" : "text-danger")}>
+                            {item.trendPercent}%
+                        </Text>
+                    </View>
+                ) : null}
                 <Text numberOfLines={1} className="flex-1 font-jakarta text-[11px] text-text-secondary-muter">
                     {item.trendLabel}
                 </Text>

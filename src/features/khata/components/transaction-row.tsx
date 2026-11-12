@@ -3,7 +3,7 @@
 import { SymbolView } from "expo-symbols";
 import { Pressable, Text, View } from "react-native";
 
-import { pkr } from "@/features/khata/lib/debt";
+import { debtSign, pkr } from "@/features/khata/lib/debt";
 import type { EntryKind, IExpenseEntry } from "@/features/khata/types";
 import { cn } from "@/lib/cn";
 import { entryDateTime } from "@/lib/date-format";
@@ -25,7 +25,9 @@ type Props = {
 
 export function TransactionRow({ entry, categoryLabel, onDelete, onEdit }: Props) {
     const kind = KIND[entry.kind];
-    const income = entry.kind === "income";
+    // const income = entry.kind === "income";
+    // money coming in: income, or a "You Got" udhaar type (same rule as the web dashboard)
+    const credit = entry.kind === "income" || debtSign(entry) < 0;
 
     return (
         <View className="flex-row items-center gap-3 border-b border-border-clr bg-white px-4 py-3">
@@ -42,8 +44,8 @@ export function TransactionRow({ entry, categoryLabel, onDelete, onEdit }: Props
                     </Text>
                 </View>
             </View>
-            <Text className={cn("font-jakarta-bold text-sm", income ? "text-success" : "text-text-secondary")}>
-                {income ? "+" : "-"}
+            <Text className={cn("font-jakarta-bold text-sm", credit ? "text-success" : "text-text-secondary")}>
+                {credit ? "+" : "-"}
                 {pkr(entry.amount)}
             </Text>
             {onEdit ? (
