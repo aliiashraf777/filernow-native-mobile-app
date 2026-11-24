@@ -6,11 +6,13 @@ import * as Sharing from "expo-sharing";
 import { Directory, File, Paths } from "expo-file-system";
 
 import { suspendLockWhile } from "@/features/app-lock/lib/lock-suspension";
+import { json } from "zod";
 
 export const MIME = {
     pdf: "application/pdf",
     csv: "text/csv",
     xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    json: "application/json"
 } as const;
 
 // iOS share sheet needs a UTI as well as a MIME type
@@ -18,6 +20,7 @@ const UTI: Record<string, string> = {
     [MIME.pdf]: "com.adobe.pdf",
     [MIME.csv]: "public.comma-separated-values-text",
     [MIME.xlsx]: "org.openxmlformats.spreadsheetml.sheet",
+    [MIME.json]: "public.json",
 };
 
 export type DeliverMode = "save" | "save-new" | "share"; // save-new = ignore the remembered folder and ask again

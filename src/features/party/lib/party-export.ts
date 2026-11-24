@@ -6,7 +6,7 @@ import * as Sharing from "expo-sharing";
 import * as XLSX from "xlsx";
 
 import { type LedgerRow, debtLabel, partyTypeLabel, pkr } from "@/features/khata/lib/debt";
-import type { IParty } from "@/features/khata/types";
+import type { IParty } from "@/features/khata/types/types";
 import i18n from "@/i18n";
 import { getAppLanguage, isAppLanguage } from "@/i18n/languages";
 import { formatDateTime, localDate } from "@/lib/date-format";

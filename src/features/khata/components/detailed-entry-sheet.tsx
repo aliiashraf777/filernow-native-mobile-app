@@ -10,7 +10,7 @@ import { Field, FormButton, Input } from "@/components/ui/form";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { pkr } from "@/features/khata/lib/debt";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import { type IExpenseEntry, KHATA_LABELS } from "@/features/khata/types";
+import { type IExpenseEntry, KHATA_LABELS } from "@/features/khata/types/types";
 import { entryTime, localDate, localTime } from "@/lib/date-format";
 import { colors } from "@/theme/tokens";
 

@@ -44,6 +44,7 @@ const colors = {
     "chip-blue": "#2563EB",
     "chip-purple-bg": "#EDE9FE",
     "chip-purple": "#7C3AED",
+    "chip-purple-soft": "#F5F3FF",
     "chip-red-bg": "#FEE2E2",
     "chip-red": "#DC2626",
 

@@ -23,13 +23,7 @@
       "net": "Net Udhaar",
       "get": "Aap ko milenge",
       "give": "Aap ko dene hain",
-      "settled": "Barabar hisaab wali parties",
-      "netGet": "aap ko milenge",
-      "netGive": "aap ko dene hain",
-      "netZero": "hisaab barabar",
-      "getHint": "wasool karna hai",
-      "giveHint": "ada karna hai",
-      "settledHint": "clear ho chuki"
+      "settled": "Barabar hisaab wali parties"
     },
     "actions": {
       "gave": "Aap ne diya",
@@ -62,25 +56,49 @@
     "list": {
       "title": "Transactions ({{total}})",
       "search": "Party, qism ya note dhoondein",
-      "empty": "Abhi koi udhaar nahi. Upar \"Aap ne diya\" ya \"Aap ko mila\" dabayein ya demo data load karein.",
+      "empty": "Abhi koi udhaar nahi. Neeche \"Aap ne diya\" ya \"Aap ko mila\" dabayein ya demo data load karein.",
       "noMatch": "Is filter mein koi entry nahi mili."
     },
     "picker": {
       "title": "Party chunein",
       "new": "+ Nayi party"
     },
-    "delete": {
-      "title": "Entry delete karein?",
-      "confirm": "Haan, delete"
-    },
     "export": {
       "title": "Udhaar export karein",
       "docTitle": "Udhaar Khata — {{name}}",
-      "noEntries": "Export ke liye koi entry nahi hai",
-      "failed": "Export nahi ho saka. Dobara koshish karein."
+      "noEntries": "Export ke liye koi entry nahi hai"
     },
     "a11y": {
       "export": "Export"
+    },
+    "guide": {
+      "open": "Ye kaise kaam karta hai?",
+      "title": "Udhaar kaise kaam karta hai",
+      "subtitle": "Do cheezein yaad rakhein: aapki jeb aur aapki copy",
+      "intro": "Khata do alag cheezein sambhalta hai. Aapki jeb mein asli paise hote hain. Copy sirf likhti hai ke kis ne kis ko dena hai.",
+      "pocket": "Aapki jeb",
+      "pocketHint": "Jo cash aap ke paas hai",
+      "notebook": "Aapki copy",
+      "notebookHint": "Kis ne kis ko dena hai",
+      "tryIt": "Try karein: chunein kya hua",
+      "example": "Misal: dost ke saath {{amount}}",
+      "before": "Pehle",
+      "after": "Baad mein",
+      "owesYou": "Un se aap ko milenge",
+      "youOwe": "Aap ne un ko dene hain",
+      "clear": "Hisaab barabar",
+      "rulesTitle": "3 aasan usool",
+      "ruleSign": "Har row par + (hara) ka matlab paise jeb mein aaye aur - ka matlab nikle.",
+      "ruleCards": "Net, Get aur Give cards aur Aap ne diya / Aap ko mila tabs aap ki copy ko follow karte hain.",
+      "ruleForgive": "Maaf wahid surat hai jab koi paisa nahi hilta. Sirf copy badalti hai.",
+      "effect": {
+        "diya": "Aap ne paise udhaar diye. Jeb se paise kam hue, lekin copy mein likha gaya ke dost ne aap ko dene hain.",
+        "liya": "Aap ne paise udhaar liye. Jeb mein paise barhe, lekin copy mein likha gaya ke aap ne dost ko dene hain.",
+        "diya_wapis_liya": "Dost ne aap ke paise wapis kar diye. Jeb mein paise barhe aur copy saaf ho gayi.",
+        "liya_wapis_diya": "Aap ne dost ke paise wapis kar diye. Jeb se paise kam hue aur copy saaf ho gayi.",
+        "diya_maaf": "Aap ne dost ka qarz maaf kar diya. Jeb jaisi thi waisi rahi aur copy saaf ho gayi.",
+        "liya_maaf": "Dost ne aap ka qarz maaf kar diya. Jeb jaisi thi waisi rahi aur copy saaf ho gayi."
+      }
     }
   },
   "stats": {
@@ -94,14 +112,81 @@
     "showing": "{{total}} mein se {{from}}–{{to}}",
     "page": "Page {{page}} / {{pages}}"
   },
+  "kind": {
+    "income": "Aamdani",
+    "expense": "Kharcha",
+    "debt": "Udhaar"
+  },
+  "trend": {
+    "vsLastMonth": "pichle mahine ke muqable"
+  },
+  "row": {
+    "edit": "Entry edit karein",
+    "delete": "Entry delete karein"
+  },
+  "deleteEntry": {
+    "title": "Entry delete karein?",
+    "confirm": "Haan, delete"
+  },
+  "daily": {
+    "stats": {
+      "balance": "Cards ka kul balance",
+      "income": "Kul aamdani",
+      "expense": "Kul kharcha",
+      "debt": "Kul udhaar"
+    },
+    "sort": {
+      "title": "Tarteeb",
+      "date_desc": "Sab se nayi pehle",
+      "date_asc": "Sab se purani pehle",
+      "amount_desc": "Raqam: zyada se kam",
+      "amount_asc": "Raqam: kam se zyada",
+      "subject_asc": "Naam (A-Z)"
+    },
+    "add": {
+      "income": "Aamdani add karein",
+      "expense": "Kharcha add karein",
+      "debt": "Udhaar add karein"
+    },
+    "tabs": {
+      "all": "Sab"
+    },
+    "list": {
+      "search": "Subject ya category dhoondein",
+      "title": "Transactions ({{total}})",
+      "empty": "Abhi koi entry nahi. Neeche \"+ Entry add karein\" dabayein ya demo data load karein.",
+      "noMatch": "Is filter mein koi entry nahi mili.",
+      "uncategorized": "Bagair category"
+    },
+    "debtHint": "Udhaar add karne ke liye party chunein",
+    "export": {
+      "title": "Transactions export karein",
+      "docTitle": "Rozana Khata — {{name}}",
+      "noEntries": "Export ke liye koi entry nahi hai"
+    },
+    "a11y": {
+      "export": "Export",
+      "categories": "Categories",
+      "sort": "Tarteeb"
+    }
+  },
   "export": {
     "modeTitle": "{{format}} export karein",
-    "modeMessage": "Is phone mein save karein ya share karein?",
     "save": "Phone mein save karein",
     "share": "Share karein",
     "saved": "Aap ke chune hue folder mein save ho gaya",
     "failed": "File export nahi ho saki. Save na ho to Share try karein.",
     "changeFolder": "Doosre folder mein save karein"
+  },
+  "backup": {
+    "note": "Udhaar aur parties sirf is phone mein save hain. Inka backup lein taake naya phone ya reinstall par ye zaya na hon.",
+    "backup": "Backup lein",
+    "restore": "Restore karein",
+    "nothing": "Abhi backup ke liye kuch nahi",
+    "failed": "Backup nahi ban saka. Dobara koshish karein.",
+    "invalid": "Ye Khata backup file sahi nahi hai",
+    "restored": "Restore ho gaya: {{entries}} entries, {{parties}} parties",
+    "upToDate": "Is backup mein kuch naya nahi"
   },
   "addEntry": {
     "label": "Entry add karein",

@@ -9,7 +9,7 @@ import { CardFormSheet } from "@/features/khata/components/card-form-sheet";
 import { TransferSheet } from "@/features/khata/components/transfer-sheet";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import { type ICard, MAX_CARDS } from "@/features/khata/types";
+import { type ICard, MAX_CARDS } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { colors } from "@/theme/tokens";
 

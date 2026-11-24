@@ -5,7 +5,7 @@ import { useMemo } from "react";
 
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { GRAIN, type Granularity, type TrendRow, buildTrend } from "@/features/khata/lib/trend";
-import type { ICategoryBreakdownItem } from "@/features/khata/types";
+import type { ICategoryBreakdownItem } from "@/features/khata/types/types";
 
 /** Everything the Daily Khata charts need, for the active business. */
 export function useDailyCharts() {

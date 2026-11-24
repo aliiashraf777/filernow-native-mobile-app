@@ -9,7 +9,7 @@ import { ChipGroup } from "@/components/ui/chip-group";
 import { Field, FormButton, Input } from "@/components/ui/form";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import { type EntryKind, type ICategory, KHATA_LABELS } from "@/features/khata/types";
+import { type EntryKind, type ICategory, KHATA_LABELS } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { colors } from "@/theme/tokens";
 

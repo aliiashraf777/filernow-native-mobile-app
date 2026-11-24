@@ -4,7 +4,7 @@ import { SymbolView, type SymbolViewProps } from "expo-symbols";
 import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
-import { PARTY_TYPES, type PartyType } from "@/features/khata/types";
+import { PARTY_TYPES, type PartyType } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { colors } from "@/theme/tokens";
 

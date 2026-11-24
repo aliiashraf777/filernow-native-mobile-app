@@ -1,10 +1,11 @@
 // nativeApp\src\features\khata\components\transaction-row.tsx
 
 import { SymbolView } from "expo-symbols";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
-import { debtSign, pkr } from "@/features/khata/lib/debt";
-import type { EntryKind, IExpenseEntry } from "@/features/khata/types";
+import { cashFlow, pkr } from "@/features/khata/lib/debt";
+import type { EntryKind, IExpenseEntry } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { entryDateTime } from "@/lib/date-format";
 import { colors } from "@/theme/tokens";
@@ -18,17 +19,16 @@ const KIND: Record<EntryKind, { badge: string; text: string }> = {
 type Props = {
     entry: IExpenseEntry;
     categoryLabel: string;
-    /** Omit when the entry can't be deleted here (server entries: the API has no delete yet). */
-    onDelete?: (entry: IExpenseEntry) => void;
-    /** Omit for entries that are edited elsewhere (udhaar → Party screen) or can't be edited (server). */
+    onDelete: (entry: IExpenseEntry) => void;
+    /** Omit for entries that are edited elsewhere (udhaar entries are edited in the Party screen). */
     onEdit?: (entry: IExpenseEntry) => void;
 };
 
 export function TransactionRow({ entry, categoryLabel, onDelete, onEdit }: Props) {
+    const { t } = useTranslation("khata");
     const kind = KIND[entry.kind];
-    // const income = entry.kind === "income";
-    // money coming in: income, or a "You Got" udhaar type (same rule as the web dashboard)
-    const credit = entry.kind === "income" || debtSign(entry) < 0;
+    // +1 money in, -1 money out, 0 no cash moved (forgiven udhaar): no sign
+    const flow = cashFlow(entry);
 
     return (
         <View className="flex-row items-center gap-3 border-b border-border-clr bg-white px-4 py-3">
@@ -38,27 +38,25 @@ export function TransactionRow({ entry, categoryLabel, onDelete, onEdit }: Props
                 </Text>
                 <View className="mt-1 flex-row items-center gap-2">
                     <View className={cn("rounded-full px-2 py-0.5", kind.badge)}>
-                        <Text className={cn("font-jakarta-semibold text-[11px] capitalize", kind.text)}>{entry.kind}</Text>
+                        <Text className={cn("font-jakarta-semibold text-[11px]", kind.text)}>{t(`kind.${entry.kind}`)}</Text>
                     </View>
                     <Text numberOfLines={1} className="flex-1 font-jakarta text-xs text-text-secondary-muted">
                         {categoryLabel} · {entryDateTime(entry)}
                     </Text>
                 </View>
             </View>
-            <Text className={cn("font-jakarta-bold text-sm", credit ? "text-success" : "text-text-secondary")}>
-                {credit ? "+" : "-"}
+            <Text className={cn("font-jakarta-bold text-sm", flow > 0 ? "text-success" : flow < 0 && entry.kind === "debt" ? "text-danger" : "text-text-secondary")}>
+                {flow > 0 ? "+" : flow < 0 ? "-" : ""}
                 {pkr(entry.amount)}
             </Text>
             {onEdit ? (
-                <Pressable accessibilityRole="button" accessibilityLabel="Edit entry" onPress={() => onEdit(entry)} hitSlop={10}>
+                <Pressable accessibilityRole="button" accessibilityLabel={t("row.edit")} onPress={() => onEdit(entry)} hitSlop={10}>
                     <SymbolView name={{ ios: "pencil", android: "edit", web: "edit" }} size={17} tintColor={colors["text-secondary"]} />
                 </Pressable>
             ) : null}
-            {onDelete ? (
-                <Pressable accessibilityRole="button" accessibilityLabel="Delete entry" onPress={() => onDelete(entry)} hitSlop={10}>
-                    <SymbolView name={{ ios: "trash", android: "delete", web: "delete" }} size={17} tintColor={colors["text-secondary-muted"]} />
-                </Pressable>
-            ) : null}
+            <Pressable accessibilityRole="button" accessibilityLabel={t("row.delete")} onPress={() => onDelete(entry)} hitSlop={10}>
+                <SymbolView name={{ ios: "trash", android: "delete", web: "delete" }} size={17} tintColor={colors["text-secondary-muted"]} />
+            </Pressable>
         </View>
     );
 }

@@ -23,13 +23,7 @@
       "net": "Net Udhaar",
       "get": "You will get",
       "give": "You will give",
-      "settled": "Settled parties",
-      "netGet": "owed to you",
-      "netGive": "you owe",
-      "netZero": "all settled",
-      "getHint": "to receive",
-      "giveHint": "to pay",
-      "settledHint": "cleared"
+      "settled": "Settled parties"
     },
     "actions": {
       "gave": "You Gave",
@@ -62,25 +56,49 @@
     "list": {
       "title": "Transactions ({{total}})",
       "search": "Search party, type or note",
-      "empty": "No udhaar yet. Tap \"You Gave\" or \"You Got\" above, or load demo data.",
+      "empty": "No udhaar yet. Tap \"You Gave\" or \"You Got\" below, or load demo data.",
       "noMatch": "No entries match this filter."
     },
     "picker": {
       "title": "Choose a party",
       "new": "+ New party"
     },
-    "delete": {
-      "title": "Delete this entry?",
-      "confirm": "Yes, delete"
-    },
     "export": {
       "title": "Export udhaar",
       "docTitle": "Udhaar Khata — {{name}}",
-      "noEntries": "No entries to export",
-      "failed": "Couldn't export. Please try again."
+      "noEntries": "No entries to export"
     },
     "a11y": {
       "export": "Export"
+    },
+    "guide": {
+      "open": "How does this work?",
+      "title": "How Udhaar works",
+      "subtitle": "Two things to remember: your pocket and your notebook",
+      "intro": "A khata keeps two different things apart. Your pocket holds the real money you have. Your notebook only writes down who owes whom.",
+      "pocket": "Your pocket",
+      "pocketHint": "Cash you really have",
+      "notebook": "Your notebook",
+      "notebookHint": "Who owes whom",
+      "tryIt": "Try it: pick what happened",
+      "example": "Example: {{amount}} with a friend",
+      "before": "Before",
+      "after": "After",
+      "owesYou": "They owe you",
+      "youOwe": "You owe them",
+      "clear": "All clear",
+      "rulesTitle": "3 easy rules",
+      "ruleSign": "On every row, + (green) means money came into your pocket and - means it went out.",
+      "ruleCards": "The Net, Get and Give cards and the Gave / Got tabs follow your notebook.",
+      "ruleForgive": "Forgiven (maaf) is the only time no money moves. Only the notebook changes.",
+      "effect": {
+        "diya": "You lent money. Your pocket goes down, but the notebook now says your friend owes you.",
+        "liya": "You borrowed money. Your pocket goes up, but the notebook now says you owe your friend.",
+        "diya_wapis_liya": "Your friend paid you back. Your pocket goes up and the notebook is cleared.",
+        "liya_wapis_diya": "You paid your friend back. Your pocket goes down and the notebook is cleared.",
+        "diya_maaf": "You forgave what your friend owed you. Your pocket stays the same and the notebook is cleared.",
+        "liya_maaf": "Your friend forgave what you owed. Your pocket stays the same and the notebook is cleared."
+      }
     }
   },
   "stats": {
@@ -94,14 +112,81 @@
     "showing": "Showing {{from}}–{{to}} of {{total}}",
     "page": "Page {{page}} of {{pages}}"
   },
+  "kind": {
+    "income": "Income",
+    "expense": "Expense",
+    "debt": "Udhaar"
+  },
+  "trend": {
+    "vsLastMonth": "vs last month"
+  },
+  "row": {
+    "edit": "Edit entry",
+    "delete": "Delete entry"
+  },
+  "deleteEntry": {
+    "title": "Delete this entry?",
+    "confirm": "Yes, delete"
+  },
+  "daily": {
+    "stats": {
+      "balance": "Total cards balance",
+      "income": "Total income",
+      "expense": "Total expense",
+      "debt": "Total udhaar"
+    },
+    "sort": {
+      "title": "Sort by",
+      "date_desc": "Newest first",
+      "date_asc": "Oldest first",
+      "amount_desc": "Amount: high to low",
+      "amount_asc": "Amount: low to high",
+      "subject_asc": "Name (A-Z)"
+    },
+    "add": {
+      "income": "Add Income",
+      "expense": "Add Expense",
+      "debt": "Add Udhaar"
+    },
+    "tabs": {
+      "all": "All"
+    },
+    "list": {
+      "search": "Search subject or category",
+      "title": "Transactions ({{total}})",
+      "empty": "No entries yet. Tap \"+ Add Entry\" below or load demo data.",
+      "noMatch": "No entries match this filter.",
+      "uncategorized": "Uncategorized"
+    },
+    "debtHint": "Choose a party to add Udhaar",
+    "export": {
+      "title": "Export transactions",
+      "docTitle": "Daily Khata — {{name}}",
+      "noEntries": "No entries to export"
+    },
+    "a11y": {
+      "export": "Export",
+      "categories": "Categories",
+      "sort": "Sort"
+    }
+  },
   "export": {
     "modeTitle": "Export {{format}}",
-    "modeMessage": "Save a copy on this phone, or share it?",
     "save": "Save to device",
     "share": "Share",
     "saved": "Saved to the folder you chose",
     "failed": "Couldn't export the file. Try Share if saving keeps failing.",
     "changeFolder": "Save to a different folder"
+  },
+  "backup": {
+    "note": "Udhaar and parties are saved on this phone only. Back them up so a new phone or a reinstall doesn't lose them.",
+    "backup": "Back up",
+    "restore": "Restore",
+    "nothing": "Nothing to back up yet",
+    "failed": "Couldn't create the backup. Please try again.",
+    "invalid": "This isn't a valid Khata backup file",
+    "restored": "Restored {{entries}} entries and {{parties}} parties",
+    "upToDate": "Nothing new in this backup"
   },
   "addEntry": {
     "label": "Add Entry",

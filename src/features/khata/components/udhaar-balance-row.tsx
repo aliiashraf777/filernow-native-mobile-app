@@ -23,7 +23,7 @@ export function UdhaarBalanceRow({ name, balance, onPress }: Props) {
                 {name}
             </Text>
             <View className="items-end">
-                <Text className={cn("font-jakarta-bold text-sm", get ? "text-success" : "text-danger")}>{pkr(Math.abs(balance))}</Text>
+                <Text className={cn("font-jakarta-bold text-sm", get ? "text-danger" : "text-success")}>{pkr(Math.abs(balance))}</Text>
                 <Text className="font-jakarta text-[11px] text-text-secondary-muted">{get ? t("get") : t("give")}</Text>
             </View>
         </Pressable>

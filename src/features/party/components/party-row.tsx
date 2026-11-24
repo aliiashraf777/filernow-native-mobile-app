@@ -4,7 +4,7 @@ import { SymbolView } from "expo-symbols";
 import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
-import type { IParty } from "@/features/khata/types";
+import type { IParty } from "@/features/khata/types/types";
 import { BalanceText } from "@/features/party/components/balance-text";
 import { colors } from "@/theme/tokens";
 

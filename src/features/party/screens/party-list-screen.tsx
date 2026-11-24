@@ -15,7 +15,7 @@ import {
     type NewParty,
     PARTY_TYPES,
     type PartyType,
-} from "@/features/khata/types";
+} from "@/features/khata/types/types";
 import { BalanceOverview } from "@/features/party/components/balance-overview";
 import { DataModeBar } from "@/features/khata/components/data-mode-bar";
 import { BulkPartySheet } from "@/features/party/components/bulk-party-sheet";
@@ -28,6 +28,7 @@ import { cn } from "@/lib/cn";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
+import { LocalOnlyNote } from "@/features/khata/components/local-only-note";
 
 type Row = { party: IParty; balance: number; last?: IExpenseEntry; count: number };
 type Tab = "all" | PartyType;
@@ -40,7 +41,7 @@ export default function PartyListScreen() {
     const router = useRouter();
     // const parties = useKhataStore((s) => s.parties);
     // const entries = useKhataStore((s) => s.entries);
-    const {parties, entries} = useBusinessData();
+    const { parties, entries } = useBusinessData();
     const addParty = useKhataStore((s) => s.addParty);
     const addParties = useKhataStore((s) => s.addParties);
     const updateParty = useKhataStore((s) => s.updateParty);
@@ -205,14 +206,17 @@ export default function PartyListScreen() {
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ paddingBottom: 96 }}
                 ListHeaderComponent={
-                    <BalanceOverview
-                        get={get}
-                        give={give}
-                        getCount={getCount}
-                        giveCount={giveCount}
-                        hidden={hidden}
-                        onToggleHidden={() => setHidden((h) => !h)}
-                    />
+                    <View>
+                        <LocalOnlyNote />
+                        <BalanceOverview
+                            get={get}
+                            give={give}
+                            getCount={getCount}
+                            giveCount={giveCount}
+                            hidden={hidden}
+                            onToggleHidden={() => setHidden((h) => !h)}
+                        />
+                    </View>
                 }
                 ListEmptyComponent={
                     <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">

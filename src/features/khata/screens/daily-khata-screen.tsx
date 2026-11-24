@@ -3,18 +3,18 @@
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useTranslation } from "react-i18next";
-import { useMemo, useState } from "react";
-import { Alert, FlatList, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Alert, FlatList, Pressable, ScrollView, Text, View } from "react-native";
 
 import { Input } from "@/components/ui/form";
 import { OptionSheet } from "@/components/ui/option-sheet";
 import { useActiveBusiness } from "@/features/business/store/business-store";
 import { CardsManager } from "@/features/khata/components/cards-manager";
 import { CategoryManagerSheet } from "@/features/khata/components/category-manager-sheet";
-import { DataModeBar } from "@/features/khata/components/data-mode-bar";
 import { DailyCharts } from "@/features/khata/components/daily-charts";
-import { KhataSyncBar } from "@/features/khata/components/khata-sync-bar";
+import { DataModeBar } from "@/features/khata/components/data-mode-bar";
 import { DetailedEntrySheet } from "@/features/khata/components/detailed-entry-sheet";
+import { ExportFlow } from "@/features/khata/components/export-flow";
 import { PaginationBar } from "@/features/khata/components/pagination-bar";
 import { StatCard, type StatCtaVariant } from "@/features/khata/components/stat-card";
 import { StatsToggleBar } from "@/features/khata/components/stats-toggle-bar";
@@ -22,24 +22,15 @@ import { TransactionRow } from "@/features/khata/components/transaction-row";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { useDailyStats } from "@/features/khata/hooks/use-daily-stats";
 import { pkr } from "@/features/khata/lib/debt";
-// import {
-//     type TransactionsExport,
-//     exportTransactionsCsv,
-//     exportTransactionsPdf,
-//     exportTransactionsXlsx,
-// } from "@/features/khata/lib/export-transactions-data";
-// import type { DeliverMode } from "@/features/khata/lib/export-file";
-import { ExportFlow } from "@/features/khata/components/export-flow";
 import type { TransactionsExport } from "@/features/khata/lib/export-transactions-data";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import { type EntryKind, type FilterTab, type IExpenseEntry, KHATA_LABELS } from "@/features/khata/types";
+import type { EntryKind, FilterTab, IExpenseEntry } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { entrySortKey, localDate } from "@/lib/date-format";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
 
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc" | "subject_asc";
-// type ExportKind = "pdf" | "xlsx" | "csv";
 
 const PAGE_SIZE = 10;
 /** Add button on the stat cards: "pencil" | "button" | "none". The sticky "+ Add Entry" works either way. */
@@ -48,25 +39,8 @@ const STAT_CTA: StatCtaVariant = "pencil";
 // Two native modals can't swap in the same frame on iOS: let the first one finish closing.
 const afterClose = (fn: () => void) => setTimeout(fn, 350);
 
-const SORTS: { value: SortKey; label: string }[] = [
-    { value: "date_desc", label: "Newest first" },
-    { value: "date_asc", label: "Oldest first" },
-    { value: "amount_desc", label: "Amount: high to low" },
-    { value: "amount_asc", label: "Amount: low to high" },
-    { value: "subject_asc", label: "Naam (A-Z)" },
-];
-
-// const EXPORTS: { value: ExportKind; label: string }[] = [
-//     { value: "pdf", label: "PDF" },
-//     { value: "xlsx", label: "Excel (.xlsx)" },
-//     { value: "csv", label: "CSV" },
-// ];
-
-const ADD_OPTIONS: { value: EntryKind; label: string }[] = [
-    { value: "income", label: KHATA_LABELS.income.verb },
-    { value: "expense", label: KHATA_LABELS.expense.verb },
-    { value: "debt", label: KHATA_LABELS.debt.verb },
-];
+const SORT_KEYS: SortKey[] = ["date_desc", "date_asc", "amount_desc", "amount_asc", "subject_asc"];
+const TABS: FilterTab[] = ["all", "income", "expense", "debt"];
 
 const COMPARE: Record<SortKey, (a: IExpenseEntry, b: IExpenseEntry) => number> = {
     date_desc: (a, b) => entrySortKey(b).localeCompare(entrySortKey(a)),
@@ -76,21 +50,13 @@ const COMPARE: Record<SortKey, (a: IExpenseEntry, b: IExpenseEntry) => number> =
     subject_asc: (a, b) => a.subject.localeCompare(b.subject),
 };
 
-const TABS: { key: FilterTab; label: string }[] = [
-    { key: "all", label: "All" },
-    { key: "income", label: KHATA_LABELS.income.noun },
-    { key: "expense", label: KHATA_LABELS.expense.noun },
-    { key: "debt", label: KHATA_LABELS.debt.noun },
-];
-
 export default function DailyKhataScreen() {
     const { t } = useTranslation(["khata", "common"]);
     const router = useRouter();
     const business = useActiveBusiness();
     const { entries, parties, cards, categories } = useBusinessData();
+    // const categories = useKhataStore((s) => s.categories);
     const deleteEntry = useKhataStore((s) => s.deleteEntry);
-    const sync = useKhataStore((s) => s.sync);
-    const syncing = useKhataStore((s) => s.syncing);
     const stats = useDailyStats();
 
     const [filter, setFilter] = useState<FilterTab>("all");
@@ -105,8 +71,18 @@ export default function DailyKhataScreen() {
     const [showStats, setShowStats] = useState(false); // charts are hidden until the user asks
     const [page, setPage] = useState(1);
 
+    const sorts = useMemo(() => SORT_KEYS.map((k) => ({ value: k, label: t(`daily.sort.${k}`) })), [t]);
+    const addOptions = useMemo<{ value: EntryKind; label: string }[]>(
+        () => [
+            { value: "income", label: t("daily.add.income") },
+            { value: "expense", label: t("daily.add.expense") },
+            { value: "debt", label: t("daily.add.debt") },
+        ],
+        [t],
+    );
+
     const categoryLabel = useMemo(() => new Map(categories.map((c) => [c.id, c.label])), [categories]);
-    const labelOf = (id: string) => categoryLabel.get(id) ?? "Uncategorized";
+    const labelOf = (id: string) => categoryLabel.get(id) ?? t("daily.list.uncategorized");
 
     const counts = useMemo<Record<FilterTab, number>>(
         () => ({
@@ -129,18 +105,8 @@ export default function DailyKhataScreen() {
             .sort(COMPARE[sortKey]);
     }, [entries, filter, q, sortKey, categoryLabel]);
 
-    const changeFilter = (value: FilterTab) => {
-        setPage(1);
-        setFilter(value);
-    };
-    const changeQuery = (value: string) => {
-        setPage(1);
-        setQ(value);
-    };
-    const changeSort = (value: SortKey) => {
-        setPage(1);
-        setSortKey(value);
-    };
+    // back to page 1 whenever the list itself changes shape
+    useEffect(() => setPage(1), [filter, q, sortKey]);
 
     // deleting the last row of the last page must not leave us on an empty page
     const pages = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
@@ -148,9 +114,9 @@ export default function DailyKhataScreen() {
     const pageRows = useMemo(() => shown.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE), [shown, safePage]);
 
     const confirmDelete = (entry: IExpenseEntry) =>
-        Alert.alert("Entry delete karein?", `${entry.subject} · ${pkr(entry.amount)}`, [
-            { text: "Nahi", style: "cancel" },
-            { text: "Haan, delete", style: "destructive", onPress: () => deleteEntry(entry.id) },
+        Alert.alert(t("deleteEntry.title"), `${entry.subject} · ${pkr(entry.amount)}`, [
+            { text: t("common:actions.cancel"), style: "cancel" },
+            { text: t("deleteEntry.confirm"), style: "destructive", onPress: () => deleteEntry(entry.id) },
         ]);
 
     // ids match both the stat cards and the "Add Entry" picker: income | expense | debt
@@ -158,48 +124,13 @@ export default function DailyKhataScreen() {
         if (id === "income") setEntryKind("income");
         else if (id === "expense") setEntryKind("expense");
         else if (id === "debt") {
-            toast("Party chun kar Udhaar add karein");
+            toast(t("daily.debtHint"));
             router.push("/khata/party");
         }
     };
 
-    // const runExport = async (kind: ExportKind, mode: DeliverMode) => {
-    //     try {
-    //         const input: TransactionsExport = {
-    //             title: `Daily Khata — ${business.name}`,
-    //             entries: shown, // everything that matches the filter, not just the current page
-    //             categoryLabel: labelOf,
-    //             partyName: (id) => parties.find((p) => p.id === id)?.name ?? "",
-    //             cardLabel: (id) => cards.find((c) => c.id === id)?.label ?? "Cash",
-    //         };
-    //         const base = `daily-khata-${localDate()}`;
-    //         const result =
-    //             kind === "pdf"
-    //                 ? await exportTransactionsPdf(input, `${base}.pdf`, mode)
-    //                 : kind === "xlsx"
-    //                     ? await exportTransactionsXlsx(input, `${base}.xlsx`, mode)
-    //                     : await exportTransactionsCsv(input, `${base}.csv`, mode);
-    //         if (result === "saved") toast.success(t("export.saved"));
-    //     } catch (e) {
-    //         console.warn("export failed", e);
-    //         toast.error(t("export.failed"));
-    //     }
-    // };
-
-    // // step 2 of export: save a copy on the phone, or share it
-    // const askExportMode = (kind: ExportKind) => {
-    //     if (!shown.length) return toast("Export ke liye koi entry nahi hai");
-    //     afterClose(() =>
-    //         Alert.alert(t("export.modeTitle", { format: kind.toUpperCase() }), t("export.modeMessage"), [
-    //             { text: t("export.save"), onPress: () => runExport(kind, "save") },
-    //             { text: t("export.share"), onPress: () => runExport(kind, "share") },
-    //             { text: t("common:actions.cancel"), style: "cancel" },
-    //         ]),
-    //     );
-    // };
-
     const buildExportInput = (): TransactionsExport => ({
-        title: `Daily Khata — ${business.name}`,
+        title: t("daily.export.docTitle", { name: business.name }),
         entries: shown, // everything that matches the filter, not just the current page
         categoryLabel: labelOf,
         partyName: (id) => parties.find((p) => p.id === id)?.name ?? "",
@@ -219,10 +150,10 @@ export default function DailyKhataScreen() {
                     title: t("sections.daily.title"),
                     headerRight: () => (
                         <View className="flex-row items-center gap-5">
-                            <Pressable accessibilityRole="button" accessibilityLabel="Export" onPress={() => setExportOpen(true)} hitSlop={12}>
+                            <Pressable accessibilityRole="button" accessibilityLabel={t("daily.a11y.export")} onPress={() => setExportOpen(true)} hitSlop={12}>
                                 <SymbolView name={{ ios: "square.and.arrow.up", android: "ios_share", web: "ios_share" }} size={21} tintColor={colors["text-secondary"]} />
                             </Pressable>
-                            <Pressable accessibilityRole="button" accessibilityLabel="Categories" onPress={() => setCategoriesOpen(true)} hitSlop={12}>
+                            <Pressable accessibilityRole="button" accessibilityLabel={t("daily.a11y.categories")} onPress={() => setCategoriesOpen(true)} hitSlop={12}>
                                 <SymbolView name={{ ios: "tag", android: "sell", web: "sell" }} size={22} tintColor={colors.primary} />
                             </Pressable>
                         </View>
@@ -235,11 +166,8 @@ export default function DailyKhataScreen() {
                 keyExtractor={(e) => e.id}
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ paddingBottom: 96 }} // room for the sticky Add Entry button
-                // pull down to reload from the server
-                refreshControl={<RefreshControl refreshing={syncing} onRefresh={sync} tintColor={colors.primary} colors={[colors.primary]} />}
                 ListHeaderComponent={
                     <View>
-                        <KhataSyncBar />
                         <DataModeBar />
 
                         <View className="flex-row flex-wrap gap-3 px-4 pt-4">
@@ -252,7 +180,6 @@ export default function DailyKhataScreen() {
                                     ctaVariant={STAT_CTA}
                                     ctaLabel={item.ctaLabel}
                                     onCtaPress={item.ctaLabel ? () => onCta(item.id) : undefined}
-                                    showTrendChip={item.showTrend}
                                 />
                             ))}
                         </View>
@@ -265,19 +192,19 @@ export default function DailyKhataScreen() {
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingTop: 16 }}>
                             {TABS.map((tab) => (
                                 <Pressable
-                                    key={tab.key}
+                                    key={tab}
                                     accessibilityRole="tab"
-                                    accessibilityState={{ selected: filter === tab.key }}
-                                    onPress={() => changeFilter(tab.key)}
+                                    accessibilityState={{ selected: filter === tab }}
+                                    onPress={() => setFilter(tab)}
                                     className={cn(
                                         "min-h-10 flex-row items-center gap-2 rounded-full border px-4",
-                                        filter === tab.key ? "border-primary bg-primary" : "border-border-clr bg-white",
+                                        filter === tab ? "border-primary bg-primary" : "border-border-clr bg-white",
                                     )}>
-                                    <Text className={cn("font-jakarta-semibold text-xs", filter === tab.key ? "text-white" : "text-text-secondary")}>
-                                        {tab.label}
+                                    <Text className={cn("font-jakarta-semibold text-xs", filter === tab ? "text-white" : "text-text-secondary")}>
+                                        {tab === "all" ? t("daily.tabs.all") : t(`kind.${tab}`)}
                                     </Text>
-                                    <Text className={cn("font-jakarta-bold text-[11px]", filter === tab.key ? "text-white" : "text-text-secondary-muted")}>
-                                        {counts[tab.key]}
+                                    <Text className={cn("font-jakarta-bold text-[11px]", filter === tab ? "text-white" : "text-text-secondary-muted")}>
+                                        {counts[tab]}
                                     </Text>
                                 </Pressable>
                             ))}
@@ -287,15 +214,15 @@ export default function DailyKhataScreen() {
                             <View className="flex-1">
                                 <Input
                                     icon={{ ios: "magnifyingglass", android: "search", web: "search" }}
-                                    placeholder="Subject ya category dhoondein"
+                                    placeholder={t("daily.list.search")}
                                     value={q}
-                                    onChangeText={changeQuery}
+                                    onChangeText={setQ}
                                     autoCorrect={false}
                                 />
                             </View>
                             <Pressable
                                 accessibilityRole="button"
-                                accessibilityLabel="Sort"
+                                accessibilityLabel={t("daily.a11y.sort")}
                                 onPress={() => setSortOpen(true)}
                                 className="h-12 w-12 items-center justify-center rounded-brand-8 border border-border-clr bg-white active:bg-page-bg">
                                 <SymbolView
@@ -308,24 +235,21 @@ export default function DailyKhataScreen() {
                         </View>
 
                         <Text className="border-b border-border-clr bg-white px-4 py-2 font-jakarta-semibold text-xs text-text-secondary">
-                            Transactions ({shown.length})
+                            {t("daily.list.title", { total: shown.length })}
                         </Text>
                     </View>
                 }
                 ListEmptyComponent={
                     <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">
-                        {entries.length === 0
-                            ? 'Abhi koi entry nahi. Neeche "+ Add Entry" dabayein ya "Load Demo Data" chalayein.'
-                            : "Is filter mein koi entry nahi mili."}
+                        {entries.length === 0 ? t("daily.list.empty") : t("daily.list.noMatch")}
                     </Text>
                 }
                 renderItem={({ item }) => (
                     <TransactionRow
                         entry={item}
                         categoryLabel={labelOf(item.categoryId)}
-                        // server entries can't be edited/deleted through the API yet
-                        onDelete={item.remote ? undefined : confirmDelete}
-                        onEdit={item.remote || item.kind === "debt" ? undefined : setEditing}
+                        onDelete={confirmDelete}
+                        onEdit={item.kind === "debt" ? undefined : setEditing}
                     />
                 )}
                 ListFooterComponent={<PaginationBar page={safePage} pageSize={PAGE_SIZE} total={shown.length} onChange={setPage} />}
@@ -340,31 +264,22 @@ export default function DailyKhataScreen() {
                 <Text className="font-jakarta-bold text-sm text-white">{t("addEntry.label")}</Text>
             </Pressable>
 
-            <OptionSheet visible={sortOpen} title="Tarteeb" options={SORTS} value={sortKey} onChange={changeSort} onClose={() => setSortOpen(false)} />
-
-            {/* <OptionSheet<ExportKind | "">
-                visible={exportOpen}
-                title="Transactions export karein"
-                options={EXPORTS}
-                value=""
-                onChange={(v) => v && askExportMode(v)}
-                onClose={() => setExportOpen(false)}
-            /> */}
+            <OptionSheet visible={sortOpen} title={t("daily.sort.title")} options={sorts} value={sortKey} onChange={setSortKey} onClose={() => setSortOpen(false)} />
 
             <ExportFlow
                 visible={exportOpen}
                 onClose={() => setExportOpen(false)}
-                title="Transactions export karein"
+                title={t("daily.export.title")}
                 baseName={`daily-khata-${localDate()}`}
                 count={shown.length}
-                emptyMessage="Export ke liye koi entry nahi hai"
+                emptyMessage={t("daily.export.noEntries")}
                 buildInput={buildExportInput}
             />
 
             <OptionSheet<EntryKind | "">
                 visible={addOpen}
                 title={t("addEntry.title")}
-                options={ADD_OPTIONS}
+                options={addOptions}
                 value=""
                 onChange={(v) => v && afterClose(() => onCta(v))}
                 onClose={() => setAddOpen(false)}

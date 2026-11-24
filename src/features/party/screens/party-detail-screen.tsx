@@ -11,7 +11,7 @@ import { PlaceholderScreen } from "@/components/ui/placeholder-screen";
 import { DataModeBar } from "@/features/khata/components/data-mode-bar";
 import { buildLedger, debtLabel, partyTypeLabel } from "@/features/khata/lib/debt";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import { DEBT_TYPE_META, type IExpenseEntry } from "@/features/khata/types";
+import { DEBT_TYPE_META, type IExpenseEntry } from "@/features/khata/types/types";
 import { DebtEntrySheet } from "@/features/party/components/debt-entry-sheet";
 import { LedgerHeader, LedgerRowItem } from "@/features/party/components/ledger";
 import { PartyBalanceCard } from "@/features/party/components/party-balance-card";

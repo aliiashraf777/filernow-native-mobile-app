@@ -3,8 +3,9 @@
 import * as XLSX from "xlsx";
 
 // import { pkr } from "@/features/khata/lib/debt";
-import { debtBalances, debtSign, debtTotals, pkr } from "@/features/khata/lib/debt";
-import type { IExpenseEntry } from "@/features/khata/types";
+// import { debtBalances, debtSign, debtTotals, pkr } from "@/features/khata/lib/debt";
+import { cashFlow, debtBalances, debtTotals, pkr } from "@/features/khata/lib/debt";
+import type { IExpenseEntry } from "@/features/khata/types/types";
 import { entryTime } from "@/lib/date-format";
 // import { MIME, shareBytes, sharePdf } from "@/lib/share-file";
 // import { MIME, shareBytes, sharePdf } from "./share-file";
@@ -30,7 +31,9 @@ type Row = {
     amount: number;
     note: string;
     /** true = adds to your cash (income, or a "You Got" udhaar type). */
-    credit: boolean;
+    // credit: boolean;
+    /** Cash effect: 1 money in, -1 money out, 0 none (forgiven udhaar). */
+    flow: 1 | -1 | 0;
 };
 
 const HEAD = ["Date", "Time", "Type", "Subject", "Category", "Party", "Card", "Amount", "Note"];
@@ -46,7 +49,8 @@ const rowsOf = (i: TransactionsExport): Row[] =>
         card: e.kind === "debt" ? "" : i.cardLabel(e.cardId),
         amount: e.amount,
         note: e.description ?? "",
-        credit: e.kind === "income" || debtSign(e) < 0,
+        // credit: e.kind === "income" || debtSign(e) < 0,
+        flow: cashFlow(e)
     }));
 const asArray = (r: Row) => [r.date, r.time, r.type, r.subject, r.category, r.party, r.card, r.amount, r.note];
 
@@ -109,14 +113,19 @@ function pdfHtml(i: TransactionsExport) {
         .map((r) => {
             // const sign = r.type === "income" ? "+" : "-";
             // const cls = r.type === "income" ? "inc" : r.type === "expense" ? "exp" : "";
-            const sign = r.credit ? "+" : "-";
-            const cls = r.credit ? "inc" : r.type === "expense" ? "exp" : "";
+            // const sign = r.credit ? "+" : "-";
+            // const cls = r.credit ? "inc" : r.type === "expense" ? "exp" : "";
+            const sign = r.flow > 0 ? "+" : r.flow < 0 ? "-" : "";
+            const cls = r.flow > 0 ? "inc" : r.flow < 0 ? "exp" : "";
             return (
                 `<tr><td>${esc(r.date)}</td><td>${esc(r.subject)}</td><td style="text-transform:capitalize">${r.type}</td>` +
                 `<td>${esc(r.category)}</td><td class="r ${cls}">${sign}${pkr(r.amount)}</td></tr>`
             );
         })
         .join("");
+
+    // Daily exports list udhaar rows but totals only cover income/expense: say so instead of leaving it implicit
+    const note = !isUdhaar(i.entries) && i.entries.some((e) => e.kind === "debt") ? " • Udhaar entries are listed but not counted in the totals" : "";
 
     return `<html><head><meta charset="utf-8"/><style>
 body{font-family:Helvetica,Arial,sans-serif;color:${colors["text-dark"]};margin:0;padding:0 28px 28px}
@@ -139,7 +148,7 @@ tr:nth-child(even) td{background:#F9FAFB}.r{text-align:right}th.r{text-align:rig
 <div class="box"><small>NET</small><b>${net < 0 ? "-" : ""}${pkr(Math.abs(net))}</b></div></div>
 <table><thead><tr><th>Date</th><th>Subject</th><th>Type</th><th>Category</th><th class="r">Amount</th></tr></thead>
 <tbody>${body}</tbody></table>
-<div class="foot">Computer-generated statement • FilerNow Digital Khata</div>
+<div class="foot">Computer-generated statement • FilerNow Digital Khata${note}</div>
 </body></html>`;
 }
 

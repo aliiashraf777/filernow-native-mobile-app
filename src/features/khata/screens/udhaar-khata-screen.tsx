@@ -2,7 +2,7 @@
 
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, FlatList, Pressable, Text, View } from "react-native";
 
@@ -22,7 +22,7 @@ import { useUdhaarStats } from "@/features/khata/hooks/use-udhaar-stats";
 import { debtBalances, debtKey, debtLabel, debtSign, pkr } from "@/features/khata/lib/debt";
 import type { TransactionsExport } from "@/features/khata/lib/export-transactions-data";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import type { IExpenseEntry, IParty, NewParty } from "@/features/khata/types";
+import type { IExpenseEntry, IParty, NewParty } from "@/features/khata/types/types";
 import { DebtEntrySheet } from "@/features/party/components/debt-entry-sheet";
 import { PartyFormSheet } from "@/features/party/components/party-form-sheet";
 import { PARTY_BASE, partyHref } from "@/features/party/lib/party";
@@ -30,14 +30,19 @@ import { cn } from "@/lib/cn";
 import { entrySortKey, localDate } from "@/lib/date-format";
 import { colors } from "@/theme/tokens";
 
+import { UdhaarGuideSheet } from "@/features/khata/components/udhaar-guide-sheet";
+import { LocalOnlyNote } from "../components/local-only-note";
+
 type Filter = "all" | "gave" | "got";
+/** The add/edit sheet. party/editing are kept after closing so the sheet can animate out with its content. */
+type SheetState = { open: boolean; party: IParty | null; editing: IExpenseEntry | null };
 
 const PAGE_SIZE = 10;
 const FILTERS: Filter[] = ["all", "gave", "got"];
 const NEW_PARTY = "__new__";
 const BALANCE_PREVIEW = 4;
 
-const noop = () => {};
+const noop = () => { };
 // Two native modals can't swap in the same frame on iOS: let the first one finish closing.
 const afterClose = (fn: () => void) => setTimeout(fn, 350);
 
@@ -57,13 +62,13 @@ export default function UdhaarKhataScreen() {
     const [page, setPage] = useState(1);
     const [exportOpen, setExportOpen] = useState(false);
     const [showStats, setShowStats] = useState(false); // chart is hidden until the user asks
+    const [guideOpen, setGuideOpen] = useState(false)
 
     // add-entry flow: choose party -> (optional new party) -> You Gave / You Got sheet
     const [sign, setSign] = useState<1 | -1>(1); // 1 = You Gave, -1 = You Got (same as DebtEntrySheet)
     const [pickerOpen, setPickerOpen] = useState(false);
     const [partyFormOpen, setPartyFormOpen] = useState(false);
-    const [entryParty, setEntryParty] = useState<IParty | null>(null);
-    const [editing, setEditing] = useState<IExpenseEntry | null>(null);
+    const [sheet, setSheet] = useState<SheetState>({ open: false, party: null, editing: null });
 
     const debtEntries = useMemo(() => entries.filter((e) => e.kind === "debt"), [entries]);
     const partyById = useMemo(() => new Map(parties.map((p) => [p.id, p])), [parties]);
@@ -82,25 +87,22 @@ export default function UdhaarKhataScreen() {
         [debtEntries, partyById],
     );
 
-    const k = q.trim().toLowerCase();
-    const shown = debtEntries
-        .filter((e) => {
-            const s = debtSign(e);
-            return (
-                (filter === "all" || (filter === "gave" ? s > 0 : s < 0)) &&
-                (!k || `${e.subject} ${debtLabel(e.categoryId)} ${e.description ?? ""}`.toLowerCase().includes(k))
-            );
-        })
-        .sort((a, b) => entrySortKey(b).localeCompare(entrySortKey(a)));
+    const shown = useMemo(() => {
+        const k = q.trim().toLowerCase();
+        return debtEntries
+            .filter((e) => {
+                const s = debtSign(e);
+                return (
+                    (filter === "all" || (filter === "gave" ? s > 0 : s < 0)) &&
+                    (!k || `${e.subject} ${debtLabel(e.categoryId)} ${e.description ?? ""}`.toLowerCase().includes(k))
+                );
+            })
+            .sort((a, b) => entrySortKey(b).localeCompare(entrySortKey(a)));
+        // `t` changes with the language, so translated debt labels re-evaluate for search
+    }, [debtEntries, filter, q, t]);
 
-    const changeFilter = (value: Filter) => {
-        setPage(1);
-        setFilter(value);
-    };
-    const changeQuery = (value: string) => {
-        setPage(1);
-        setQ(value);
-    };
+    // back to page 1 whenever the list itself changes shape
+    useEffect(() => setPage(1), [filter, q]);
 
     // deleting the last row of the last page must not leave us on an empty page
     const pages = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
@@ -117,23 +119,23 @@ export default function UdhaarKhataScreen() {
         setPickerOpen(false);
         if (id === NEW_PARTY) return afterClose(() => setPartyFormOpen(true));
         const party = partyById.get(id);
-        if (party) afterClose(() => setEntryParty(party));
+        if (party) afterClose(() => setSheet({ open: true, party, editing: null }));
     };
 
     const onPartySaved = (v: NewParty) => {
         const party = addParty(v); // returns the new party so we can continue straight into the entry sheet
-        afterClose(() => setEntryParty(party));
+        afterClose(() => setSheet({ open: true, party, editing: null }));
     };
 
-    const closeEntrySheet = () => {
-        setEntryParty(null);
-        setEditing(null);
+    const openEdit = (entry: IExpenseEntry) => {
+        const party = entry.partyId ? partyById.get(entry.partyId) : undefined;
+        if (party) setSheet({ open: true, party, editing: entry });
     };
 
     const confirmDelete = (entry: IExpenseEntry) =>
-        Alert.alert(t("udhaar.delete.title"), `${entry.subject} · ${pkr(entry.amount)}`, [
+        Alert.alert(t("deleteEntry.title"), `${entry.subject} · ${pkr(entry.amount)}`, [
             { text: t("common:actions.cancel"), style: "cancel" },
-            { text: t("udhaar.delete.confirm"), style: "destructive", onPress: () => deleteEntry(entry.id) },
+            { text: t("deleteEntry.confirm"), style: "destructive", onPress: () => deleteEntry(entry.id) },
         ]);
 
     const buildExportInput = (): TransactionsExport => ({
@@ -143,8 +145,6 @@ export default function UdhaarKhataScreen() {
         partyName: (id) => (id ? partyById.get(id)?.name : undefined) ?? "",
         cardLabel: () => "-", // udhaar never touches cards
     });
-
-    const sheetParty = editing ? (editing.partyId ? partyById.get(editing.partyId) ?? null : null) : entryParty;
 
     return (
         <View className="flex-1 bg-page-bg">
@@ -163,19 +163,32 @@ export default function UdhaarKhataScreen() {
                 data={pageRows}
                 keyExtractor={(e) => e.id}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingBottom: 104 }} // room for the sticky action bar
+                // contentContainerStyle={{ paddingBottom: 104 }} // room for the sticky action bar
+                contentContainerStyle={{ paddingBottom: 110 }} // room for the sticky action bar
                 ListHeaderComponent={
                     <View>
                         <DataModeBar />
+                        <LocalOnlyNote />
+
                         <View className="flex-row flex-wrap gap-3 px-4 pt-4">
                             {stats.map((item) => (
-                                // no real month-over-month number here, so no trend chip
-                                <StatCard key={item.id} item={item} onPress={noop} showTrendChip={false} />
+                                <StatCard key={item.id} item={item} onPress={noop} />
                             ))}
                         </View>
 
+                        {/* udhaar balance parties & guide */}
                         <View className="mx-4 mt-4 gap-2 rounded-brand-12 border border-border-clr bg-white p-3">
-                            <Text className="font-jakarta-semibold text-sm text-text-dark">{t("udhaar.balances.title")}</Text>
+                            <View className="flex-row items-center justify-between">
+                                <Text className="font-jakarta-semibold text-sm text-text-dark">{t("udhaar.balances.title")}</Text>
+                                <Pressable
+                                    accessibilityRole="button"
+                                    onPress={() => setGuideOpen(true)}
+                                    hitSlop={8}
+                                    className="min-h-8 flex-row items-center gap-1 rounded-full bg-primary-tint px-3 active:opacity-70">
+                                    <SymbolView name={{ ios: "questionmark.circle", android: "help", web: "help" }} size={14} tintColor={colors.primary} />
+                                    <Text className="font-jakarta-semibold text-[11px] text-primary">{t("udhaar.guide.open")}</Text>
+                                </Pressable>
+                            </View>
                             {balanceRows.length === 0 ? (
                                 <View className="rounded-brand-8 bg-success-bg px-3 py-3">
                                     <Text className="text-center font-jakarta-semibold text-xs text-success">{t("udhaar.balances.empty")}</Text>
@@ -206,7 +219,7 @@ export default function UdhaarKhataScreen() {
                                     key={f}
                                     accessibilityRole="tab"
                                     accessibilityState={{ selected: filter === f }}
-                                    onPress={() => changeFilter(f)}
+                                    onPress={() => setFilter(f)}
                                     className={cn(
                                         "min-h-10 justify-center rounded-full border px-4",
                                         filter === f ? "border-primary bg-primary" : "border-border-clr bg-white",
@@ -223,7 +236,7 @@ export default function UdhaarKhataScreen() {
                                 icon={{ ios: "magnifyingglass", android: "search", web: "search" }}
                                 placeholder={t("udhaar.list.search")}
                                 value={q}
-                                onChangeText={changeQuery}
+                                onChangeText={setQ}
                                 autoCorrect={false}
                             />
                         </View>
@@ -244,14 +257,14 @@ export default function UdhaarKhataScreen() {
                         categoryLabel={debtLabel(item.categoryId)}
                         onDelete={confirmDelete}
                         // entries whose party was deleted (or never existed) can't open the party-based sheet
-                        onEdit={item.partyId && partyById.has(item.partyId) ? setEditing : undefined}
+                        onEdit={item.partyId && partyById.has(item.partyId) ? openEdit : undefined}
                     />
                 )}
                 ListFooterComponent={<PaginationBar page={safePage} pageSize={PAGE_SIZE} total={shown.length} onChange={setPage} />}
             />
 
-            {/* sticky primary actions */}
-            <View className="absolute bottom-0 left-0 right-0 flex-row gap-3 border-t border-border-clr bg-white px-4 pb-4 pt-3">
+            {/* sticky primary actions (the tab bar below already owns the bottom inset) */}
+            <View className="absolute bottom-0 left-0 right-0 flex-row gap-3 border-t border-border-clr bg-white px-4 pb-10 pt-3">
                 <Pressable
                     accessibilityRole="button"
                     onPress={() => startEntry(1)}
@@ -276,6 +289,7 @@ export default function UdhaarKhataScreen() {
                 onChange={onPickParty}
                 onClose={() => setPickerOpen(false)}
             />
+            <UdhaarGuideSheet visible={guideOpen} onClose={() => setGuideOpen(false)} />
             <ExportFlow
                 visible={exportOpen}
                 onClose={() => setExportOpen(false)}
@@ -291,14 +305,14 @@ export default function UdhaarKhataScreen() {
                 onClose={() => setPartyFormOpen(false)}
                 onSaved={onPartySaved}
             />
-            {sheetParty ? (
+            {sheet.party ? (
                 <DebtEntrySheet
-                    visible
-                    party={sheetParty}
+                    visible={sheet.open}
+                    party={sheet.party}
                     sign={sign}
-                    editing={editing}
-                    onClose={closeEntrySheet}
-                    onSaved={(payload) => (editing ? updateEntry(editing.id, payload) : addEntry(payload))}
+                    editing={sheet.editing}
+                    onClose={() => setSheet((s) => ({ ...s, open: false }))}
+                    onSaved={(payload) => (sheet.editing ? updateEntry(sheet.editing.id, payload) : addEntry(payload))}
                 />
             ) : null}
         </View>

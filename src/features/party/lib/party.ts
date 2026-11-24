@@ -2,7 +2,7 @@
 
 import type { Href } from "expo-router";
 
-import type { IParty } from "@/features/khata/types";
+import type { IParty } from "@/features/khata/types/types";
 import { newId } from "@/lib/id";
 
 export const PARTY_BASE = "/khata/party";

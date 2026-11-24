@@ -1,4 +1,4 @@
-// nativeApp\src\features\khata\expenseManagerTy.ts
+// nativeApp\src\features\khata\types\types.ts
 
 // REPLACED: Swapped vector icons out for Apple SF Symbols support via expo-symbols
 import type { SymbolViewProps } from "expo-symbols";
