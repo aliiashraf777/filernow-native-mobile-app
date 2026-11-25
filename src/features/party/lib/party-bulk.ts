@@ -1,6 +1,6 @@
 // nativeApp\src\features\party\lib\party-bulk.ts
 
-import { type IParty, PARTY_TYPES, type PartyType } from "@/features/khata/types";
+import { type IParty, PARTY_TYPES, type PartyType } from "@/features/khata/types/types";
 
 export type BulkRow = {
     line: number;

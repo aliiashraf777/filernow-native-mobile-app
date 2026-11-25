@@ -1,4 +1,4 @@
-import type { IExpenseEntry, IParty } from "../types";
+import type { IExpenseEntry, IParty } from "../types/types";
 
 export const dummyExpenseEntries: IExpenseEntry[] = [
     { id: "e1", kind: "expense", subject: "Electricity Bill", categoryId: "cat-utilities", amount: 8500, date: "2026-09-10" },

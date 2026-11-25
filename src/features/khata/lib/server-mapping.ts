@@ -1,7 +1,7 @@
 // nativeApp\src\features\khata\lib\server-mapping.ts
 
 import type { ApiCard, ApiCategory, ApiEntry, CategoryColor } from "@/features/khata/api/expenses-api";
-import type { ICard, ICategory, IExpenseEntry } from "@/features/khata/types";
+import type { ICard, ICategory, IExpenseEntry } from "@/features/khata/types/types";
 
 // Server data → the app's Khata types, so screens keep working unchanged.
 

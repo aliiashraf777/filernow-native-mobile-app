@@ -1,4 +1,4 @@
-import type { ICard } from "../types";
+import type { ICard } from "../types/types";
 
 export const dummyCards: ICard[] = [
     { id: "card-1", label: "Meezan Bank", balance: 155950, last4: "1289", expiryMonth: 9, expiryYear: 2031, gradient: "primary" },

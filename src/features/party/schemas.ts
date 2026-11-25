@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { PARTY_TYPES } from "@/features/khata/types";
+import { PARTY_TYPES } from "@/features/khata/types/types";
 
 /** Validation messages are keys under party:form, translated where the error is shown. */
 export type PartyFormErrorKey = "form.nameError" | "form.phoneError";

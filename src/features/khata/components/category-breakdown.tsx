@@ -6,7 +6,7 @@ import { Pressable, Text, View } from "react-native";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ChartCard, ChartEmpty } from "@/features/khata/components/chart-card";
 import { pkr } from "@/features/khata/lib/debt";
-import type { ICategoryBreakdownItem } from "@/features/khata/types";
+import type { ICategoryBreakdownItem } from "@/features/khata/types/types";
 
 function CategoryRow({ item, index }: { item: ICategoryBreakdownItem; index: number }) {
     return (

@@ -10,7 +10,7 @@ import { ChipGroup } from "@/components/ui/chip-group";
 import { ChartCard, ChartEmpty } from "@/features/khata/components/chart-card";
 import { pkr } from "@/features/khata/lib/debt";
 import { GRAIN, type Granularity, type TrendRow, formatAmount, formatTick } from "@/features/khata/lib/trend";
-import type { EntryKind } from "@/features/khata/types";
+import type { EntryKind } from "@/features/khata/types/types";
 import { colors } from "@/theme/tokens";
 
 type KindFilter = "all" | EntryKind;

@@ -1,5 +1,3 @@
-// nativeApp\src\features\khata\store\khata-store.ts
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -11,6 +9,7 @@ import { expensesApi } from "@/features/khata/api/expenses-api";
 import { dummyCards } from "@/features/khata/data/dummy-cards";
 import { defaultCategories } from "@/features/khata/data/default-categories";
 import { dummyExpenseEntries, dummyParties } from "@/features/khata/data/dummy-entries";
+import { buildDemoEntries } from "@/features/khata/data/demo-history";
 import {
     CARD_COLOR,
     type CardMeta,
@@ -31,7 +30,7 @@ import {
     type IParty,
     type NewParty,
     MAX_CARDS,
-} from "@/features/khata/types";
+} from "@/features/khata/types/types";
 import { makeSlug } from "@/features/party/lib/party";
 import i18n from "@/i18n";
 import { apiErrorMessage } from "@/lib/api/errors";
@@ -42,10 +41,12 @@ import { toast } from "@/lib/toast";
  * Where Khata data lives:
  * - income/expense entries, cards, income/expense categories → the server (per business),
  *   cached here so the screens work offline and open instantly;
- * - Udhaar (debt) entries and parties → this phone only (the API has no parties yet).
+ * - Udhaar (debt) entries and parties → this phone only (the API has no parties yet);
+ * - demo data → memory only, per business. It is never saved and never sent to the API. (DEPRECATED)
+ * - demo data → a practice copy per business, saved on this phone but never sent to the API. (CURRENT-UPDATED)
  */
 
-/** Phone-only data of ONE business. */
+/** Phone-only data of ONE business: the "phone notebook". */
 export type LocalData = { entries: IExpenseEntry[]; parties: IParty[] };
 /** Server data of ONE business (last successful sync). */
 export type RemoteData = { entries: IExpenseEntry[]; cards: ICard[]; categories: ICategory[]; syncedAt: string | null };
@@ -60,7 +61,7 @@ const DEBT_CATEGORIES = defaultCategories.filter((c) => c.kind === "debt");
 const cardDelta = (entry: Pick<IExpenseEntry, "kind" | "amount">) =>
     entry.kind === "income" ? entry.amount : entry.kind === "expense" ? -entry.amount : 0;
 const createDemoData = (): DemoBusinessData => ({
-    entries: dummyExpenseEntries.map((entry) => ({ ...entry })),
+    entries: buildDemoEntries(dummyExpenseEntries, dummyParties),
     parties: dummyParties.map((party) => ({ ...party })),
     cards: dummyCards.map((card) => ({ ...card })),
     categories: defaultCategories.map((category) => ({ ...category })),
@@ -77,8 +78,11 @@ type KhataState = {
     remote: Record<string, RemoteData>;
     /** Card expiry/colour the server doesn't store, kept for cards added on this phone. */
     cardMeta: Record<string, CardMeta>;
-    /** Editable, per-business local demo copy; never sent to the live account API. */
+    /** Editable per-business demo copy. Session-only: never saved, never sent to the live account API. */
+    /** Editable per-business practice copy. Saved on this phone (it survives restarts) but never sent to the live account API. (UPDATED) */
     demoData: Record<string, DemoBusinessData>;
+    /** Session-only too: the app always starts in live ("blank") mode. */
+    /** Which businesses are in demo mode. The mode bar's blinking dot is what reminds the user. (UPDATED) */
     dataMode: Record<string, DataMode>;
     syncing: boolean;
     syncError: string | null;
@@ -89,6 +93,8 @@ type KhataState = {
     resetToBlank: () => void;
     /** Moves a business's phone-only data to a new id (pre-backend "my-expenses" → server id). */
     adoptBusinessData: (fromId: string, toId: string) => void;
+    /** Adds the Udhaar entries/parties of a backup that this business doesn't have yet (never deletes). */
+    restoreLocalData: (backup: LocalData) => { entries: number; parties: number };
 
     // All actions below work on the ACTIVE business. Server-backed ones resolve true on success.
     addEntry: (entry: NewEntry) => Promise<boolean>;
@@ -108,6 +114,21 @@ type KhataState = {
     transferBetweenCards: (fromId: string, toId: string, amount: number) => Promise<boolean>;
 };
 
+/**
+ * The money actions that differ between demo (fake, in memory) and live (real, on the server).
+ * Both implementations MUST provide every member: adding one here and forgetting a side is a compile error.
+ * Shared validation happens before these run, so they receive already-checked objects.
+ */
+type MoneyOps = {
+    addCategory: (label: string, color: ICategory["color"], kind: Exclude<EntryKind, "debt">) => Promise<boolean>;
+    deleteCategory: (target: ICategory) => Promise<boolean>;
+    addCard: (card: Omit<ICard, "id">) => Promise<boolean>;
+    updateCard: (card: ICard, patch: Partial<ICard>) => Promise<boolean>;
+    transfer: (from: ICard, to: ICard, amount: number) => Promise<boolean>;
+};
+
+// Demo copies and the data mode are session-only, so only these four are saved. (UPDATED)
+// type Persisted = Pick<KhataState, "categories" | "data" | "remote" | "cardMeta">;
 type Persisted = Pick<KhataState, "categories" | "data" | "remote" | "cardMeta" | "demoData" | "dataMode">;
 
 const money = (n: number) => `PKR ${n.toLocaleString("en-PK")}`;
@@ -138,6 +159,23 @@ export const useKhataStore = create<KhataState>()(
                     return { data: { ...s.data, [id]: { ...cur, ...patch(cur) } } };
                 });
             };
+
+            /* ---- "pick the notebook once" ---- */
+            /** The phone notebook (Udhaar entries + parties): the demo copy in demo mode, the saved local data otherwise. */
+            const book = (): LocalData => (isDemoMode() ? demo() : local());
+            const updateBook = (patch: (b: LocalData) => Partial<LocalData>) => (isDemoMode() ? updateDemo(patch) : updateLocal(patch));
+            /** Where an entry is stored: demo keeps every kind in the phone notebook, live keeps only Udhaar there. */
+            const inPhoneBook = (kind: EntryKind) => isDemoMode() || kind === "debt";
+            const activeCards = () => (isDemoMode() ? demo().cards : remote().cards);
+            const activeCategories = () => (isDemoMode() ? demo().categories : get().categories);
+            /** Card balances: the server computes them in live mode, so only the demo copy is adjusted here. */
+            const adjustDemoCards = (deltas: Record<string, number>) => {
+                if (!isDemoMode()) return;
+                updateDemo((d) => ({
+                    cards: d.cards.map((c) => (deltas[c.id] ? { ...c, balance: c.balance + deltas[c.id] } : c)),
+                }));
+            };
+
             /** Runs a server write; on failure shows the API's message and resolves false. */
             const write = async (fn: () => Promise<unknown>, success: string) => {
                 try {
@@ -150,6 +188,125 @@ export const useKhataStore = create<KhataState>()(
                 await get().sync();
                 return true;
             };
+
+            /* ---- money actions: demo vs live ---- */
+            const demoOps: MoneyOps = {
+                addCategory: async (label, color, kind) => {
+                    updateDemo((d) => ({ categories: [...d.categories, { id: newId(), label, color, kind }] }));
+                    toast.success(t("categoryAdded", { name: label }));
+                    return true;
+                },
+                deleteCategory: async (target) => {
+                    const fallback = demo().categories.find((c) => c.kind === target.kind && c.label === "Other" && c.id !== target.id);
+                    if (!fallback) {
+                        toast.error(t("otherCategoryLocked"));
+                        return false;
+                    }
+                    updateDemo((d) => ({
+                        categories: d.categories.filter((c) => c.id !== target.id),
+                        entries: d.entries.map((e) => (e.categoryId === target.id ? { ...e, categoryId: fallback.id } : e)),
+                    }));
+                    toast.success(t("categoryRemoved", { name: target.label }));
+                    return true;
+                },
+                addCard: async (card) => {
+                    updateDemo((d) => ({ cards: [...d.cards, { ...card, id: newId() }] }));
+                    toast.success(t("cardAdded", { name: card.label }));
+                    return true;
+                },
+                updateCard: async (card, patch) => {
+                    updateDemo((d) => ({ cards: d.cards.map((c) => (c.id === card.id ? { ...c, ...patch } : c)) }));
+                    toast.success(t("cardUpdated"));
+                    return true;
+                },
+                transfer: async (from, to, amount) => {
+                    updateDemo((d) => ({
+                        cards: d.cards.map((c) =>
+                            c.id === from.id ? { ...c, balance: c.balance - amount }
+                                : c.id === to.id ? { ...c, balance: c.balance + amount }
+                                    : c,
+                        ),
+                    }));
+                    toast.success(t("transferred", { amount: money(amount), from: from.label, to: to.label }));
+                    return true;
+                },
+            };
+
+            const liveOps: MoneyOps = {
+                addCategory: (label, color, kind) =>
+                    write(
+                        () => expensesApi.createCategory({ name: label, type: apiTypeOf(kind), color: categoryHex(color) }),
+                        t("categoryAdded", { name: label }),
+                    ),
+                deleteCategory: async (target) => {
+                    // an id starting with "name:" is only a name on old entries; nothing to delete on the server
+                    if (target.id.startsWith("name:")) return false;
+                    return write(() => expensesApi.deleteCategory(Number(target.id)), t("categoryRemoved", { name: target.label }));
+                },
+                addCard: async (card) => {
+                    let createdId: number | null = null;
+                    const ok = await write(async () => {
+                        const created = await expensesApi.createCard({
+                            card_number: card.last4,
+                            bank_name: card.label,
+                            balance: card.balance,
+                            card_color: CARD_COLOR[card.gradient],
+                            expiry_month: card.expiryMonth ?? null,
+                            // the form asks for YY
+                            expiry_year: card.expiryYear != null ? 2000 + card.expiryYear : null,
+                        });
+                        createdId = created.id;
+                        set((s) => ({
+                            cardMeta: {
+                                ...s.cardMeta,
+                                [String(created.id)]: {
+                                    expiryMonth: card.expiryMonth,
+                                    expiryYear: card.expiryYear,
+                                    gradient: card.gradient,
+                                },
+                            },
+                        }));
+                    }, t("cardAdded", { name: card.label }));
+                    return ok && createdId !== null;
+                },
+                updateCard: async (card, patch) => {
+                    if ((patch.label !== undefined && patch.label !== card.label) || (patch.last4 !== undefined && patch.last4 !== card.last4)) {
+                        toast.error(t("cardRenameUnsupported"));
+                        return false;
+                    }
+                    // expiry/colour are kept on this phone
+                    set((s) => ({
+                        cardMeta: {
+                            ...s.cardMeta,
+                            [card.id]: {
+                                ...s.cardMeta[card.id],
+                                ...(patch.expiryMonth !== undefined ? { expiryMonth: patch.expiryMonth } : {}),
+                                ...(patch.expiryYear !== undefined ? { expiryYear: patch.expiryYear } : {}),
+                                ...(patch.gradient !== undefined ? { gradient: patch.gradient } : {}),
+                            },
+                        },
+                    }));
+                    if (patch.balance === undefined || patch.balance === card.balance) {
+                        toast.success(t("cardUpdated"));
+                        await get().sync();
+                        return true;
+                    }
+                    // the server stores an opening balance (> 0); entries on the card are added on top
+                    const txnSum = cardTxnSum(card.id, remote().entries);
+                    const opening = patch.balance - txnSum;
+                    if (!(opening > 0)) {
+                        toast.error(t("balanceTooLow", { amount: money(txnSum) }));
+                        return false;
+                    }
+                    return write(() => expensesApi.setCardBalance(Number(card.id), opening), t("cardUpdated"));
+                },
+                transfer: (from, to, amount) =>
+                    write(
+                        () => expensesApi.transfer(Number(from.id), Number(to.id), amount),
+                        t("transferred", { amount: money(amount), from: from.label, to: to.label }),
+                    ),
+            };
+            const ops = (): MoneyOps => (isDemoMode() ? demoOps : liveOps);
 
             return {
                 categories: [...DEBT_CATEGORIES],
@@ -222,36 +379,34 @@ export const useKhataStore = create<KhataState>()(
                         return { data: { ...rest, [toId]: from } };
                     }),
 
+                restoreLocalData: (backup) => {
+                    if (isDemoMode()) return { entries: 0, parties: 0 };
+                    const cur = local();
+                    const haveEntry = new Set(cur.entries.map((e) => e.id));
+                    const haveParty = new Set(cur.parties.map((p) => p.id));
+                    const entries = backup.entries.filter((e) => !haveEntry.has(e.id));
+                    const parties = backup.parties.filter((p) => !haveParty.has(p.id));
+                    if (entries.length || parties.length) {
+                        updateLocal((d) => ({ entries: [...entries, ...d.entries], parties: [...parties, ...d.parties] }));
+                    }
+                    return { entries: entries.length, parties: parties.length };
+                },
+
                 addEntry: async (entry) => {
-                    if (isDemoMode()) {
-                        if (entry.kind === "expense" && !entry.cardId) {
-                            toast.error(t("cardRequired"));
-                            return false;
-                        }
-                        const clean = entry.kind === "debt" ? { ...entry, cardId: undefined } : entry;
-                        const created = { ...clean, id: newId(), createdAt: new Date().toISOString() };
-                        updateDemo((d) => ({
-                            entries: [created, ...d.entries],
-                            cards: d.cards.map((card) =>
-                                card.id === clean.cardId ? { ...card, balance: card.balance + cardDelta(clean) } : card,
-                            ),
-                        }));
-                        toast.success(t("saved", { name: entry.subject }));
-                        return true;
-                    }
-                    if (entry.kind === "debt") {
-                        // Udhaar lives in the party ledger on this phone
-                        const clean = { ...entry, cardId: undefined };
-                        updateLocal((d) => ({
-                            entries: [{ ...clean, id: newId(), createdAt: new Date().toISOString() }, ...d.entries],
-                        }));
-                        toast.success(t("saved", { name: entry.subject }));
-                        return true;
-                    }
                     if (entry.kind === "expense" && !entry.cardId) {
                         toast.error(t("cardRequired"));
                         return false;
                     }
+                    if (inPhoneBook(entry.kind)) {
+                        // Udhaar never touches cards
+                        const clean = entry.kind === "debt" ? { ...entry, cardId: undefined } : entry;
+                        const created: IExpenseEntry = { ...clean, id: newId(), createdAt: new Date().toISOString() };
+                        updateBook((b) => ({ entries: [created, ...b.entries] }));
+                        if (clean.cardId) adjustDemoCards({ [clean.cardId]: cardDelta(clean) });
+                        toast.success(t("saved", { name: entry.subject }));
+                        return true;
+                    }
+                    // live income/expense → the server
                     const category = get().categories.find((c) => c.id === entry.categoryId)?.label ?? "Other";
                     const form = {
                         subject: entry.subject,
@@ -270,66 +425,39 @@ export const useKhataStore = create<KhataState>()(
                 },
 
                 updateEntry: (id, patch) => {
-                    if (isDemoMode()) {
-                        const old = demo().entries.find((e) => e.id === id);
-                        if (!old) return false;
-                        const updated = { ...old, ...patch };
-                        const deltas: Record<string, number> = {};
-                        if (old.cardId && old.kind !== "debt") deltas[old.cardId] = (deltas[old.cardId] ?? 0) - cardDelta(old);
-                        if (updated.cardId && updated.kind !== "debt") {
-                            deltas[updated.cardId] = (deltas[updated.cardId] ?? 0) + cardDelta(updated);
-                        }
-                        updateDemo((d) => ({
-                            entries: d.entries.map((e) => (e.id === id ? updated : e)),
-                            cards: d.cards.map((card) =>
-                                deltas[card.id] ? { ...card, balance: card.balance + deltas[card.id] } : card,
-                            ),
-                        }));
-                        toast.success(t("updated", { name: updated.subject }));
-                        return true;
-                    }
-                    if (id.startsWith(SERVER_ENTRY_PREFIX)) {
+                    if (!isDemoMode() && id.startsWith(SERVER_ENTRY_PREFIX)) {
                         toast.error(t("notEditable"));
                         return false;
                     }
-                    const old = local().entries.find((e) => e.id === id);
+                    const old = book().entries.find((e) => e.id === id);
                     if (!old) return false;
                     const updated = { ...old, ...patch };
-                    updateLocal((d) => ({ entries: d.entries.map((e) => (e.id === id ? updated : e)) }));
+                    // undo the old card effect, apply the new one (Udhaar never touches cards)
+                    const deltas: Record<string, number> = {};
+                    if (old.cardId && old.kind !== "debt") deltas[old.cardId] = (deltas[old.cardId] ?? 0) - cardDelta(old);
+                    if (updated.cardId && updated.kind !== "debt") deltas[updated.cardId] = (deltas[updated.cardId] ?? 0) + cardDelta(updated);
+                    updateBook((b) => ({ entries: b.entries.map((e) => (e.id === id ? updated : e)) }));
+                    adjustDemoCards(deltas);
                     toast.success(t("updated", { name: updated.subject }));
                     return true;
                 },
 
                 deleteEntry: (id) => {
-                    if (isDemoMode()) {
-                        const target = demo().entries.find((e) => e.id === id);
-                        if (!target) return false;
-                        updateDemo((d) => ({
-                            entries: d.entries.filter((e) => e.id !== id),
-                            cards: d.cards.map((card) =>
-                                target.cardId && target.kind !== "debt" && card.id === target.cardId
-                                    ? { ...card, balance: card.balance - cardDelta(target) }
-                                    : card,
-                            ),
-                        }));
-                        toast.success(t("deleted", { name: target.subject }));
-                        return true;
-                    }
-                    if (id.startsWith(SERVER_ENTRY_PREFIX)) {
+                    if (!isDemoMode() && id.startsWith(SERVER_ENTRY_PREFIX)) {
                         toast.error(t("notDeletable"));
                         return false;
                     }
-                    const target = local().entries.find((e) => e.id === id);
+                    const target = book().entries.find((e) => e.id === id);
                     if (!target) return false;
-                    updateLocal((d) => ({ entries: d.entries.filter((e) => e.id !== id) }));
+                    updateBook((b) => ({ entries: b.entries.filter((e) => e.id !== id) }));
+                    if (target.cardId && target.kind !== "debt") adjustDemoCards({ [target.cardId]: -cardDelta(target) });
                     toast.success(t("deleted", { name: target.subject }));
                     return true;
                 },
 
                 addParty: (p) => {
                     const party: IParty = { ...p, id: newId(), slug: makeSlug(p.name), createdAt: new Date().toISOString() };
-                    if (isDemoMode()) updateDemo((d) => ({ parties: [party, ...d.parties] }));
-                    else updateLocal((d) => ({ parties: [party, ...d.parties] }));
+                    updateBook((b) => ({ parties: [party, ...b.parties] }));
                     toast.success(t("partyAdded", { name: party.name }));
                     return party;
                 },
@@ -337,41 +465,24 @@ export const useKhataStore = create<KhataState>()(
                 addParties: (list) => {
                     const now = new Date().toISOString();
                     const created: IParty[] = list.map((p) => ({ ...p, id: newId(), slug: makeSlug(p.name), createdAt: now }));
-                    if (isDemoMode()) updateDemo((d) => ({ parties: [...created, ...d.parties] }));
-                    else updateLocal((d) => ({ parties: [...created, ...d.parties] }));
+                    updateBook((b) => ({ parties: [...created, ...b.parties] }));
                     toast.success(t("partiesAdded", { count: created.length }));
                     return created.length;
                 },
 
-                updateParty: (id, patch) => {
-                    if (isDemoMode()) {
-                        updateDemo((d) => ({ parties: d.parties.map((p) => (p.id === id ? { ...p, ...patch } : p)) }));
-                    } else {
-                        updateLocal((d) => ({ parties: d.parties.map((p) => (p.id === id ? { ...p, ...patch } : p)) }));
-                    }
-                },
+                updateParty: (id, patch) => updateBook((b) => ({ parties: b.parties.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
 
                 deleteParty: (id, withEntries = false) => {
-                    const entries = isDemoMode() ? demo().entries : local().entries;
-                    const linked = entries.filter((e) => e.partyId === id);
+                    const linked = book().entries.filter((e) => e.partyId === id);
                     if (linked.length && !withEntries) {
                         toast.error(t("partyHasEntries"));
                         return false;
                     }
-                    if (isDemoMode()) {
-                        updateDemo((d) => ({
-                            entries: d.entries.filter((e) => e.partyId !== id),
-                            parties: d.parties.filter((p) => p.id !== id),
-                        }));
-                    } else {
-                        updateLocal((d) => ({
-                            entries: d.entries.filter((e) => e.partyId !== id),
-                            parties: d.parties.filter((p) => p.id !== id),
-                        }));
-                    }
-                    toast.success(
-                        linked.length ? t("partyDeletedWithEntries", { count: linked.length }) : t("partyDeleted"),
-                    );
+                    updateBook((b) => ({
+                        entries: b.entries.filter((e) => e.partyId !== id),
+                        parties: b.parties.filter((p) => p.id !== id),
+                    }));
+                    toast.success(linked.length ? t("partyDeletedWithEntries", { count: linked.length }) : t("partyDeleted"));
                     return true;
                 },
 
@@ -381,27 +492,15 @@ export const useKhataStore = create<KhataState>()(
                         toast.error(t("debtCategoryLocked"));
                         return false;
                     }
-                    const categories = isDemoMode() ? demo().categories : get().categories;
-                    if (categories.some((c) => c.kind === kind && c.label.toLowerCase() === clean.toLowerCase())) {
+                    if (activeCategories().some((c) => c.kind === kind && c.label.toLowerCase() === clean.toLowerCase())) {
                         toast.error(t("categoryExists", { name: clean }));
                         return false;
                     }
-                    if (isDemoMode()) {
-                        updateDemo((d) => ({
-                            categories: [...d.categories, { id: newId(), label: clean, color, kind }],
-                        }));
-                        toast.success(t("categoryAdded", { name: clean }));
-                        return true;
-                    }
-                    return write(
-                        () => expensesApi.createCategory({ name: clean, type: apiTypeOf(kind), color: categoryHex(color) }),
-                        t("categoryAdded", { name: clean }),
-                    );
+                    return ops().addCategory(clean, color, kind);
                 },
 
                 deleteCategory: async (id) => {
-                    const categories = isDemoMode() ? demo().categories : get().categories;
-                    const target = categories.find((c) => c.id === id);
+                    const target = activeCategories().find((c) => c.id === id);
                     if (!target) return false;
                     if (target.kind === "debt") {
                         toast.error(t("debtCategoryLocked"));
@@ -411,105 +510,25 @@ export const useKhataStore = create<KhataState>()(
                         toast.error(t("otherCategoryLocked"));
                         return false;
                     }
-                    if (isDemoMode()) {
-                        const fallback = categories.find((c) => c.kind === target.kind && c.label === "Other" && c.id !== id);
-                        if (!fallback) {
-                            toast.error(t("otherCategoryLocked"));
-                            return false;
-                        }
-                        updateDemo((d) => ({
-                            categories: d.categories.filter((c) => c.id !== id),
-                            entries: d.entries.map((e) => (e.categoryId === id ? { ...e, categoryId: fallback.id } : e)),
-                        }));
-                        toast.success(t("categoryRemoved", { name: target.label }));
-                        return true;
-                    }
-                    if (id.startsWith("name:")) {
-                        // only a name on old entries; nothing to delete on the server
-                        return false;
-                    }
-                    return write(() => expensesApi.deleteCategory(Number(id)), t("categoryRemoved", { name: target.label }));
+                    return ops().deleteCategory(target);
                 },
 
                 addCard: async (card) => {
-                    if ((isDemoMode() ? demo().cards : remote().cards).length >= MAX_CARDS) {
+                    if (activeCards().length >= MAX_CARDS) {
                         toast.error(t("maxCards", { count: MAX_CARDS }));
                         return false;
                     }
-                    if (isDemoMode()) {
-                        updateDemo((d) => ({ cards: [...d.cards, { ...card, id: newId() }] }));
-                        toast.success(t("cardAdded", { name: card.label }));
-                        return true;
-                    }
-                    let createdId: number | null = null;
-                    const ok = await write(async () => {
-                        const created = await expensesApi.createCard({
-                            card_number: card.last4,
-                            bank_name: card.label,
-                            balance: card.balance,
-                            card_color: CARD_COLOR[card.gradient],
-                            expiry_month: card.expiryMonth ?? null,
-                            // the form asks for YY
-                            expiry_year: card.expiryYear != null ? 2000 + card.expiryYear : null,
-                        });
-                        createdId = created.id;
-                        set((s) => ({
-                            cardMeta: {
-                                ...s.cardMeta,
-                                [String(created.id)]: {
-                                    expiryMonth: card.expiryMonth,
-                                    expiryYear: card.expiryYear,
-                                    gradient: card.gradient,
-                                },
-                            },
-                        }));
-                    }, t("cardAdded", { name: card.label }));
-                    return ok && createdId !== null;
+                    return ops().addCard(card);
                 },
 
                 updateCard: async (id, patch) => {
-                    if (isDemoMode()) {
-                        const card = demo().cards.find((c) => c.id === id);
-                        if (!card) return false;
-                        updateDemo((d) => ({ cards: d.cards.map((c) => (c.id === id ? { ...c, ...patch } : c)) }));
-                        toast.success(t("cardUpdated"));
-                        return true;
-                    }
-                    const card = remote().cards.find((c) => c.id === id);
+                    const card = activeCards().find((c) => c.id === id);
                     if (!card) return false;
-                    if ((patch.label !== undefined && patch.label !== card.label) || (patch.last4 !== undefined && patch.last4 !== card.last4)) {
-                        toast.error(t("cardRenameUnsupported"));
-                        return false;
-                    }
-                    // expiry/colour are kept on this phone
-                    set((s) => ({
-                        cardMeta: {
-                            ...s.cardMeta,
-                            [id]: {
-                                ...s.cardMeta[id],
-                                ...(patch.expiryMonth !== undefined ? { expiryMonth: patch.expiryMonth } : {}),
-                                ...(patch.expiryYear !== undefined ? { expiryYear: patch.expiryYear } : {}),
-                                ...(patch.gradient !== undefined ? { gradient: patch.gradient } : {}),
-                            },
-                        },
-                    }));
-                    if (patch.balance === undefined || patch.balance === card.balance) {
-                        toast.success(t("cardUpdated"));
-                        await get().sync();
-                        return true;
-                    }
-                    // the server stores an opening balance (> 0); entries on the card are added on top
-                    const txnSum = cardTxnSum(id, remote().entries);
-                    const opening = patch.balance - txnSum;
-                    if (!(opening > 0)) {
-                        toast.error(t("balanceTooLow", { amount: money(txnSum) }));
-                        return false;
-                    }
-                    return write(() => expensesApi.setCardBalance(Number(id), opening), t("cardUpdated"));
+                    return ops().updateCard(card, patch);
                 },
 
                 transferBetweenCards: async (fromId, toId, amount) => {
-                    const cards = isDemoMode() ? demo().cards : remote().cards;
+                    const cards = activeCards();
                     const from = cards.find((c) => c.id === fromId);
                     const to = cards.find((c) => c.id === toId);
                     if (!from || !to || fromId === toId || amount <= 0) {
@@ -520,27 +539,13 @@ export const useKhataStore = create<KhataState>()(
                         toast.error(t("notEnoughBalance", { name: from.label }));
                         return false;
                     }
-                    if (isDemoMode()) {
-                        updateDemo((d) => ({
-                            cards: d.cards.map((card) =>
-                                card.id === fromId ? { ...card, balance: card.balance - amount }
-                                    : card.id === toId ? { ...card, balance: card.balance + amount }
-                                        : card,
-                            ),
-                        }));
-                        toast.success(t("transferred", { amount: money(amount), from: from.label, to: to.label }));
-                        return true;
-                    }
-                    return write(
-                        () => expensesApi.transfer(Number(fromId), Number(toId), amount),
-                        t("transferred", { amount: money(amount), from: from.label, to: to.label }),
-                    );
+                    return ops().transfer(from, to, amount);
                 },
             };
         },
         {
             name: "filernow-khata",
-            version: 4,
+            version: 5,
             storage: createJSONStorage(() => AsyncStorage),
             partialize: (s): Persisted => ({
                 categories: s.categories,
@@ -548,7 +553,7 @@ export const useKhataStore = create<KhataState>()(
                 remote: s.remote,
                 cardMeta: s.cardMeta,
                 demoData: s.demoData,
-                dataMode: s.dataMode,
+                dataMode: s.dataMode
             }),
             migrate: (persisted, version): Persisted => {
                 let state = persisted as Record<string, unknown>;
@@ -573,20 +578,15 @@ export const useKhataStore = create<KhataState>()(
                         ),
                     };
                 }
-                const dataMode = (state.dataMode as Persisted["dataMode"]) ?? {};
-                const demoData = { ...((state.demoData as Persisted["demoData"]) ?? {}) };
-                if (version < 4) {
-                    for (const [id, mode] of Object.entries(dataMode)) {
-                        if (mode === "demo" && !demoData[id]) demoData[id] = createDemoData();
-                    }
-                }
+                // v5: demo copies and the data mode are session-only now. Whatever v4 saved is simply not returned here. 
+                // UPDATED it now and date more are persisted
                 return {
                     categories: (state.categories as ICategory[]) ?? [...DEBT_CATEGORIES],
                     data: (state.data as Persisted["data"]) ?? {},
                     remote: (state.remote as Persisted["remote"]) ?? {},
                     cardMeta: (state.cardMeta as Persisted["cardMeta"]) ?? {},
-                    demoData,
-                    dataMode,
+                    demoData: (state.demoData as Persisted["demoData"]) ?? {},
+                    dataMode: (state.dataMode as Persisted["dataMode"]) ?? {},
                 };
             },
         },

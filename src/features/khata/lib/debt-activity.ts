@@ -1,6 +1,6 @@
 // nativeApp\src\features\khata\lib\debt-activity.ts
 
-import { DEBT_CATEGORY_TYPE, type DebtType, type IExpenseEntry } from "@/features/khata/types";
+import { DEBT_CATEGORY_TYPE, type DebtType, type IExpenseEntry } from "@/features/khata/types/types";
 
 export type Grain = "day" | "week" | "month";
 export type ActivityBucket = { key: string; label: string; gave: number; got: number };

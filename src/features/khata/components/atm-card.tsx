@@ -5,7 +5,7 @@ import { Text, View } from "react-native";
 
 import { GradientFill } from "@/components/ui/gradient-fill";
 import { pkr } from "@/features/khata/lib/debt";
-import type { ICard } from "@/features/khata/types";
+import type { ICard } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { colors } from "@/theme/tokens";
 

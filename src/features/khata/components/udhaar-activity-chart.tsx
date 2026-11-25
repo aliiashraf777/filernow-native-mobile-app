@@ -6,7 +6,7 @@ import { Pressable, Text, View } from "react-native";
 
 import { GroupedBarChart } from "@/components/charts/grouped-bar-chart";
 import { buildDebtActivity, type Grain } from "@/features/khata/lib/debt-activity";
-import type { IExpenseEntry } from "@/features/khata/types";
+import type { IExpenseEntry } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { colors } from "@/theme/tokens";
 

@@ -8,7 +8,7 @@ import { Pressable, Text, TextInput, View } from "react-native";
 
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Field, FormButton } from "@/components/ui/form";
-import type { IParty, NewParty, PartyType } from "@/features/khata/types";
+import type { IParty, NewParty, PartyType } from "@/features/khata/types/types";
 import { PartyTypeToggle } from "@/features/party/components/party-type-toggle";
 import { type BulkRow, parseBulkParties } from "@/features/party/lib/party-bulk";
 import { toast } from "@/lib/toast";

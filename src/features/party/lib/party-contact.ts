@@ -2,7 +2,7 @@
 
 import { Linking, Platform } from "react-native";
 
-import type { IParty } from "@/features/khata/types";
+import type { IParty } from "@/features/khata/types/types";
 import i18n from "@/i18n";
 
 /** "03001234567" or "+923001234567" -> "923001234567" (wa.me format). */

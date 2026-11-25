@@ -2,18 +2,13 @@
 
 import type { SymbolViewProps } from "expo-symbols";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
-import { debtBalances, debtTotals, pkr } from "@/features/khata/lib/debt";
-import {
-    type EntryKind,
-    type FilterTab,
-    type IExpenseEntry,
-    type IExpenseStatItem,
-    KHATA_LABELS,
-} from "@/features/khata/types";
+import { cashFlow, debtBalances, debtTotals, pkr } from "@/features/khata/lib/debt";
+import type { EntryKind, FilterTab, IExpenseEntry, IExpenseStatItem } from "@/features/khata/types/types";
 
-export type StatItem = IExpenseStatItem & { filter: FilterTab; ctaLabel?: string; showTrend: boolean };
+export type StatItem = IExpenseStatItem & { filter: FilterTab; ctaLabel?: string };
 
 const ICONS = {
     balance: { ios: "creditcard.fill", android: "account_balance_wallet", web: "account_balance_wallet" },
@@ -22,9 +17,9 @@ const ICONS = {
     debt: { ios: "arrow.left.arrow.right", android: "swap_horiz", web: "swap_horiz" },
 } as const satisfies Record<string, SymbolViewProps["name"]>;
 
-type Delta = { percent: number; direction: "up" | "down"; hasBaseline: boolean };
-// no data last month = nothing to compare against, so the card shows no % chip
-const NO_BASELINE: Delta = { percent: 0, direction: "up", hasBaseline: false };
+type Delta = { percent: number; direction: "up" | "down" };
+// nothing to compare against (blank data, or nothing last month): 0%, shown as a neutral chip
+const FLAT: Delta = { percent: 0, direction: "up" };
 
 const monthKey = (d: string) => d.slice(0, 7);
 // LOCAL month. toISOString() is UTC: on the 1st of a month in Pakistan it would still be last month.
@@ -34,9 +29,9 @@ const shiftMonth = (key: string, offset: number) => {
     return localMonthKey(new Date(y, m - 1 + offset, 1));
 };
 
-/** This month vs last month, as a % and an up/down direction. (kind "debt" compares udhaar volume, not net balance.) */
+/** This month vs last month as a % + direction. (kind "debt" compares udhaar volume, not net balance.) */
 function monthlyDelta(entries: IExpenseEntry[], kind: EntryKind | "net"): Delta {
-    if (entries.length === 0) return NO_BASELINE;
+    if (entries.length === 0) return FLAT;
 
     const now = localMonthKey(new Date());
     const prev = shiftMonth(now, -1);
@@ -46,50 +41,65 @@ function monthlyDelta(entries: IExpenseEntry[], kind: EntryKind | "net"): Delta 
 
     const current = totalFor(now);
     const previous = totalFor(prev);
-    if (previous === 0) return NO_BASELINE;
+    if (previous === 0) return FLAT;
 
     return {
         percent: Math.round((Math.abs(current - previous) / Math.abs(previous)) * 100),
         direction: current >= previous ? "up" : "down",
-        hasBaseline: true,
     };
 }
 
 export function useDailyStats(): StatItem[] {
+    const { t } = useTranslation("khata");
     const { entries, cards } = useBusinessData();
 
-    return useMemo(() => {
+    return useMemo<StatItem[]>(() => {
         const sum = (kind: EntryKind) => entries.filter((e) => e.kind === kind).reduce((s, e) => s + e.amount, 0);
         const { youWillGet, youWillGive } = debtTotals(debtBalances(entries));
         const cardsBalance = cards.reduce((s, c) => s + c.balance, 0);
 
-        const bal = monthlyDelta(entries, "net");
+        // const bal = monthlyDelta(entries, "net");
+        // The card shows a BALANCE, so its trend compares the balance now with the balance at the start of
+        // this month (= end of last month). That is today's balance minus this month's card cash flow.
+        const monthStart = `${localMonthKey(new Date())}-01`;
+        const flowThisMonth = entries
+            .filter((e) => e.cardId && e.kind !== "debt" && e.date.slice(0, 10) >= monthStart)
+            .reduce((s, e) => s + cashFlow(e) * e.amount, 0);
+        const startBalance = cardsBalance - flowThisMonth;
+        const bal: Delta =
+            startBalance === 0
+                ? FLAT
+                : {
+                    percent: Math.round((Math.abs(flowThisMonth) / Math.abs(startBalance)) * 100),
+                    direction: flowThisMonth >= 0 ? "up" : "down",
+                };
+
         const inc = monthlyDelta(entries, "income");
         const exp = monthlyDelta(entries, "expense");
         const debt = monthlyDelta(entries, "debt");
-        const label = (d: Delta) => (d.hasBaseline ? "vs last month" : "No data last month");
+        const label = t("trend.vsLastMonth");
 
         return [
             {
-                id: "balance", title: "Total Cards Balance", value: pkr(cardsBalance),
-                trendDirection: bal.direction, trendPercent: bal.percent, trendLabel: label(bal), showTrend: bal.hasBaseline,
+                id: "balance", title: t("daily.stats.balance"), value: pkr(cardsBalance),
+                trendDirection: bal.direction, trendPercent: bal.percent, trendLabel: label,
                 icon: ICONS.balance, chip: "green", isPositive: bal.direction === "up", filter: "all",
             },
             {
-                id: "income", title: KHATA_LABELS.income.title, value: pkr(sum("income")),
-                trendDirection: inc.direction, trendPercent: inc.percent, trendLabel: label(inc), showTrend: inc.hasBaseline,
-                icon: ICONS.income, chip: "blue", isPositive: inc.direction === "up", filter: "income", ctaLabel: KHATA_LABELS.income.verb,
+                id: "income", title: t("daily.stats.income"), value: pkr(sum("income")),
+                trendDirection: inc.direction, trendPercent: inc.percent, trendLabel: label,
+                icon: ICONS.income, chip: "blue", isPositive: inc.direction === "up", filter: "income", ctaLabel: t("daily.add.income"),
             },
             {
-                id: "expense", title: KHATA_LABELS.expense.title, value: pkr(sum("expense")),
-                trendDirection: exp.direction, trendPercent: exp.percent, trendLabel: label(exp), showTrend: exp.hasBaseline,
-                icon: ICONS.expense, chip: "purple", isPositive: exp.direction === "down", filter: "expense", ctaLabel: KHATA_LABELS.expense.verb,
+                id: "expense", title: t("daily.stats.expense"), value: pkr(sum("expense")),
+                trendDirection: exp.direction, trendPercent: exp.percent, trendLabel: label,
+                icon: ICONS.expense, chip: "purple", isPositive: exp.direction === "down", filter: "expense", ctaLabel: t("daily.add.expense"),
             },
             {
-                id: "debt", title: KHATA_LABELS.debt.title, value: pkr(Math.abs(youWillGet - youWillGive)),
-                trendDirection: debt.direction, trendPercent: debt.percent, trendLabel: label(debt), showTrend: debt.hasBaseline,
-                icon: ICONS.debt, chip: "red", isPositive: debt.direction === "down", filter: "debt", ctaLabel: KHATA_LABELS.debt.verb,
+                id: "debt", title: t("daily.stats.debt"), value: pkr(Math.abs(youWillGet - youWillGive)),
+                trendDirection: debt.direction, trendPercent: debt.percent, trendLabel: label,
+                icon: ICONS.debt, chip: "red", isPositive: debt.direction === "down", filter: "debt", ctaLabel: t("daily.add.debt"),
             },
         ];
-    }, [entries, cards]);
+    }, [entries, cards, t]);
 }

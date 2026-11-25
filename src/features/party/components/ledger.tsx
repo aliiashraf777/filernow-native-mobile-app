@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { type LedgerRow, debtLabel, pkr } from "@/features/khata/lib/debt";
-import type { IExpenseEntry } from "@/features/khata/types";
+import type { IExpenseEntry } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { entryDateTime } from "@/lib/date-format";
 import { colors } from "@/theme/tokens";

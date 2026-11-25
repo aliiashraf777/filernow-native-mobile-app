@@ -1,7 +1,7 @@
 // nativeApp\src\features\khata\lib\trend.ts
 
 import { debtSign } from "@/features/khata/lib/debt";
-import type { IExpenseEntry } from "@/features/khata/types";
+import type { IExpenseEntry } from "@/features/khata/types/types";
 
 export type Granularity = "day" | "week" | "month";
 export type TrendRow = { label: string; expense: number; income: number; debt: number };

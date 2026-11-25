@@ -7,7 +7,7 @@ import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Field, FormButton, Input } from "@/components/ui/form";
 import { GradientFill } from "@/components/ui/gradient-fill";
 import { AtmCard, GRADIENTS } from "@/features/khata/components/atm-card";
-import type { ICard } from "@/features/khata/types";
+import type { ICard } from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 
 const GRADIENT_OPTIONS: { key: ICard["gradient"]; label: string }[] = [

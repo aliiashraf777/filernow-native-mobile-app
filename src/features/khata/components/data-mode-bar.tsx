@@ -1,9 +1,11 @@
+// nativeApp\src\features\khata\components\data-mode-bar.tsx
+
 import { useTranslation } from "react-i18next";
 import { Alert, Pressable, Text, View } from "react-native";
 
+import { BlinkingDot } from "@/components/ui/blinking-dot";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import { cn } from "@/lib/cn";
 
 export function DataModeBar() {
     const { t } = useTranslation(["khata", "common"]);
@@ -22,7 +24,8 @@ export function DataModeBar() {
     return (
         <View className="mx-4 mt-4 flex-row items-center justify-between rounded-brand-12 border border-border-clr bg-white px-3 py-2.5">
             <View className="flex-row items-center gap-2">
-                <View className={cn("h-2 w-2 rounded-full", isDemo ? "bg-warning" : "bg-success")} />
+                {/* demo: faster, orange blink (this is practice data); live: slow green pulse */}
+                <BlinkingDot className={isDemo ? "bg-warning" : "bg-success"} period={isDemo ? 800 : 1600} />
                 <Text className="font-jakarta-medium text-xs text-text-secondary">
                     {t("mode.label", { mode: t(isDemo ? "mode.demo" : "mode.blank") })}
                 </Text>

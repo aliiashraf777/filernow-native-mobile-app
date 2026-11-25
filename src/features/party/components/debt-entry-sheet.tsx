@@ -13,7 +13,7 @@ import {
     DEBT_TYPE_META,
     type IExpenseEntry,
     type IParty,
-} from "@/features/khata/types";
+} from "@/features/khata/types/types";
 import { cn } from "@/lib/cn";
 import { entryTime, localDate, localTime } from "@/lib/date-format";
 import { colors } from "@/theme/tokens";
