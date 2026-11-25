@@ -195,12 +195,12 @@
   "mode": {
     "label": "Mode: {{mode}}",
     "demo": "Demo",
-    "blank": "Khaali",
-    "startFresh": "Naye sire se shuru karein",
+    "blank": "Live",
+    "startFresh": "Demo se bahir, Live shuru karein",
     "loadDemo": "Demo data load karein",
     "replaceTitle": "Data mode tabdeel karein?",
     "loadDemoMessage": "Demo data current Khata view ki jagah dikhaya jayega. Aap ke live account data mein koi tabdeeli nahi hogi. Jari rakhein?",
-    "startFreshMessage": "Aap ka demo data aur us mein ki hui tabdeeliyan delete ho jayengi. Naye sire se shuru karein?"
+    "startFreshMessage": "Aap ka demo data aur us mein ki hui tabdeeliyan delete ho jayengi. Live khata shuru karein?"
   },
   "toast": {
     "demoLoaded": "Demo data load ho gaya",

@@ -6,7 +6,6 @@ import * as Sharing from "expo-sharing";
 import { Directory, File, Paths } from "expo-file-system";
 
 import { suspendLockWhile } from "@/features/app-lock/lib/lock-suspension";
-import { json } from "zod";
 
 export const MIME = {
     pdf: "application/pdf",

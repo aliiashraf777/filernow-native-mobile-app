@@ -42,7 +42,8 @@ import { toast } from "@/lib/toast";
  * - income/expense entries, cards, income/expense categories → the server (per business),
  *   cached here so the screens work offline and open instantly;
  * - Udhaar (debt) entries and parties → this phone only (the API has no parties yet);
- * - demo data → memory only, per business. It is never saved and never sent to the API.
+ * - demo data → memory only, per business. It is never saved and never sent to the API. (DEPRECATED)
+ * - demo data → a practice copy per business, saved on this phone but never sent to the API. (CURRENT-UPDATED)
  */
 
 /** Phone-only data of ONE business: the "phone notebook". */
@@ -78,8 +79,10 @@ type KhataState = {
     /** Card expiry/colour the server doesn't store, kept for cards added on this phone. */
     cardMeta: Record<string, CardMeta>;
     /** Editable per-business demo copy. Session-only: never saved, never sent to the live account API. */
+    /** Editable per-business practice copy. Saved on this phone (it survives restarts) but never sent to the live account API. (UPDATED) */
     demoData: Record<string, DemoBusinessData>;
     /** Session-only too: the app always starts in live ("blank") mode. */
+    /** Which businesses are in demo mode. The mode bar's blinking dot is what reminds the user. (UPDATED) */
     dataMode: Record<string, DataMode>;
     syncing: boolean;
     syncError: string | null;
@@ -117,15 +120,16 @@ type KhataState = {
  * Shared validation happens before these run, so they receive already-checked objects.
  */
 type MoneyOps = {
-    addCategory: (label: string, color: ICategory["color"], kind: EntryKind) => Promise<boolean>;
+    addCategory: (label: string, color: ICategory["color"], kind: Exclude<EntryKind, "debt">) => Promise<boolean>;
     deleteCategory: (target: ICategory) => Promise<boolean>;
     addCard: (card: Omit<ICard, "id">) => Promise<boolean>;
     updateCard: (card: ICard, patch: Partial<ICard>) => Promise<boolean>;
     transfer: (from: ICard, to: ICard, amount: number) => Promise<boolean>;
 };
 
-// Demo copies and the data mode are session-only, so only these four are saved.
-type Persisted = Pick<KhataState, "categories" | "data" | "remote" | "cardMeta">;
+// Demo copies and the data mode are session-only, so only these four are saved. (UPDATED)
+// type Persisted = Pick<KhataState, "categories" | "data" | "remote" | "cardMeta">;
+type Persisted = Pick<KhataState, "categories" | "data" | "remote" | "cardMeta" | "demoData" | "dataMode">;
 
 const money = (n: number) => `PKR ${n.toLocaleString("en-PK")}`;
 // store messages follow the app language
@@ -548,6 +552,8 @@ export const useKhataStore = create<KhataState>()(
                 data: s.data,
                 remote: s.remote,
                 cardMeta: s.cardMeta,
+                demoData: s.demoData,
+                dataMode: s.dataMode
             }),
             migrate: (persisted, version): Persisted => {
                 let state = persisted as Record<string, unknown>;
@@ -572,12 +578,15 @@ export const useKhataStore = create<KhataState>()(
                         ),
                     };
                 }
-                // v5: demo copies and the data mode are session-only now. Whatever v4 saved is simply not returned here.
+                // v5: demo copies and the data mode are session-only now. Whatever v4 saved is simply not returned here. 
+                // UPDATED it now and date more are persisted
                 return {
                     categories: (state.categories as ICategory[]) ?? [...DEBT_CATEGORIES],
                     data: (state.data as Persisted["data"]) ?? {},
                     remote: (state.remote as Persisted["remote"]) ?? {},
                     cardMeta: (state.cardMeta as Persisted["cardMeta"]) ?? {},
+                    demoData: (state.demoData as Persisted["demoData"]) ?? {},
+                    dataMode: (state.dataMode as Persisted["dataMode"]) ?? {},
                 };
             },
         },

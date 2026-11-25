@@ -195,12 +195,12 @@
   "mode": {
     "label": "Mode: {{mode}}",
     "demo": "Demo",
-    "blank": "Blank",
-    "startFresh": "Start Fresh",
+    "blank": "Live",
+    "startFresh": "Exit Demo",
     "loadDemo": "Load Demo Data",
-    "replaceTitle": "Switch data mode?",
+    "replaceTitle": "Exit data mode?",
     "loadDemoMessage": "Demo data will replace the current Khata view. Your live account data will not be changed. Continue?",
-    "startFreshMessage": "Your demo data and any changes you made to it will be deleted. Start fresh?"
+    "startFreshMessage": "Your demo data and any changes you made to it will be deleted. Start Live Khata?"
   },
   "toast": {
     "demoLoaded": "Demo data loaded",
