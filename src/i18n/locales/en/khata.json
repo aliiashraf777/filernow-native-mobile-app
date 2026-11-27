@@ -224,6 +224,8 @@
     "maxCards": "You can add up to {{count}} cards",
     "cardAdded": "{{name}} added",
     "cardUpdated": "Card updated",
+    "cardRemoved": "{{name}} deleted",
+    "cardDeleteUnavailable": "Card deletion isn't supported for live data yet",
     "differentCards": "Choose two different cards",
     "notEnoughBalance": "{{name}} doesn't have enough balance",
     "transferred": "{{amount}} moved from {{from}} to {{to}}",

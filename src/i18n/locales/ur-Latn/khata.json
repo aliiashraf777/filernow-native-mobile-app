@@ -224,6 +224,8 @@
     "maxCards": "Sirf {{count}} cards add ho sakte hain",
     "cardAdded": "{{name}} add ho gaya",
     "cardUpdated": "Card update ho gaya",
+    "cardRemoved": "{{name}} delete ho gaya",
+    "cardDeleteUnavailable": "Live data mein card delete abhi supported nahi hai",
     "differentCards": "Alag alag cards chunein",
     "notEnoughBalance": "{{name}} me itna balance nahi hai",
     "transferred": "{{amount}} {{from}} se {{to}} me transfer hue",

@@ -2,7 +2,7 @@
 
 import { SymbolView, type SymbolViewProps } from "expo-symbols";
 import { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Alert, Pressable, Text, View } from "react-native";
 
 import { AtmCard } from "@/features/khata/components/atm-card";
 import { CardFormSheet } from "@/features/khata/components/card-form-sheet";
@@ -29,9 +29,10 @@ function ActionButton({ icon, label, disabled, onPress }: { icon: SymbolViewProp
 }
 
 export function CardsManager() {
-    const { cards } = useBusinessData();
+    const { cards, dataMode } = useBusinessData();
     const addCard = useKhataStore((s) => s.addCard);
     const updateCard = useKhataStore((s) => s.updateCard);
+    const deleteCard = useKhataStore((s) => s.deleteCard);
 
     const [selectedId, setSelectedId] = useState("");
     const [formOpen, setFormOpen] = useState(false);
@@ -46,7 +47,24 @@ export function CardsManager() {
         setFormOpen(true);
     };
 
-    // No delete: the API can't remove cards yet.
+    const confirmDelete = (card: ICard) => {
+        if (dataMode !== "demo") {
+            void deleteCard(card.id);
+            return;
+        }
+        Alert.alert("Card delete karein?", "Is demo card se judi entries bhi unlink ho jayengi.", [
+            { text: "Nahi", style: "cancel" },
+            {
+                text: "Haan, delete",
+                style: "destructive",
+                onPress: async () => {
+                    if (await deleteCard(card.id)) {
+                        setSelectedId(cards.find((c) => c.id !== card.id)?.id ?? "");
+                    }
+                },
+            },
+        ]);
+    };
 
     return (
         <View className="mx-4 mt-4 rounded-brand-12 border border-border-clr bg-white p-3">
@@ -85,6 +103,7 @@ export function CardsManager() {
                     ) : null}
                     <View className="mt-3 flex-row gap-2">
                         <ActionButton icon={{ ios: "pencil", android: "edit", web: "edit" }} label="Edit" onPress={() => openForm(active)} />
+                        <ActionButton icon={{ ios: "trash", android: "delete", web: "delete" }} label="Delete" onPress={() => confirmDelete(active)} />
                         <ActionButton
                             icon={{ ios: "arrow.left.arrow.right", android: "swap_horiz", web: "swap_horiz" }}
                             label="Transfer"

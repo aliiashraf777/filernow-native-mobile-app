@@ -224,6 +224,8 @@
     "maxCards": "صرف {{count}} کارڈز شامل ہو سکتے ہیں",
     "cardAdded": "{{name}} شامل ہو گیا",
     "cardUpdated": "کارڈ اپ ڈیٹ ہو گیا",
+    "cardRemoved": "{{name}} حذف کر دیا گیا",
+    "cardDeleteUnavailable": "لائیو ڈیٹا میں کارڈ حذف کرنا ابھی ممکن نہیں",
     "differentCards": "دو مختلف کارڈز منتخب کریں",
     "notEnoughBalance": "{{name}} میں اتنا بیلنس نہیں ہے",
     "transferred": "{{amount}} {{from}} سے {{to}} میں منتقل ہو گئے",

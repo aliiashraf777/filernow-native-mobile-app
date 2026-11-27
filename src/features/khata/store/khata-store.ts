@@ -111,6 +111,7 @@ type KhataState = {
 
     addCard: (card: Omit<ICard, "id">) => Promise<boolean>;
     updateCard: (id: string, patch: Partial<ICard>) => Promise<boolean>;
+    deleteCard: (id: string) => Promise<boolean>;
     transferBetweenCards: (fromId: string, toId: string, amount: number) => Promise<boolean>;
 };
 
@@ -124,6 +125,7 @@ type MoneyOps = {
     deleteCategory: (target: ICategory) => Promise<boolean>;
     addCard: (card: Omit<ICard, "id">) => Promise<boolean>;
     updateCard: (card: ICard, patch: Partial<ICard>) => Promise<boolean>;
+    deleteCard: (card: ICard) => Promise<boolean>;
     transfer: (from: ICard, to: ICard, amount: number) => Promise<boolean>;
 };
 
@@ -219,6 +221,14 @@ export const useKhataStore = create<KhataState>()(
                     toast.success(t("cardUpdated"));
                     return true;
                 },
+                deleteCard: async (card) => {
+                    updateDemo((d) => ({
+                        cards: d.cards.filter((c) => c.id !== card.id),
+                        entries: d.entries.map((entry) => (entry.cardId === card.id ? { ...entry, cardId: undefined } : entry)),
+                    }));
+                    toast.success(t("cardRemoved", { name: card.label }));
+                    return true;
+                },
                 transfer: async (from, to, amount) => {
                     updateDemo((d) => ({
                         cards: d.cards.map((c) =>
@@ -299,6 +309,10 @@ export const useKhataStore = create<KhataState>()(
                         return false;
                     }
                     return write(() => expensesApi.setCardBalance(Number(card.id), opening), t("cardUpdated"));
+                },
+                deleteCard: async () => {
+                    toast.error(t("cardDeleteUnavailable"));
+                    return false;
                 },
                 transfer: (from, to, amount) =>
                     write(
@@ -525,6 +539,12 @@ export const useKhataStore = create<KhataState>()(
                     const card = activeCards().find((c) => c.id === id);
                     if (!card) return false;
                     return ops().updateCard(card, patch);
+                },
+
+                deleteCard: async (id) => {
+                    const card = activeCards().find((c) => c.id === id);
+                    if (!card) return false;
+                    return ops().deleteCard(card);
                 },
 
                 transferBetweenCards: async (fromId, toId, amount) => {
