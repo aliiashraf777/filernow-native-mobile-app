@@ -196,15 +196,17 @@
     "label": "Mode: {{mode}}",
     "demo": "Demo",
     "blank": "Live",
-    "startFresh": "Demo se bahir, Live shuru karein",
+    "startFresh": "Demo se bahar",
     "loadDemo": "Demo data load karein",
-    "replaceTitle": "Data mode tabdeel karein?",
+    "loadDemoTitle": "Demo data par jayein?",
     "loadDemoMessage": "Demo data current Khata view ki jagah dikhaya jayega. Aap ke live account data mein koi tabdeeli nahi hogi. Jari rakhein?",
-    "startFreshMessage": "Aap ka demo data aur us mein ki hui tabdeeliyan delete ho jayengi. Live khata shuru karein?"
+    "startFreshTitle": "Demo se bahar niklein?",
+    "startFreshMessage": "Aap ka demo data aur us mein ki hui tabdeeliyan delete ho jayengi. Aap ka asli (live) data mehfooz hai aur wapas aa jayega. Demo se bahar niklein?",
+    "demoNote": "Sirf practice data: yahan kuch bhi asli nahi, aur kuch bhi aap ke account mein nahi bheja jata."
   },
   "toast": {
-    "demoLoaded": "Demo data load ho gaya",
-    "cleared": "Demo data clear ho gaya",
+    "demoLoaded": "Demo data load ho gaya. Aap ka asli data mehfooz hai.",
+    "cleared": "Demo band ho gaya. Aap ka asli data wapas aa gaya.",
     "saved": "{{name}} save ho gaya",
     "updated": "{{name}} update ho gaya",
     "deleted": "{{name}} delete ho gaya",

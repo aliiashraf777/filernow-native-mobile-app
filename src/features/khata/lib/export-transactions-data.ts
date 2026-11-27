@@ -108,7 +108,14 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 function pdfHtml(i: TransactionsExport) {
     // const { income, expense, net } = totals(i.entries);
     const { labels, first, second, net } = totals(i.entries);
+    
+    // Udhaar: "You will get" is money you GAVE out, so it is red; "You will give" is green. Daily keeps income green / expense red.
+    const udhaar = isUdhaar(i.entries);
+    const firstColor = udhaar ? colors.danger : colors.success;
+    const secondColor = udhaar ? colors.success : colors.danger;
+
     const today = new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+
     const body = rowsOf(i)
         .map((r) => {
             // const sign = r.type === "income" ? "+" : "-";
@@ -143,8 +150,8 @@ tr:nth-child(even) td{background:#F9FAFB}.r{text-align:right}th.r{text-align:rig
 <div class="band"><div><h1>${esc(i.title)}</h1><p>${i.entries.length} transactions</p></div>
 <div class="r"><p>FilerNow Digital Khata</p><p>${today}</p></div></div>
 <div class="boxes">
-<div class="box"><small>${labels[0].toUpperCase()}</small><b style="color:${colors.success}">${pkr(first)}</b></div>
-<div class="box"><small>${labels[1].toUpperCase()}</small><b style="color:${colors.danger}">${pkr(second)}</b></div>
+<div class="box"><small>${labels[0].toUpperCase()}</small><b style="color:${firstColor}">${pkr(first)}</b></div>
+<div class="box"><small>${labels[1].toUpperCase()}</small><b style="color:${secondColor}">${pkr(second)}</b></div>
 <div class="box"><small>NET</small><b>${net < 0 ? "-" : ""}${pkr(Math.abs(net))}</b></div></div>
 <table><thead><tr><th>Date</th><th>Subject</th><th>Type</th><th>Category</th><th class="r">Amount</th></tr></thead>
 <tbody>${body}</tbody></table>

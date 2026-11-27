@@ -198,13 +198,15 @@
     "blank": "Live",
     "startFresh": "Exit Demo",
     "loadDemo": "Load Demo Data",
-    "replaceTitle": "Exit data mode?",
+    "loadDemoTitle": "Switch to demo data?",
     "loadDemoMessage": "Demo data will replace the current Khata view. Your live account data will not be changed. Continue?",
-    "startFreshMessage": "Your demo data and any changes you made to it will be deleted. Start Live Khata?"
+    "startFreshTitle": "Exit demo mode?",
+    "startFreshMessage": "Your demo data and any changes you made to it will be deleted. Your live data is safe and will come back. Exit demo?",
+    "demoNote": "Practice data only: nothing here is real, and nothing is sent to your account."
   },
   "toast": {
-    "demoLoaded": "Demo data loaded",
-    "cleared": "Demo data cleared",
+    "demoLoaded": "Demo data loaded. Your live data is safe.",
+    "cleared": "Demo closed. Your live data is back.",
     "saved": "{{name}} saved",
     "updated": "{{name}} updated",
     "deleted": "{{name}} deleted",
