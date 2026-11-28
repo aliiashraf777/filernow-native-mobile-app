@@ -41,7 +41,7 @@ import { toast } from "@/lib/toast";
  * Where Khata data lives:
  * - income/expense entries, cards, income/expense categories → the server (per business),
  *   cached here so the screens work offline and open instantly;
- * - Udhaar (debt) entries and parties → this phone only (the API has no parties yet);
+ * - Udhaar entries and party records → this phone only; income/expense rows may sync an opaque party ID;
  * - demo data → memory only, per business. It is never saved and never sent to the API. (DEPRECATED)
  * - demo data → a practice copy per business, saved on this phone but never sent to the API. (CURRENT-UPDATED)
  */
@@ -428,6 +428,7 @@ export const useKhataStore = create<KhataState>()(
                         amount: entry.amount,
                         entry_date: entry.date.slice(0, 10),
                         description: entry.description ?? null,
+                        ...(entry.partyId ? { party_id: entry.partyId } : {}),
                     };
                     return write(
                         () =>

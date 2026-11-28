@@ -24,6 +24,7 @@ export type ApiEntry = {
     amount: string;
     entry_date: string;
     account_id: number | null;
+    party_id?: string | null;
     description: string | null;
     created_at: string;
     updated_at: string;
@@ -35,6 +36,7 @@ export type NewExpense = {
     amount: number;
     entry_date: string; // YYYY-MM-DD
     account_id: number; // required by the API for expenses
+    party_id?: string;
     description?: string | null;
 };
 

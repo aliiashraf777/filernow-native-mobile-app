@@ -54,7 +54,7 @@
       }
     },
     "list": {
-      "title": "Transactions ({{total}})",
+      "title": "Udhaar entries",
       "search": "Search party, type or note",
       "empty": "No udhaar yet. Tap \"You Gave\" or \"You Got\" below, or load demo data.",
       "noMatch": "No entries match this filter."
@@ -148,13 +148,56 @@
       "expense": "Add Expense",
       "debt": "Add Udhaar"
     },
+    "entry": {
+      "title": "Add {{kind}}",
+      "editTitle": "Edit {{kind}}",
+      "incomeSubtitle": "Record money received.",
+      "expenseSubtitle": "Record what you spent.",
+      "amountHeading": "Enter the amount",
+      "amount": "Amount",
+      "amountPlaceholder": "e.g. 5,000",
+      "party": "Party (optional)",
+      "partyHint": "Link this entry to someone in your records.",
+      "chooseParty": "Choose a party",
+      "noParty": "No party",
+      "addParty": "Add party",
+      "incomeSubject": "Income source",
+      "expenseSubject": "What was this expense for?",
+      "incomePlaceholder": "e.g. Salary or sales",
+      "expensePlaceholder": "e.g. Groceries or electricity",
+      "subjectHint": "Use a short name you will recognize later.",
+      "category": "Category",
+      "categoryHint": "Choose the best match",
+      "chooseCategory": "Choose a category",
+      "chooseCard": "Choose a card",
+      "incomeCardLabel": "Received into",
+      "expenseCardLabel": "Paid from",
+      "balanceHint": "Card balance updates automatically.",
+      "cash": "Cash",
+      "date": "Date",
+      "time": "Time",
+      "choose": "Choose",
+      "note": "Note",
+      "noteHint": "Optional. Add a detail for later.",
+      "notePlaceholder": "Add a note...",
+      "save": "Save entry",
+      "saveChanges": "Save changes",
+      "saving": "Saving...",
+      "errors": {
+        "subject": "Enter at least 2 characters.",
+        "amount": "Enter a valid amount.",
+        "category": "Choose a category.",
+        "card": "Choose a card.",
+        "noCards": "Add a card in My Cards first."
+      }
+    },
     "tabs": {
       "all": "All"
     },
     "list": {
       "search": "Search subject or category",
-      "title": "Transactions ({{total}})",
-      "empty": "No entries yet. Tap \"+ Add Entry\" below or load demo data.",
+      "title": "Transactions",
+      "empty": "No entries yet. Tap \"+ Add Entry\" in the top bar or load demo data.",
       "noMatch": "No entries match this filter.",
       "uncategorized": "Uncategorized"
     },
@@ -176,12 +219,25 @@
     "share": "Share",
     "saved": "Saved to the folder you chose",
     "failed": "Couldn't export the file. Try Share if saving keeps failing.",
-    "changeFolder": "Save to a different folder"
+    "changeFolder": "Save to a different folder",
+    "subtitle": "Choose a format and how you want to send it.",
+    "formatLabel": "File format",
+    "deliveryLabel": "Save or share",
+    "pdfHint": "Easy to view",
+    "xlsxHint": "For spreadsheets",
+    "csvHint": "Simple data file",
+    "entryCount": "{{count}} entries included",
+    "saveHint": "Save to your selected folder",
+    "shareHint": "Send a copy to another app",
+    "changeFolderHint": "Choose a folder for this export"
   },
   "backup": {
-    "note": "Udhaar and parties are saved on this phone only. Back them up so a new phone or a reinstall doesn't lose them.",
+    "title": "Protect your records",
+    "note": "Stored only on this phone. Back up your data before reinstalling or changing devices.",
     "backup": "Back up",
+    "backupHint": "Create a backup file",
     "restore": "Restore",
+    "restoreHint": "Add from a backup",
     "nothing": "Nothing to back up yet",
     "failed": "Couldn't create the backup. Please try again.",
     "invalid": "This isn't a valid Khata backup file",
@@ -191,6 +247,9 @@
     "guide": {
       "title": "Backup & Restore",
       "subtitle": "Keep your khata safe and move it to a new phone",
+      "phone": "Phone",
+      "backupFile": "Backup file",
+      "restore": "Restore",
       "intro": "A backup is a small copy of your khata in one file, like a photo of your notebook.",
       "step1Title": "1. Back up",
       "step1": "Tap Back up and send the file somewhere safe: Google Drive, Files, or WhatsApp to yourself.",
@@ -205,7 +264,38 @@
   },
   "addEntry": {
     "label": "Add Entry",
-    "title": "What do you want to add?"
+    "title": "What do you want to add?",
+    "subtitle": "Choose the kind of entry to record.",
+    "incomeHint": "Money received",
+    "expenseHint": "Money spent",
+    "debtHint": "Money lent, borrowed or repaid"
+  },
+  "categoryManager": {
+    "title": "Manage categories",
+    "subtitle": "Organize income and expense entries.",
+    "createTitle": "Create a category",
+    "createDescription": "Use your own labels to organize entries.",
+    "nameLabel": "Category name",
+    "namePlaceholder": "e.g. Groceries",
+    "colorLabel": "Choose a color",
+    "createButton": "Add category",
+    "saving": "Adding...",
+    "listTitle": "Your categories",
+    "builtIn": "Built in",
+    "fixedTitle": "Udhaar categories are fixed",
+    "fixedDescription": "These categories keep party balances accurate and cannot be changed.",
+    "empty": "No categories in this section yet.",
+    "deleteTitle": "Delete this category?",
+    "deleteMessage": "Entries in {{name}} will be moved to Other.",
+    "deleteA11y": "Delete {{name}}",
+    "colors": {
+      "primary": "Red",
+      "secondary": "Green",
+      "warning": "Amber",
+      "info": "Blue",
+      "danger": "Dark red",
+      "neutral": "Gray"
+    }
   },
   "mode": {
     "label": "Mode: {{mode}}",

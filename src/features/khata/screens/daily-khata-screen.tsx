@@ -4,11 +4,11 @@ import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
-import { Alert, FlatList, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, FlatList, Pressable, Text, View } from "react-native";
 
-import { Input } from "@/components/ui/form";
 import { OptionSheet } from "@/components/ui/option-sheet";
 import { useActiveBusiness } from "@/features/business/store/business-store";
+import { AddEntrySheet } from "@/features/khata/components/add-entry-sheet";
 import { CardsManager } from "@/features/khata/components/cards-manager";
 import { CategoryManagerSheet } from "@/features/khata/components/category-manager-sheet";
 import { DailyCharts } from "@/features/khata/components/daily-charts";
@@ -18,14 +18,14 @@ import { ExportFlow } from "@/features/khata/components/export-flow";
 import { PaginationBar } from "@/features/khata/components/pagination-bar";
 import { StatCard, type StatCtaVariant } from "@/features/khata/components/stat-card";
 import { StatsToggleBar } from "@/features/khata/components/stats-toggle-bar";
+import { TransactionListHeader } from "@/features/khata/components/transaction-list-header";
 import { TransactionRow } from "@/features/khata/components/transaction-row";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { useDailyStats } from "@/features/khata/hooks/use-daily-stats";
 import { pkr } from "@/features/khata/lib/debt";
 import type { TransactionsExport } from "@/features/khata/lib/export-transactions-data";
 import { useKhataStore } from "@/features/khata/store/khata-store";
-import type { EntryKind, FilterTab, IExpenseEntry } from "@/features/khata/types/types";
-import { cn } from "@/lib/cn";
+import type { FilterTab, IExpenseEntry } from "@/features/khata/types/types";
 import { entrySortKey, localDate } from "@/lib/date-format";
 import { toast } from "@/lib/toast";
 import { colors } from "@/theme/tokens";
@@ -72,15 +72,6 @@ export default function DailyKhataScreen() {
     const [page, setPage] = useState(1);
 
     const sorts = useMemo(() => SORT_KEYS.map((k) => ({ value: k, label: t(`daily.sort.${k}`) })), [t]);
-    const addOptions = useMemo<{ value: EntryKind; label: string }[]>(
-        () => [
-            { value: "income", label: t("daily.add.income") },
-            { value: "expense", label: t("daily.add.expense") },
-            { value: "debt", label: t("daily.add.debt") },
-        ],
-        [t],
-    );
-
     const categoryLabel = useMemo(() => new Map(categories.map((c) => [c.id, c.label])), [categories]);
     const labelOf = (id: string) => categoryLabel.get(id) ?? t("daily.list.uncategorized");
 
@@ -149,12 +140,22 @@ export default function DailyKhataScreen() {
                 options={{
                     title: t("sections.daily.title"),
                     headerRight: () => (
-                        <View className="flex-row items-center gap-5">
+                        <View className="flex-row items-center gap-3">
                             <Pressable accessibilityRole="button" accessibilityLabel={t("daily.a11y.export")} onPress={() => setExportOpen(true)} hitSlop={12}>
                                 <SymbolView name={{ ios: "square.and.arrow.up", android: "ios_share", web: "ios_share" }} size={21} tintColor={colors["text-secondary"]} />
                             </Pressable>
                             <Pressable accessibilityRole="button" accessibilityLabel={t("daily.a11y.categories")} onPress={() => setCategoriesOpen(true)} hitSlop={12}>
                                 <SymbolView name={{ ios: "tag", android: "sell", web: "sell" }} size={22} tintColor={colors.primary} />
+                            </Pressable>
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={t("addEntry.label")}
+                                onPress={() => setAddOpen(true)}
+                                className="h-9 flex-row items-center gap-1 rounded-brand-12 bg-primary px-2.5 active:opacity-80">
+                                <SymbolView name={{ ios: "plus", android: "add", web: "add" }} size={19} tintColor={colors.surface} />
+                                <Text numberOfLines={1} className="font-jakarta-bold text-[11px] text-white">
+                                    {t("addEntry.label")}
+                                </Text>
                             </Pressable>
                         </View>
                     ),
@@ -165,7 +166,7 @@ export default function DailyKhataScreen() {
                 data={pageRows}
                 keyExtractor={(e) => e.id}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingBottom: 96 }} // room for the sticky Add Entry button
+                contentContainerStyle={{ paddingBottom: 16 }}
                 ListHeaderComponent={
                     <View>
                         <DataModeBar />
@@ -189,60 +190,42 @@ export default function DailyKhataScreen() {
                         <StatsToggleBar open={showStats} onToggle={() => setShowStats((v) => !v)} />
                         {showStats ? <DailyCharts /> : null}
 
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingTop: 16 }}>
-                            {TABS.map((tab) => (
+                        <TransactionListHeader
+                            title={t("daily.list.title")}
+                            total={shown.length}
+                            filters={TABS.map((tab) => ({
+                                value: tab,
+                                label: tab === "all" ? t("daily.tabs.all") : t(`kind.${tab}`),
+                                count: counts[tab],
+                            }))}
+                            activeFilter={filter}
+                            onFilterChange={setFilter}
+                            query={q}
+                            onQueryChange={setQ}
+                            searchPlaceholder={t("daily.list.search")}
+                            action={
                                 <Pressable
-                                    key={tab}
-                                    accessibilityRole="tab"
-                                    accessibilityState={{ selected: filter === tab }}
-                                    onPress={() => setFilter(tab)}
-                                    className={cn(
-                                        "min-h-10 flex-row items-center gap-2 rounded-full border px-4",
-                                        filter === tab ? "border-primary bg-primary" : "border-border-clr bg-white",
-                                    )}>
-                                    <Text className={cn("font-jakarta-semibold text-xs", filter === tab ? "text-white" : "text-text-secondary")}>
-                                        {tab === "all" ? t("daily.tabs.all") : t(`kind.${tab}`)}
-                                    </Text>
-                                    <Text className={cn("font-jakarta-bold text-[11px]", filter === tab ? "text-white" : "text-text-secondary-muted")}>
-                                        {counts[tab]}
-                                    </Text>
+                                    accessibilityRole="button"
+                                    accessibilityLabel={t("daily.a11y.sort")}
+                                    onPress={() => setSortOpen(true)}
+                                    className="h-9 w-9 items-center justify-center rounded-brand-8 border border-border-clr bg-white active:bg-page-bg">
+                                    <SymbolView
+                                        name={{ ios: "arrow.up.arrow.down", android: "swap_vert", web: "swap_vert" }}
+                                        size={17}
+                                        tintColor={colors["text-secondary"]}
+                                    />
+                                    {sortKey !== "date_desc" ? <View className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" /> : null}
                                 </Pressable>
-                            ))}
-                        </ScrollView>
-
-                        <View className="flex-row items-center gap-2 px-4 pb-3 pt-3">
-                            <View className="flex-1">
-                                <Input
-                                    icon={{ ios: "magnifyingglass", android: "search", web: "search" }}
-                                    placeholder={t("daily.list.search")}
-                                    value={q}
-                                    onChangeText={setQ}
-                                    autoCorrect={false}
-                                />
-                            </View>
-                            <Pressable
-                                accessibilityRole="button"
-                                accessibilityLabel={t("daily.a11y.sort")}
-                                onPress={() => setSortOpen(true)}
-                                className="h-12 w-12 items-center justify-center rounded-brand-8 border border-border-clr bg-white active:bg-page-bg">
-                                <SymbolView
-                                    name={{ ios: "arrow.up.arrow.down", android: "swap_vert", web: "swap_vert" }}
-                                    size={18}
-                                    tintColor={colors["text-secondary"]}
-                                />
-                                {sortKey !== "date_desc" ? <View className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" /> : null}
-                            </Pressable>
-                        </View>
-
-                        <Text className="border-b border-border-clr bg-white px-4 py-2 font-jakarta-semibold text-xs text-text-secondary">
-                            {t("daily.list.title", { total: shown.length })}
-                        </Text>
+                            }
+                        />
                     </View>
                 }
                 ListEmptyComponent={
-                    <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">
-                        {entries.length === 0 ? t("daily.list.empty") : t("daily.list.noMatch")}
-                    </Text>
+                    <View className="mx-4 rounded-b-brand-16 border-x border-b border-t border-border-clr bg-white px-4 py-8">
+                        <Text className="text-center font-jakarta text-sm leading-5 text-text-secondary-muted">
+                            {entries.length === 0 ? t("daily.list.empty") : t("daily.list.noMatch")}
+                        </Text>
+                    </View>
                 }
                 renderItem={({ item }) => (
                     <TransactionRow
@@ -250,19 +233,17 @@ export default function DailyKhataScreen() {
                         categoryLabel={labelOf(item.categoryId)}
                         onDelete={confirmDelete}
                         onEdit={item.kind === "debt" ? undefined : setEditing}
+                        inSection
                     />
                 )}
-                ListFooterComponent={<PaginationBar page={safePage} pageSize={PAGE_SIZE} total={shown.length} onChange={setPage} />}
+                ListFooterComponent={
+                    <View className="mx-4 min-h-3 rounded-b-brand-16 border-x border-b border-border-clr bg-white">
+                        {shown.length > 0 ? (
+                            <PaginationBar page={safePage} pageSize={PAGE_SIZE} total={shown.length} onChange={setPage} />
+                        ) : null}
+                    </View>
+                }
             />
-
-            {/* sticky primary action, same pill as the Party screen */}
-            <Pressable
-                accessibilityRole="button"
-                onPress={() => setAddOpen(true)}
-                className="absolute bottom-4 right-4 min-h-12 flex-row items-center gap-2 rounded-full bg-primary px-5 shadow-lg shadow-black/20 active:opacity-80">
-                <SymbolView name={{ ios: "plus", android: "add", web: "add" }} size={18} tintColor="#FFFFFF" />
-                <Text className="font-jakarta-bold text-sm text-white">{t("addEntry.label")}</Text>
-            </Pressable>
 
             <OptionSheet visible={sortOpen} title={t("daily.sort.title")} options={sorts} value={sortKey} onChange={setSortKey} onClose={() => setSortOpen(false)} />
 
@@ -276,12 +257,12 @@ export default function DailyKhataScreen() {
                 buildInput={buildExportInput}
             />
 
-            <OptionSheet<EntryKind | "">
+            <AddEntrySheet
                 visible={addOpen}
-                title={t("addEntry.title")}
-                options={addOptions}
-                value=""
-                onChange={(v) => v && afterClose(() => onCta(v))}
+                onSelect={(kind) => {
+                    setAddOpen(false);
+                    afterClose(() => onCta(kind));
+                }}
                 onClose={() => setAddOpen(false)}
             />
             <DetailedEntrySheet visible={entryKind !== null || editing !== null} kind={sheetKind} editing={editing} onClose={closeEntrySheet} />

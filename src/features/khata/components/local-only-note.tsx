@@ -1,7 +1,7 @@
 // nativeApp\src\features\khata\components\local-only-note.tsx
 
 import * as DocumentPicker from "expo-document-picker";
-import { SymbolView } from "expo-symbols";
+import { ChevronRight, ShieldCheck } from "lucide-react-native";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
@@ -15,7 +15,6 @@ import { buildBackup, parseBackup } from "@/features/khata/lib/khata-backup";
 import { EMPTY_LOCAL, useKhataStore } from "@/features/khata/store/khata-store";
 import { localDate } from "@/lib/date-format";
 import { toast } from "@/lib/toast";
-import { colors } from "@/theme/tokens";
 
 /** Warns that Udhaar + parties are saved on this phone only, and offers a backup file as the safety net. */
 export function LocalOnlyNote() {
@@ -60,21 +59,35 @@ export function LocalOnlyNote() {
     return (
         <>
             <View className="mx-4 mt-4 rounded-brand-12 border border-warning/25 bg-warning-bg p-3">
-                <View className="flex-row items-start gap-2">
-                    <SymbolView name={{ ios: "iphone", android: "smartphone", web: "smartphone" }} size={16} tintColor={colors.warning} />
-                    <Text className="flex-1 font-jakarta text-xs leading-4 text-text-secondary">{t("note")}</Text>
-                </View>
-                <View className="mt-3 flex-row gap-2">
-                    <Pressable accessibilityRole="button" onPress={backUp} className="min-h-10 flex-1 items-center justify-center rounded-brand-8 bg-white active:opacity-80">
-                        <Text className="font-jakarta-semibold text-xs text-text-secondary">{t("backup")}</Text>
+                <View className="flex-row items-center gap-2">
+                    <View className="h-7 w-7 items-center justify-center rounded-brand-8 bg-white">
+                        <ShieldCheck size={15} className="text-warning" strokeWidth={2} />
+                    </View>
+                    <Text className="flex-1 font-jakarta-bold text-xs text-text-dark">{t("title")}</Text>
+                    <Pressable
+                        accessibilityRole="link"
+                        onPress={() => setGuideOpen(true)}
+                        hitSlop={8}
+                        className="flex-row items-center active:opacity-70">
+                        <Text className="font-jakarta-semibold text-[10px] text-text-secondary">{t("howTo")}</Text>
+                        <ChevronRight size={12} className="text-text-secondary" strokeWidth={2} />
                     </Pressable>
-                    <Pressable accessibilityRole="button" onPress={restore} className="min-h-10 flex-1 items-center justify-center rounded-brand-8 bg-white active:opacity-80">
+                </View>
+                <Text className="mt-2 font-jakarta text-xs leading-4 text-text-secondary">{t("note")}</Text>
+                <View className="mt-3 flex-row gap-2">
+                    <Pressable
+                        accessibilityRole="button"
+                        onPress={backUp}
+                        className="min-h-10 flex-1 items-center justify-center rounded-brand-8 bg-primary px-3 active:opacity-85">
+                        <Text className="font-jakarta-semibold text-xs text-white">{t("backup")}</Text>
+                    </Pressable>
+                    <Pressable
+                        accessibilityRole="button"
+                        onPress={restore}
+                        className="min-h-10 flex-1 items-center justify-center rounded-brand-8 border border-border-strong bg-white px-3 active:bg-page-bg">
                         <Text className="font-jakarta-semibold text-xs text-text-secondary">{t("restore")}</Text>
                     </Pressable>
                 </View>
-                <Pressable accessibilityRole="link" onPress={() => setGuideOpen(true)} hitSlop={8} className="mt-3 self-start">
-                    <Text className="font-jakarta-semibold text-xs text-primary">{t("howTo")}</Text>
-                </Pressable>
             </View>
             <BackupGuideSheet visible={guideOpen} onClose={() => setGuideOpen(false)} />
         </>

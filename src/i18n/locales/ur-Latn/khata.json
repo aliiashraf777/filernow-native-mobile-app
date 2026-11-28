@@ -54,7 +54,7 @@
       }
     },
     "list": {
-      "title": "Transactions ({{total}})",
+      "title": "Udhaar entries",
       "search": "Party, qism ya note dhoondein",
       "empty": "Abhi koi udhaar nahi. Neeche \"Aap ne diya\" ya \"Aap ko mila\" dabayein ya demo data load karein.",
       "noMatch": "Is filter mein koi entry nahi mili."
@@ -148,13 +148,56 @@
       "expense": "Kharcha add karein",
       "debt": "Udhaar add karein"
     },
+    "entry": {
+      "title": "{{kind}} add karein",
+      "editTitle": "{{kind}} edit karein",
+      "incomeSubtitle": "Mili hui raqam ka record banayein.",
+      "expenseSubtitle": "Kharch ki hui raqam ka record banayein.",
+      "amountHeading": "Raqam darj karein",
+      "amount": "Raqam",
+      "amountPlaceholder": "Misal: 5,000",
+      "party": "Party (ikhtiyari)",
+      "partyHint": "Is entry ko apne record mein kisi party se jorein.",
+      "chooseParty": "Party chunein",
+      "noParty": "Koi party nahi",
+      "addParty": "Party add karein",
+      "incomeSubject": "Aamdani ka zariya",
+      "expenseSubject": "Ye kharcha kis liye tha?",
+      "incomePlaceholder": "Misal: Tankhwah ya sale",
+      "expensePlaceholder": "Misal: Grocery ya bijli",
+      "subjectHint": "Chhota naam likhein jo baad mein pehchan sakein.",
+      "category": "Category",
+      "categoryHint": "Munasib category chunein",
+      "chooseCategory": "Category chunein",
+      "chooseCard": "Card chunein",
+      "incomeCardLabel": "Kis mein mili",
+      "expenseCardLabel": "Kis card se ada ki",
+      "balanceHint": "Card ka balance khud update ho jayega.",
+      "cash": "Cash",
+      "date": "Tareekh",
+      "time": "Waqt",
+      "choose": "Chunein",
+      "note": "Note",
+      "noteHint": "Ikhtiyari. Baad ke liye koi tafseel likhein.",
+      "notePlaceholder": "Note likhein...",
+      "save": "Entry save karein",
+      "saveChanges": "Tabdeeliyan save karein",
+      "saving": "Save ho rahi hai...",
+      "errors": {
+        "subject": "Kam az kam 2 harf likhein.",
+        "amount": "Durust raqam likhein.",
+        "category": "Category chunein.",
+        "card": "Card chunein.",
+        "noCards": "Pehle My Cards mein card add karein."
+      }
+    },
     "tabs": {
       "all": "Sab"
     },
     "list": {
       "search": "Subject ya category dhoondein",
-      "title": "Transactions ({{total}})",
-      "empty": "Abhi koi entry nahi. Neeche \"+ Entry add karein\" dabayein ya demo data load karein.",
+      "title": "Entries",
+      "empty": "Abhi koi entry nahi. Upar \"+ Entry add karein\" dabayein ya demo data load karein.",
       "noMatch": "Is filter mein koi entry nahi mili.",
       "uncategorized": "Bagair category"
     },
@@ -176,12 +219,25 @@
     "share": "Share karein",
     "saved": "Aap ke chune hue folder mein save ho gaya",
     "failed": "File export nahi ho saki. Save na ho to Share try karein.",
-    "changeFolder": "Doosre folder mein save karein"
+    "changeFolder": "Doosre folder mein save karein",
+    "subtitle": "Format aur bhejne ka tareeqa chunein.",
+    "formatLabel": "File format",
+    "deliveryLabel": "Save ya share karein",
+    "pdfHint": "Dekhne mein asaan",
+    "xlsxHint": "Spreadsheet ke liye",
+    "csvHint": "Simple data file",
+    "entryCount": "{{count}} entries shamil",
+    "saveHint": "Apne chune hue folder mein save karein",
+    "shareHint": "Doosri app ko copy bhejein",
+    "changeFolderHint": "Is export ke liye folder chunein"
   },
   "backup": {
-    "note": "Udhaar aur parties sirf is phone mein save hain. Inka backup lein taake naya phone ya reinstall par ye zaya na hon.",
+    "title": "Apni records mehfooz karein",
+    "note": "Sirf is phone mein save hain. Reinstall karne ya device badalne se pehle apna data backup karein.",
     "backup": "Backup lein",
+    "backupHint": "Backup file banayein",
     "restore": "Restore karein",
+    "restoreHint": "Backup se add karein",
     "nothing": "Abhi backup ke liye kuch nahi",
     "failed": "Backup nahi ban saka. Dobara koshish karein.",
     "invalid": "Ye Khata backup file sahi nahi hai",
@@ -191,6 +247,9 @@
     "guide": {
       "title": "Backup aur Restore",
       "subtitle": "Apna khata mehfooz rakhein aur naye phone mein le jayein",
+      "phone": "Phone",
+      "backupFile": "Backup file",
+      "restore": "Restore",
       "intro": "Backup aap ke khata ki ek chhoti si copy hai, ek file mein, jaise copy ki photo.",
       "step1Title": "1. Backup lein",
       "step1": "Backup lein dabayein aur file kisi mehfooz jagah bhejein: Google Drive, Files, ya WhatsApp (apne aap ko).",
@@ -205,7 +264,38 @@
   },
   "addEntry": {
     "label": "Entry add karein",
-    "title": "Kya add karna hai?"
+    "title": "Kya add karna hai?",
+    "subtitle": "Entry ki qisam chunein.",
+    "incomeHint": "Mili hui raqam",
+    "expenseHint": "Kharch ki hui raqam",
+    "debtHint": "Diya, liya ya wapas kiya gaya Udhaar"
+  },
+  "categoryManager": {
+    "title": "Categories manage karein",
+    "subtitle": "Aamdani aur kharch ki entries ko tarteeb dein.",
+    "createTitle": "Nayi category banayein",
+    "createDescription": "Entries ko tarteeb dene ke liye apne labels use karein.",
+    "nameLabel": "Category ka naam",
+    "namePlaceholder": "Misal: Grocery",
+    "colorLabel": "Rang chunein",
+    "createButton": "Category add karein",
+    "saving": "Add ho rahi hai...",
+    "listTitle": "Aap ki categories",
+    "builtIn": "Built in",
+    "fixedTitle": "Udhaar categories fixed hain",
+    "fixedDescription": "Ye categories party balances ko durust rakhti hain aur inhein badla nahi ja sakta.",
+    "empty": "Is section mein abhi koi category nahi.",
+    "deleteTitle": "Ye category delete karein?",
+    "deleteMessage": "{{name}} ki entries Other mein chali jayengi.",
+    "deleteA11y": "{{name}} delete karein",
+    "colors": {
+      "primary": "Surkh",
+      "secondary": "Hara",
+      "warning": "Amber",
+      "info": "Neela",
+      "danger": "Gehra surkh",
+      "neutral": "Surmai"
+    }
   },
   "mode": {
     "label": "Mode: {{mode}}",

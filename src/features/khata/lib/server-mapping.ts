@@ -57,7 +57,7 @@ export function linkCategories(categories: ICategory[], entries: ApiEntry[]) {
 
 export const SERVER_ENTRY_PREFIX = "srv-";
 
-/** Only income/expense; server "debt" rows have no party, so Udhaar stays in the app's party ledger. */
+/** Income/expense rows sync party IDs; Udhaar entries still stay in the app's local party ledger. */
 export function toEntry(e: ApiEntry, categoryId: string): IExpenseEntry | null {
     const kind = KIND_OF[e.expense_type];
     if (kind !== "expense" && kind !== "income") return null;
@@ -70,6 +70,7 @@ export function toEntry(e: ApiEntry, categoryId: string): IExpenseEntry | null {
         amount: Number(e.amount),
         date: e.entry_date,
         cardId: e.account_id != null ? String(e.account_id) : undefined,
+        partyId: e.party_id ?? undefined,
         description: e.description ?? undefined,
         createdAt: e.created_at,
     };

@@ -22,16 +22,18 @@ type Props = {
     onDelete: (entry: IExpenseEntry) => void;
     /** Omit for entries that are edited elsewhere (udhaar entries are edited in the Party screen). */
     onEdit?: (entry: IExpenseEntry) => void;
+    /** Render as a row inside the screens' shared transaction section. */
+    inSection?: boolean;
 };
 
-export function TransactionRow({ entry, categoryLabel, onDelete, onEdit }: Props) {
+export function TransactionRow({ entry, categoryLabel, onDelete, onEdit, inSection = false }: Props) {
     const { t } = useTranslation("khata");
     const kind = KIND[entry.kind];
     // +1 money in, -1 money out, 0 no cash moved (forgiven udhaar): no sign
     const flow = cashFlow(entry);
 
     return (
-        <View className="flex-row items-center gap-3 border-b border-border-clr bg-white px-4 py-3">
+        <View className={cn("flex-row items-center gap-3 border-b border-border-clr bg-white px-4 py-3", inSection && "mx-4 border-x")}>
             <View className="min-w-0 flex-1">
                 <Text numberOfLines={1} className="font-jakarta-semibold text-sm text-text-dark">
                     {entry.subject}

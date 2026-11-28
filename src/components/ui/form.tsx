@@ -7,11 +7,11 @@ import { Pressable, Text, TextInput, type TextInputProps, View } from "react-nat
 import { cn } from "@/lib/cn";
 import { colors } from "@/theme/tokens";
 
-type FieldProps = { label: string; hint?: string; error?: string; required?: boolean; children: ReactNode };
+type FieldProps = { label: string; hint?: string; error?: string; required?: boolean; className?: string; children: ReactNode };
 
-export function Field({ label, hint, error, required, children }: FieldProps) {
+export function Field({ label, hint, error, required, className, children }: FieldProps) {
     return (
-        <View className="mb-4">
+        <View className={cn("mb-4", className)}>
             <Text className="mb-1.5 font-jakarta-semibold text-xs text-text-dark">
                 {label}
                 {required ? <Text className="text-danger"> *</Text> : null}

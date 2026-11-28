@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, FlatList, Pressable, Text, View } from "react-native";
 
-import { Input } from "@/components/ui/form";
 import { OptionSheet } from "@/components/ui/option-sheet";
 import { useActiveBusiness } from "@/features/business/store/business-store";
 import { DataModeBar } from "@/features/khata/components/data-mode-bar";
@@ -14,6 +13,7 @@ import { ExportFlow } from "@/features/khata/components/export-flow";
 import { PaginationBar } from "@/features/khata/components/pagination-bar";
 import { StatCard } from "@/features/khata/components/stat-card";
 import { StatsToggleBar } from "@/features/khata/components/stats-toggle-bar";
+import { TransactionListHeader } from "@/features/khata/components/transaction-list-header";
 import { TransactionRow } from "@/features/khata/components/transaction-row";
 import { UdhaarActivityChart } from "@/features/khata/components/udhaar-activity-chart";
 import { UdhaarBalanceRow } from "@/features/khata/components/udhaar-balance-row";
@@ -26,7 +26,6 @@ import type { IExpenseEntry, IParty, NewParty } from "@/features/khata/types/typ
 import { DebtEntrySheet } from "@/features/party/components/debt-entry-sheet";
 import { PartyFormSheet } from "@/features/party/components/party-form-sheet";
 import { PARTY_BASE, partyHref } from "@/features/party/lib/party";
-import { cn } from "@/lib/cn";
 import { entrySortKey, localDate } from "@/lib/date-format";
 import { colors } from "@/theme/tokens";
 
@@ -72,6 +71,14 @@ export default function UdhaarKhataScreen() {
 
     const debtEntries = useMemo(() => entries.filter((e) => e.kind === "debt"), [entries]);
     const partyById = useMemo(() => new Map(parties.map((p) => [p.id, p])), [parties]);
+    const filterCounts = useMemo(
+        () => ({
+            all: debtEntries.length,
+            gave: debtEntries.filter((entry) => debtSign(entry) > 0).length,
+            got: debtEntries.filter((entry) => debtSign(entry) < 0).length,
+        }),
+        [debtEntries],
+    );
 
     // one row per party with a non-zero balance, biggest first
     const balanceRows = useMemo(
@@ -213,43 +220,28 @@ export default function UdhaarKhataScreen() {
                         <StatsToggleBar open={showStats} onToggle={() => setShowStats((v) => !v)} />
                         {showStats ? <UdhaarActivityChart entries={debtEntries} /> : null}
 
-                        <View className="flex-row gap-2 px-4 pt-4">
-                            {FILTERS.map((f) => (
-                                <Pressable
-                                    key={f}
-                                    accessibilityRole="tab"
-                                    accessibilityState={{ selected: filter === f }}
-                                    onPress={() => setFilter(f)}
-                                    className={cn(
-                                        "min-h-10 justify-center rounded-full border px-4",
-                                        filter === f ? "border-primary bg-primary" : "border-border-clr bg-white",
-                                    )}>
-                                    <Text className={cn("font-jakarta-semibold text-xs", filter === f ? "text-white" : "text-text-secondary")}>
-                                        {t(`udhaar.filter.${f}`)}
-                                    </Text>
-                                </Pressable>
-                            ))}
-                        </View>
-
-                        <View className="px-4 pb-3 pt-3">
-                            <Input
-                                icon={{ ios: "magnifyingglass", android: "search", web: "search" }}
-                                placeholder={t("udhaar.list.search")}
-                                value={q}
-                                onChangeText={setQ}
-                                autoCorrect={false}
-                            />
-                        </View>
-
-                        <Text className="border-b border-border-clr bg-white px-4 py-2 font-jakarta-semibold text-xs text-text-secondary">
-                            {t("udhaar.list.title", { total: shown.length })}
-                        </Text>
+                        <TransactionListHeader
+                            title={t("udhaar.list.title")}
+                            total={shown.length}
+                            filters={FILTERS.map((value) => ({
+                                value,
+                                label: t(`udhaar.filter.${value}`),
+                                count: filterCounts[value],
+                            }))}
+                            activeFilter={filter}
+                            onFilterChange={setFilter}
+                            query={q}
+                            onQueryChange={setQ}
+                            searchPlaceholder={t("udhaar.list.search")}
+                        />
                     </View>
                 }
                 ListEmptyComponent={
-                    <Text className="p-8 text-center font-jakarta text-sm text-text-secondary-muted">
-                        {debtEntries.length === 0 ? t("udhaar.list.empty") : t("udhaar.list.noMatch")}
-                    </Text>
+                    <View className="mx-4 rounded-b-brand-16 border-x border-b border-t border-border-clr bg-white px-4 py-8">
+                        <Text className="text-center font-jakarta text-sm leading-5 text-text-secondary-muted">
+                            {debtEntries.length === 0 ? t("udhaar.list.empty") : t("udhaar.list.noMatch")}
+                        </Text>
+                    </View>
                 }
                 renderItem={({ item }) => (
                     <TransactionRow
@@ -258,9 +250,16 @@ export default function UdhaarKhataScreen() {
                         onDelete={confirmDelete}
                         // entries whose party was deleted (or never existed) can't open the party-based sheet
                         onEdit={item.partyId && partyById.has(item.partyId) ? openEdit : undefined}
+                        inSection
                     />
                 )}
-                ListFooterComponent={<PaginationBar page={safePage} pageSize={PAGE_SIZE} total={shown.length} onChange={setPage} />}
+                ListFooterComponent={
+                    <View className="mx-4 min-h-3 rounded-b-brand-16 border-x border-b border-border-clr bg-white">
+                        {shown.length > 0 ? (
+                            <PaginationBar page={safePage} pageSize={PAGE_SIZE} total={shown.length} onChange={setPage} />
+                        ) : null}
+                    </View>
+                }
             />
 
             {/* sticky primary actions (the tab bar below already owns the bottom inset) */}

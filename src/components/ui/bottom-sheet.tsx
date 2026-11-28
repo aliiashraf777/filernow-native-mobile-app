@@ -24,6 +24,7 @@ type Props = {
     onClose: () => void;
     title?: string;
     subtitle?: string;
+    headerLeading?: ReactNode;
     children: ReactNode;
     /** Pinned under the scrolling content, e.g. a submit button. */
     footer?: ReactNode;
@@ -40,7 +41,7 @@ type Props = {
  *
  * Controlled: flip `visible` to open/close; the exit animation plays before the modal unmounts.
  */
-export function BottomSheet({ visible, onClose, title, subtitle, children, footer, headerAction, hideCloseButton }: Props) {
+export function BottomSheet({ visible, onClose, title, subtitle, headerLeading, children, footer, headerAction, hideCloseButton }: Props) {
     const { t } = useTranslation();
     const insets = useSafeAreaInsets();
     const { height } = useWindowDimensions();
@@ -107,8 +108,9 @@ export function BottomSheet({ visible, onClose, title, subtitle, children, foote
                                 <View className="px-5 pt-3">
                                     <View className="mb-4 h-1.5 w-12 self-center rounded-full bg-[#E4DEDF]" />
 
-                                    {title || headerAction || !hideCloseButton ? (
+                                    {title || subtitle || headerLeading || headerAction || !hideCloseButton ? (
                                         <View className="mb-4 flex-row items-start gap-3">
+                                            {headerLeading}
                                             <View className="flex-1">
                                                 {title ? (
                                                     <Text
