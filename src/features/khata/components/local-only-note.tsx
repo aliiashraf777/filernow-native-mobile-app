@@ -2,11 +2,13 @@
 
 import * as DocumentPicker from "expo-document-picker";
 import { SymbolView } from "expo-symbols";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 import { suspendLockWhile } from "@/features/app-lock/lib/lock-suspension";
 import { useBusinessStore } from "@/features/business/store/business-store";
+import { BackupGuideSheet } from "@/features/khata/components/backup-guide-sheet";
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
 import { MIME, deliverFile } from "@/features/khata/lib/export-file";
 import { buildBackup, parseBackup } from "@/features/khata/lib/khata-backup";
@@ -22,6 +24,7 @@ export function LocalOnlyNote() {
     const businessId = useBusinessStore((s) => s.activeId);
     const local = useKhataStore((s) => s.data[businessId] ?? EMPTY_LOCAL);
     const restoreLocalData = useKhataStore((s) => s.restoreLocalData);
+    const [guideOpen, setGuideOpen] = useState(false);
 
     if (dataMode !== "blank") return null; // demo data is a practice copy, nothing to protect
 
@@ -55,19 +58,25 @@ export function LocalOnlyNote() {
     };
 
     return (
-        <View className="mx-4 mt-4 rounded-brand-12 border border-warning/25 bg-warning-bg p-3">
-            <View className="flex-row items-start gap-2">
-                <SymbolView name={{ ios: "iphone", android: "smartphone", web: "smartphone" }} size={16} tintColor={colors.warning} />
-                <Text className="flex-1 font-jakarta text-xs leading-4 text-text-secondary">{t("note")}</Text>
-            </View>
-            <View className="mt-3 flex-row gap-2">
-                <Pressable accessibilityRole="button" onPress={backUp} className="min-h-10 flex-1 items-center justify-center rounded-brand-8 bg-white active:opacity-80">
-                    <Text className="font-jakarta-semibold text-xs text-text-secondary">{t("backup")}</Text>
+        <>
+            <View className="mx-4 mt-4 rounded-brand-12 border border-warning/25 bg-warning-bg p-3">
+                <View className="flex-row items-start gap-2">
+                    <SymbolView name={{ ios: "iphone", android: "smartphone", web: "smartphone" }} size={16} tintColor={colors.warning} />
+                    <Text className="flex-1 font-jakarta text-xs leading-4 text-text-secondary">{t("note")}</Text>
+                </View>
+                <View className="mt-3 flex-row gap-2">
+                    <Pressable accessibilityRole="button" onPress={backUp} className="min-h-10 flex-1 items-center justify-center rounded-brand-8 bg-white active:opacity-80">
+                        <Text className="font-jakarta-semibold text-xs text-text-secondary">{t("backup")}</Text>
+                    </Pressable>
+                    <Pressable accessibilityRole="button" onPress={restore} className="min-h-10 flex-1 items-center justify-center rounded-brand-8 bg-white active:opacity-80">
+                        <Text className="font-jakarta-semibold text-xs text-text-secondary">{t("restore")}</Text>
+                    </Pressable>
+                </View>
+                <Pressable accessibilityRole="link" onPress={() => setGuideOpen(true)} hitSlop={8} className="mt-3 self-start">
+                    <Text className="font-jakarta-semibold text-xs text-primary">{t("howTo")}</Text>
                 </Pressable>
-                <Pressable accessibilityRole="button" onPress={restore} className="min-h-10 flex-1 items-center justify-center rounded-brand-8 bg-white active:opacity-80">
-                    <Text className="font-jakarta-semibold text-xs text-text-secondary">{t("restore")}</Text>
-                </Pressable>
             </View>
-        </View>
+            <BackupGuideSheet visible={guideOpen} onClose={() => setGuideOpen(false)} />
+        </>
     );
 }

@@ -64,6 +64,13 @@ export function debtTotals(balances: Map<string, number>) {
     return { youWillGet, youWillGive };
 }
 
+/** Net udhaar (you will get - you will give), counting only entries dated on or before `cutoff` ("YYYY-MM-DD"; none = all). */
+export function netUdhaar(entries: IExpenseEntry[], cutoff?: string) {
+    const upTo = cutoff ? entries.filter((e) => e.date.slice(0, 10) <= cutoff) : entries;
+    const { youWillGet, youWillGive } = debtTotals(debtBalances(upTo));
+    return youWillGet - youWillGive;
+}
+
 // Gathers individual immutable transactions, sorts them chronologically, and calculates a running row-by-row balance history list.
 export function buildLedger(entries: IExpenseEntry[], key: string) {
     let bal = 0;

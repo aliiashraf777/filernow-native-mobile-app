@@ -186,7 +186,22 @@
     "failed": "Backup nahi ban saka. Dobara koshish karein.",
     "invalid": "Ye Khata backup file sahi nahi hai",
     "restored": "Restore ho gaya: {{entries}} entries, {{parties}} parties",
-    "upToDate": "Is backup mein kuch naya nahi"
+    "upToDate": "Is backup mein kuch naya nahi",
+    "howTo": "Backup kaise kaam karta hai?",
+    "guide": {
+      "title": "Backup aur Restore",
+      "subtitle": "Apna khata mehfooz rakhein aur naye phone mein le jayein",
+      "intro": "Backup aap ke khata ki ek chhoti si copy hai, ek file mein, jaise copy ki photo.",
+      "step1Title": "1. Backup lein",
+      "step1": "Backup lein dabayein aur file kisi mehfooz jagah bhejein: Google Drive, Files, ya WhatsApp (apne aap ko).",
+      "step2Title": "2. Naya phone ya reinstall",
+      "step2": "Naye phone mein ye screen kholein aur Restore karein dabayein. Apni save ki hui file chunein.",
+      "step3Title": "3. Na kuch zaya, na double",
+      "step3": "Restore sirf wo cheezein add karta hai jo maujood nahi. Ye maujooda cheezein kabhi delete ya replace nahi karta, is liye do baar restore karna bhi mehfooz hai.",
+      "step4Title": "4. Phone aur computer",
+      "step4": "Wahi file web dashboard mein bhi chalti hai. Phone ka backup aap ka Udhaar aur parties rakhta hai.",
+      "note": "Demo data sirf practice ke liye hai, is liye uska backup nahi hota."
+    }
   },
   "addEntry": {
     "label": "Entry add karein",

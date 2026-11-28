@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBusinessData } from "@/features/khata/hooks/use-business-data";
-import { cashFlow, debtBalances, debtTotals, pkr } from "@/features/khata/lib/debt";
+import { cashFlow, debtBalances, debtTotals, netUdhaar, pkr } from "@/features/khata/lib/debt";
 import type { EntryKind, FilterTab, IExpenseEntry, IExpenseStatItem } from "@/features/khata/types/types";
 
 export type StatItem = IExpenseStatItem & { filter: FilterTab; ctaLabel?: string };
@@ -29,7 +29,7 @@ const shiftMonth = (key: string, offset: number) => {
     return localMonthKey(new Date(y, m - 1 + offset, 1));
 };
 
-/** This month vs last month as a % + direction. (kind "debt" compares udhaar volume, not net balance.) */
+/** This month vs last month as a % + direction */
 function monthlyDelta(entries: IExpenseEntry[], kind: EntryKind | "net"): Delta {
     if (entries.length === 0) return FLAT;
 
@@ -76,7 +76,21 @@ export function useDailyStats(): StatItem[] {
 
         const inc = monthlyDelta(entries, "income");
         const exp = monthlyDelta(entries, "expense");
-        const debt = monthlyDelta(entries, "debt");
+
+        // The card shows NET udhaar |get - give|, so its trend compares that exposure now with the end of last month.
+        const today = new Date();
+        const last = new Date(today.getFullYear(), today.getMonth(), 0); // day 0 = last day of last month
+        const lastMonthEnd = `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, "0")}-${String(last.getDate()).padStart(2, "0")}`;
+        const exposureNow = Math.abs(netUdhaar(entries));
+        const exposureBefore = Math.abs(netUdhaar(entries, lastMonthEnd));
+        const debt: Delta =
+            exposureBefore === 0
+                ? FLAT
+                : {
+                    percent: Math.round((Math.abs(exposureNow - exposureBefore) / exposureBefore) * 100),
+                    direction: exposureNow >= exposureBefore ? "up" : "down",
+                };
+
         const label = t("trend.vsLastMonth");
 
         return [
